@@ -433,6 +433,7 @@ class TestMainFrameTTSEngine:
         assert ('started-utterance', frame.onStart) in connect_calls
         assert ('started-word', frame.onStartWord) in connect_calls
         assert ('finished-utterance', frame.onEnd) in connect_calls
+        assert ('error', frame.onError) in connect_calls
 
     @patch('Frames.MainFrame.pyttsx3.init')
     def test_speak_on_thread_reuses_existing_engine(self, mock_init, frame):
@@ -447,3 +448,172 @@ class TestMainFrameTTSEngine:
         # Assert
         mock_init.assert_not_called()
         mock_engine.say.assert_called_once_with("Test")
+
+    @patch('Frames.MainFrame.pyttsx3.init')
+    def test_speak_on_thread_calls_run_and_wait(self, mock_init, frame):
+        """Engine should call runAndWait for proper lifecycle."""
+        # Arrange
+        mock_engine = MagicMock()
+        mock_init.return_value = mock_engine
+        frame.engine = None
+
+        # Act
+        frame.speak_on_thread(500, "Test")
+
+        # Assert
+        mock_engine.runAndWait.assert_called_once()
+
+
+class TestMainFrameEngineLifecycle:
+    """Tests for TTS engine lifecycle and cleanup."""
+
+    def test_on_start_sets_is_speaking_flag(self, frame):
+        """onStart should set is_speaking to True."""
+        # Arrange
+        frame.is_speaking = False
+
+        # Act
+        frame.onStart("test")
+
+        # Assert
+        assert frame.is_speaking is True
+
+    def test_on_start_clears_stop_requested_flag(self, frame):
+        """onStart should clear stop_requested flag."""
+        # Arrange
+        frame.stop_requested = True
+
+        # Act
+        frame.onStart("test")
+
+        # Assert
+        assert frame.stop_requested is False
+
+    def test_on_end_clears_is_speaking_flag(self, frame):
+        """onEnd should set is_speaking to False."""
+        # Arrange
+        frame.is_speaking = True
+        frame.spoken_text = "test"
+
+        # Act
+        frame.onEnd("test", True)
+
+        # Assert
+        assert frame.is_speaking is False
+
+    def test_on_end_clears_highlight_on_completion(self, frame):
+        """onEnd should clear word highlighting."""
+        # Arrange
+        frame.spoken_text = "Hello World"
+        frame.text_area.insert(END, frame.spoken_text)
+        frame.highlight_index1 = "1.0"
+        frame.highlight_index2 = "1.5"
+        frame.text_area.tag_add(TAG_CURRENT_WORD, "1.0", "1.5")
+
+        # Act
+        frame.onEnd("test", True)
+
+        # Assert
+        assert frame.highlight_index1 is None
+        assert frame.highlight_index2 is None
+
+    def test_on_end_updates_progress_only_when_completed(self, frame):
+        """onEnd should only update progress to max when completed=True."""
+        # Arrange
+        frame.spoken_text = "Hello World"
+        frame.progress["maximum"] = len(frame.spoken_text)
+        frame.progress["value"] = 5
+
+        # Act
+        frame.onEnd("test", False)  # Interrupted
+
+        # Assert - progress should NOT be updated to max when interrupted
+        assert frame.progress["value"] == 5
+
+    def test_on_error_clears_is_speaking_flag(self, frame):
+        """onError should set is_speaking to False."""
+        # Arrange
+        frame.is_speaking = True
+
+        # Act
+        frame.onError("test", Exception("Test error"))
+
+        # Assert
+        assert frame.is_speaking is False
+
+    def test_on_error_enables_speak_button(self, frame):
+        """onError should enable speak button."""
+        # Arrange
+        frame.speak_button['state'] = DISABLED
+
+        # Act
+        frame.onError("test", Exception("Test error"))
+
+        # Assert
+        assert str(frame.speak_button['state']) == NORMAL
+
+    def test_on_error_disables_stop_button(self, frame):
+        """onError should disable stop button."""
+        # Arrange
+        frame.stop_button['state'] = NORMAL
+
+        # Act
+        frame.onError("test", Exception("Test error"))
+
+        # Assert
+        assert str(frame.stop_button['state']) == DISABLED
+
+    def test_on_error_clears_highlighting(self, frame):
+        """onError should clear word highlighting."""
+        # Arrange
+        frame.text_area.insert(END, "Hello World")
+        frame.highlight_index1 = "1.0"
+        frame.highlight_index2 = "1.5"
+
+        # Act
+        frame.onError("test", Exception("Test error"))
+
+        # Assert
+        assert frame.highlight_index1 is None
+        assert frame.highlight_index2 is None
+
+    def test_on_start_word_skips_update_when_stop_requested(self, frame):
+        """onStartWord should skip updates if stop was requested."""
+        # Arrange
+        frame.spoken_text = "Hello World"
+        frame.stop_requested = True
+        frame.current_word_label['text'] = "original"
+
+        # Act
+        frame.onStartWord("test", 0, 5)
+
+        # Assert - label should not be updated
+        assert frame.current_word_label['text'] == "original"
+
+    def test_stop_sets_stop_requested_flag(self, frame):
+        """Stop should set stop_requested flag."""
+        # Arrange
+        frame.stop_button['state'] = NORMAL
+        frame.engine = Mock()
+        frame.stop_requested = False
+
+        # Act
+        frame.stop(None)
+
+        # Assert
+        assert frame.stop_requested is True
+
+    def test_cleanup_engine_releases_resources(self, frame):
+        """cleanup_engine should properly release engine resources."""
+        # Arrange
+        mock_engine = Mock()
+        frame.engine = mock_engine
+        frame.is_speaking = True
+
+        # Act
+        frame.cleanup_engine()
+
+        # Assert
+        assert frame.engine is None
+        assert frame.is_speaking is False
+        mock_engine.stop.assert_called_once()
