@@ -13,6 +13,7 @@ class MainFrame(ttk.Frame):
         self.engine_lock = threading.Lock()
         self.is_speaking = False
         self.stop_requested = False
+        self.speech_thread = None
         self.spoken_text = ''
         self.highlight_index1 = None
         self.highlight_index2 = None
@@ -93,31 +94,79 @@ class MainFrame(ttk.Frame):
 
     def cleanup_engine(self):
         """Properly release and cleanup the TTS engine resources."""
-        with self.engine_lock:
-            if self.engine is not None:
-                try:
-                    self.stop_requested = True
-                    self.engine.stop()
-                    if self.is_speaking:
-                        self.engine.endLoop()
-                except Exception as e:
-                    print(f"Error during engine cleanup: {e}")
-                finally:
-                    self.engine = None
-                    self.is_speaking = False
-                    self.stop_requested = False
+        self.stop_requested = True
+        if self.engine is not None:
+            try:
+                self.engine.stop()
+            except Exception as e:
+                print(f"Error during engine cleanup: {e}")
+            finally:
+                self.engine = None
+                self.is_speaking = False
         
 
     def paste_and_speak(self, event):
-        self.stop(event)
+        """Stop current speech, paste clipboard content, and start speaking."""
+        # Force stop any current speech and reset state
+        self.force_stop_and_reset()
+        
+        # Clear UI and insert new text
+        self.clear_display_labels()
         self.text_area.delete("1.0", END)
-        self.text_area.insert(END, self.master.clipboard_get())
+        try:
+            clipboard_text = self.master.clipboard_get()
+            self.text_area.insert(END, clipboard_text)
+        except Exception as e:
+            print(f"Error getting clipboard: {e}")
+            return
+        
+        # Start speaking the new text
         self.speak(event)
+
+    def force_stop_and_reset(self):
+        """Force stop current speech and reset engine for fresh start."""
+        self.stop_requested = True
+        
+        # Stop the current engine if running
+        if self.engine is not None:
+            try:
+                self.engine.stop()
+            except Exception as e:
+                print(f"Error stopping engine: {e}")
+            # Dispose of the engine - we'll create a fresh one
+            self.engine = None
+        
+        # Wait briefly for the speech thread to finish
+        if self.speech_thread is not None and self.speech_thread.is_alive():
+            self.speech_thread.join(timeout=0.5)
+        
+        # Reset state
+        self.is_speaking = False
+        self.stop_requested = False
+        self.speak_button['state'] = NORMAL
+        self.stop_button['state'] = DISABLED
+
+    def clear_display_labels(self):
+        """Clear all the display labels and progress."""
+        self.spoken_words['text'] = ''
+        self.current_word_label['text'] = ''
+        self.next_words['text'] = ''
+        self.progress["value"] = 0
+        
+        # Clear highlighting
+        if self.highlight_index1 is not None:
+            try:
+                self.text_area.tag_remove(TAG_CURRENT_WORD, self.highlight_index1, self.highlight_index2)
+            except Exception:
+                pass
+            self.highlight_index1 = None
+            self.highlight_index2 = None
 
     def select_all_text(self, event):
         self.text_area.tag_add(SEL, "1.0", END)
 
     def stop(self, event):
+        """Stop current speech when stop button is clicked."""
         if self.stop_button['state'].__str__() == NORMAL:
             self.stop_requested = True
             if self.engine is not None:
@@ -125,6 +174,9 @@ class MainFrame(ttk.Frame):
                     self.engine.stop()
                 except Exception as e:
                     print(f"Error stopping engine: {e}")
+                # Dispose of engine so next speech gets a fresh one
+                self.engine = None
+            self.is_speaking = False
             self.speak_button['state'] = NORMAL
             self.stop_button['state'] = DISABLED
 
@@ -220,9 +272,9 @@ class MainFrame(ttk.Frame):
 
             speech_speed = int(self.speed_entry.get())
 
-            self.thread = threading.Thread(target=self.speak_on_thread, args=(speech_speed, self.spoken_text))
-            self.thread.daemon = True
-            self.thread.start()
+            self.speech_thread = threading.Thread(target=self.speak_on_thread, args=(speech_speed, self.spoken_text))
+            self.speech_thread.daemon = True
+            self.speech_thread.start()
 
     def speak_on_thread(self, speech_speed, spoken_text):
         """Run speech synthesis on a separate thread.
@@ -230,34 +282,35 @@ class MainFrame(ttk.Frame):
         Creates a new engine for each speech session to ensure clean state
         and proper resource management.
         """
-        with self.engine_lock:
-            # Create fresh engine for each speech session
-            if self.engine is None:
-                try:
-                    self.engine = pyttsx3.init()
-                    self.engine.connect('started-utterance', self.onStart)
-                    self.engine.connect('started-word', self.onStartWord)
-                    self.engine.connect('finished-utterance', self.onEnd)
-                    self.engine.connect('error', self.onError)
-                except Exception as e:
-                    print(f"Error initializing TTS engine: {e}")
-                    self.speak_button['state'] = NORMAL
-                    self.stop_button['state'] = DISABLED
-                    return
+        # Always create a fresh engine for each speech session
+        # This avoids issues with pyttsx3 engine state after interruption
+        try:
+            engine = pyttsx3.init()
+            self.engine = engine
+            engine.connect('started-utterance', self.onStart)
+            engine.connect('started-word', self.onStartWord)
+            engine.connect('finished-utterance', self.onEnd)
+            engine.connect('error', self.onError)
+        except Exception as e:
+            print(f"Error initializing TTS engine: {e}")
+            self.speak_button['state'] = NORMAL
+            self.stop_button['state'] = DISABLED
+            return
 
-            try:
-                self.stop_requested = False
-                self.engine.setProperty('rate', speech_speed)
-                self.engine.say(spoken_text)
-                
-                # Use runAndWait for cleaner lifecycle management
-                # This blocks until speech is complete or stopped
-                self.engine.runAndWait()
-            except Exception as e:
-                print(f"Error during speech: {e}")
-                self.is_speaking = False
-                self.speak_button['state'] = NORMAL
-                self.stop_button['state'] = DISABLED
+        try:
+            self.stop_requested = False
+            engine.setProperty('rate', speech_speed)
+            engine.say(spoken_text)
+            
+            # Use runAndWait - this blocks until speech is complete or stopped
+            engine.runAndWait()
+        except Exception as e:
+            print(f"Error during speech: {e}")
+        finally:
+            # Clean up this engine instance
+            self.is_speaking = False
+            if self.engine == engine:
+                self.engine = None
 
 
 TAG_CURRENT_WORD = "current word"

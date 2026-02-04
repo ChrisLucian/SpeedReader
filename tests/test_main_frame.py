@@ -317,13 +317,16 @@ class TestMainFrameStopFunctionality:
         """Stop should call engine.stop() when stop button is enabled."""
         # Arrange
         frame.stop_button['state'] = NORMAL
-        frame.engine = Mock()
+        mock_engine = Mock()
+        frame.engine = mock_engine
 
         # Act
         frame.stop(None)
 
         # Assert
-        frame.engine.stop.assert_called_once()
+        mock_engine.stop.assert_called_once()
+        # Engine should be disposed after stop
+        assert frame.engine is None
 
     def test_stop_enables_speak_button(self, frame):
         """Stop should enable the speak button."""
@@ -436,17 +439,17 @@ class TestMainFrameTTSEngine:
         assert ('error', frame.onError) in connect_calls
 
     @patch('Frames.MainFrame.pyttsx3.init')
-    def test_speak_on_thread_reuses_existing_engine(self, mock_init, frame):
-        """Subsequent calls should reuse existing engine."""
+    def test_speak_on_thread_creates_fresh_engine_each_time(self, mock_init, frame):
+        """Each speech session should create a fresh engine for clean state."""
         # Arrange
         mock_engine = MagicMock()
-        frame.engine = mock_engine
+        mock_init.return_value = mock_engine
 
         # Act
         frame.speak_on_thread(500, "Test")
 
-        # Assert
-        mock_init.assert_not_called()
+        # Assert - fresh engine is always created
+        mock_init.assert_called_once()
         mock_engine.say.assert_called_once_with("Test")
 
     @patch('Frames.MainFrame.pyttsx3.init')
