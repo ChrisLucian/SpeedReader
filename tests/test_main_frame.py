@@ -399,9 +399,10 @@ class TestMainFrameTTSEngine:
         mock_engine = MagicMock()
         mock_init.return_value = mock_engine
         frame.engine = None
+        session_id = 1
 
         # Act
-        frame.speak_on_thread(500, "Test")
+        frame.speak_on_thread(500, "Test", session_id)
 
         # Assert
         mock_init.assert_called_once()
@@ -413,9 +414,10 @@ class TestMainFrameTTSEngine:
         mock_engine = MagicMock()
         mock_init.return_value = mock_engine
         frame.engine = None
+        session_id = 1
 
         # Act
-        frame.speak_on_thread(350, "Test")
+        frame.speak_on_thread(350, "Test", session_id)
 
         # Assert
         mock_engine.setProperty.assert_any_call('rate', 350)
@@ -427,9 +429,10 @@ class TestMainFrameTTSEngine:
         mock_engine = MagicMock()
         mock_init.return_value = mock_engine
         frame.engine = None
+        session_id = 1
 
         # Act
-        frame.speak_on_thread(500, "Test")
+        frame.speak_on_thread(500, "Test", session_id)
 
         # Assert
         connect_calls = [call[0] for call in mock_engine.connect.call_args_list]
@@ -444,9 +447,10 @@ class TestMainFrameTTSEngine:
         # Arrange
         mock_engine = MagicMock()
         mock_init.return_value = mock_engine
+        session_id = 1
 
         # Act
-        frame.speak_on_thread(500, "Test")
+        frame.speak_on_thread(500, "Test", session_id)
 
         # Assert - fresh engine is always created
         mock_init.assert_called_once()
@@ -459,12 +463,27 @@ class TestMainFrameTTSEngine:
         mock_engine = MagicMock()
         mock_init.return_value = mock_engine
         frame.engine = None
+        session_id = 1
 
         # Act
-        frame.speak_on_thread(500, "Test")
+        frame.speak_on_thread(500, "Test", session_id)
 
         # Assert
         mock_engine.runAndWait.assert_called_once()
+
+    @patch('Frames.MainFrame.pyttsx3.init')
+    def test_speak_on_thread_sets_current_session_id(self, mock_init, frame):
+        """speak_on_thread should set current_session_id for callback tracking."""
+        # Arrange
+        mock_engine = MagicMock()
+        mock_init.return_value = mock_engine
+        session_id = 42
+
+        # Act
+        frame.speak_on_thread(500, "Test", session_id)
+
+        # Assert
+        assert frame.current_session_id == session_id
 
 
 class TestMainFrameEngineLifecycle:
@@ -474,6 +493,8 @@ class TestMainFrameEngineLifecycle:
         """onStart should set is_speaking to True."""
         # Arrange
         frame.is_speaking = False
+        frame.current_session_id = 1
+        frame.speech_session_id = 1
 
         # Act
         frame.onStart("test")
@@ -485,6 +506,8 @@ class TestMainFrameEngineLifecycle:
         """onStart should clear stop_requested flag."""
         # Arrange
         frame.stop_requested = True
+        frame.current_session_id = 1
+        frame.speech_session_id = 1
 
         # Act
         frame.onStart("test")
@@ -492,11 +515,26 @@ class TestMainFrameEngineLifecycle:
         # Assert
         assert frame.stop_requested is False
 
+    def test_on_start_ignored_for_old_session(self, frame):
+        """onStart should be ignored for old sessions."""
+        # Arrange
+        frame.is_speaking = False
+        frame.current_session_id = 1
+        frame.speech_session_id = 2  # Different - old session
+
+        # Act
+        frame.onStart("test")
+
+        # Assert - should not change state
+        assert frame.is_speaking is False
+
     def test_on_end_clears_is_speaking_flag(self, frame):
         """onEnd should set is_speaking to False."""
         # Arrange
         frame.is_speaking = True
         frame.spoken_text = "test"
+        frame.current_session_id = 1
+        frame.speech_session_id = 1
 
         # Act
         frame.onEnd("test", True)
@@ -512,6 +550,8 @@ class TestMainFrameEngineLifecycle:
         frame.highlight_index1 = "1.0"
         frame.highlight_index2 = "1.5"
         frame.text_area.tag_add(TAG_CURRENT_WORD, "1.0", "1.5")
+        frame.current_session_id = 1
+        frame.speech_session_id = 1
 
         # Act
         frame.onEnd("test", True)
@@ -526,6 +566,8 @@ class TestMainFrameEngineLifecycle:
         frame.spoken_text = "Hello World"
         frame.progress["maximum"] = len(frame.spoken_text)
         frame.progress["value"] = 5
+        frame.current_session_id = 1
+        frame.speech_session_id = 1
 
         # Act
         frame.onEnd("test", False)  # Interrupted
@@ -533,10 +575,26 @@ class TestMainFrameEngineLifecycle:
         # Assert - progress should NOT be updated to max when interrupted
         assert frame.progress["value"] == 5
 
+    def test_on_end_ignored_for_old_session(self, frame):
+        """onEnd should be ignored for old sessions."""
+        # Arrange
+        frame.is_speaking = True
+        frame.spoken_text = "test"
+        frame.current_session_id = 1
+        frame.speech_session_id = 2  # Different - old session
+
+        # Act
+        frame.onEnd("test", True)
+
+        # Assert - should not change state
+        assert frame.is_speaking is True
+
     def test_on_error_clears_is_speaking_flag(self, frame):
         """onError should set is_speaking to False."""
         # Arrange
         frame.is_speaking = True
+        frame.current_session_id = 1
+        frame.speech_session_id = 1
 
         # Act
         frame.onError("test", Exception("Test error"))
@@ -548,6 +606,8 @@ class TestMainFrameEngineLifecycle:
         """onError should enable speak button."""
         # Arrange
         frame.speak_button['state'] = DISABLED
+        frame.current_session_id = 1
+        frame.speech_session_id = 1
 
         # Act
         frame.onError("test", Exception("Test error"))
@@ -559,6 +619,8 @@ class TestMainFrameEngineLifecycle:
         """onError should disable stop button."""
         # Arrange
         frame.stop_button['state'] = NORMAL
+        frame.current_session_id = 1
+        frame.speech_session_id = 1
 
         # Act
         frame.onError("test", Exception("Test error"))
@@ -572,6 +634,8 @@ class TestMainFrameEngineLifecycle:
         frame.text_area.insert(END, "Hello World")
         frame.highlight_index1 = "1.0"
         frame.highlight_index2 = "1.5"
+        frame.current_session_id = 1
+        frame.speech_session_id = 1
 
         # Act
         frame.onError("test", Exception("Test error"))
@@ -580,12 +644,43 @@ class TestMainFrameEngineLifecycle:
         assert frame.highlight_index1 is None
         assert frame.highlight_index2 is None
 
+    def test_on_error_ignored_for_old_session(self, frame):
+        """onError should be ignored for old sessions."""
+        # Arrange
+        frame.is_speaking = True
+        frame.current_session_id = 1
+        frame.speech_session_id = 2  # Different - old session
+
+        # Act
+        frame.onError("test", Exception("Test error"))
+
+        # Assert - should not change state
+        assert frame.is_speaking is True
+
     def test_on_start_word_skips_update_when_stop_requested(self, frame):
         """onStartWord should skip updates if stop was requested."""
         # Arrange
         frame.spoken_text = "Hello World"
         frame.stop_requested = True
         frame.current_word_label['text'] = "original"
+        frame.current_session_id = 1
+        frame.speech_session_id = 1
+
+        # Act
+        frame.onStartWord("test", 0, 5)
+
+        # Assert - label should not be updated
+        assert frame.current_word_label['text'] == "original"
+
+    def test_on_start_word_ignored_for_old_session(self, frame):
+        """onStartWord should be ignored for old sessions."""
+        # Arrange
+        frame.spoken_text = "Hello World"
+        frame.text_area.insert(END, frame.spoken_text)
+        frame.stop_requested = False
+        frame.current_word_label['text'] = "original"
+        frame.current_session_id = 1
+        frame.speech_session_id = 2  # Different - old session
 
         # Act
         frame.onStartWord("test", 0, 5)

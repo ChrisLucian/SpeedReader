@@ -14,6 +14,8 @@ class MainFrame(ttk.Frame):
         self.is_speaking = False
         self.stop_requested = False
         self.speech_thread = None
+        self.speech_session_id = 0  # Track current speech session to ignore stale callbacks
+        self.current_session_id = 0  # Session ID for the currently running speech
         self.spoken_text = ''
         self.highlight_index1 = None
         self.highlight_index2 = None
@@ -127,6 +129,9 @@ class MainFrame(ttk.Frame):
         """Force stop current speech and reset engine for fresh start."""
         self.stop_requested = True
         
+        # Increment session ID to invalidate any pending callbacks from old session
+        self.speech_session_id += 1
+        
         # Stop the current engine if running
         if self.engine is not None:
             try:
@@ -182,6 +187,9 @@ class MainFrame(ttk.Frame):
 
     def onStart(self, name):
         """Called when an utterance starts."""
+        # Ignore callbacks from old speech sessions
+        if self.current_session_id != self.speech_session_id:
+            return
         self.is_speaking = True
         self.stop_requested = False
         self.speak_button['state'] = DISABLED
@@ -190,8 +198,8 @@ class MainFrame(ttk.Frame):
 
     def onStartWord(self, name, location, length):
         """Called when a word starts being spoken."""
-        # Skip updates if stop was requested
-        if self.stop_requested:
+        # Skip updates if stop was requested or this is an old session
+        if self.stop_requested or self.current_session_id != self.speech_session_id:
             return
             
         read_trail = 100
@@ -219,6 +227,11 @@ class MainFrame(ttk.Frame):
             name: The name of the utterance that finished
             completed: True if speech completed normally, False if interrupted
         """
+        # Ignore callbacks from old speech sessions
+        if self.current_session_id != self.speech_session_id:
+            print(f"onEnd: {name} - ignored (old session)")
+            return
+            
         self.is_speaking = False
         self.speak_button['state'] = NORMAL
         self.stop_button['state'] = DISABLED
@@ -248,6 +261,10 @@ class MainFrame(ttk.Frame):
             name: The name of the utterance that had an error
             exception: The exception that occurred
         """
+        # Ignore callbacks from old speech sessions
+        if self.current_session_id != self.speech_session_id:
+            return
+            
         self.is_speaking = False
         self.speak_button['state'] = NORMAL
         self.stop_button['state'] = DISABLED
@@ -271,17 +288,29 @@ class MainFrame(ttk.Frame):
             self.text_area.insert(END, self.spoken_text)
 
             speech_speed = int(self.speed_entry.get())
+            
+            # Increment session ID for this new speech
+            self.speech_session_id += 1
+            session_id = self.speech_session_id
 
-            self.speech_thread = threading.Thread(target=self.speak_on_thread, args=(speech_speed, self.spoken_text))
+            self.speech_thread = threading.Thread(target=self.speak_on_thread, args=(speech_speed, self.spoken_text, session_id))
             self.speech_thread.daemon = True
             self.speech_thread.start()
 
-    def speak_on_thread(self, speech_speed, spoken_text):
+    def speak_on_thread(self, speech_speed, spoken_text, session_id):
         """Run speech synthesis on a separate thread.
         
         Creates a new engine for each speech session to ensure clean state
         and proper resource management.
+        
+        Args:
+            speech_speed: Words per minute
+            spoken_text: Text to speak
+            session_id: Session ID to track this speech session
         """
+        # Store session ID so callbacks know which session they belong to
+        self.current_session_id = session_id
+        
         # Always create a fresh engine for each speech session
         # This avoids issues with pyttsx3 engine state after interruption
         try:
@@ -307,10 +336,10 @@ class MainFrame(ttk.Frame):
         except Exception as e:
             print(f"Error during speech: {e}")
         finally:
-            # Clean up this engine instance
-            self.is_speaking = False
+            # Clean up this engine instance only if it's still the current one
             if self.engine == engine:
                 self.engine = None
+                self.is_speaking = False
 
 
 TAG_CURRENT_WORD = "current word"
