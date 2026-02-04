@@ -5,6 +5,14 @@ from tkinter import Text
 import pyttsx3
 from pyttsx3 import engine
 import re
+import platform
+
+# Windows media key support
+if platform.system() == 'Windows':
+    import ctypes
+    VK_MEDIA_PLAY_PAUSE = 0xB3
+    KEYEVENTF_EXTENDEDKEY = 0x0001
+    KEYEVENTF_KEYUP = 0x0002
 
 class MainFrame(ttk.Frame):
     def __init__(self, **kw):
@@ -19,6 +27,7 @@ class MainFrame(ttk.Frame):
         self.spoken_text = ''
         self.highlight_index1 = None
         self.highlight_index2 = None
+        self.media_was_paused = False  # Track if we paused media playback
         self.build_frame_content(kw)
 
     def build_frame_content(self, kw):
@@ -167,6 +176,38 @@ class MainFrame(ttk.Frame):
             self.highlight_index1 = None
             self.highlight_index2 = None
 
+    def pause_system_media(self):
+        """Pause any currently playing system media (Windows only).
+        
+        Sends a media play/pause key event to pause music players.
+        Sets media_was_paused flag so we know to resume later.
+        """
+        if platform.system() == 'Windows':
+            try:
+                # Send media play/pause key press
+                ctypes.windll.user32.keybd_event(VK_MEDIA_PLAY_PAUSE, 0, KEYEVENTF_EXTENDEDKEY, 0)
+                ctypes.windll.user32.keybd_event(VK_MEDIA_PLAY_PAUSE, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0)
+                self.media_was_paused = True
+                print("Paused system media playback")
+            except Exception as e:
+                print(f"Error pausing media: {e}")
+                self.media_was_paused = False
+    
+    def resume_system_media(self):
+        """Resume system media playback if we previously paused it (Windows only).
+        
+        Only resumes if media_was_paused flag is set.
+        """
+        if platform.system() == 'Windows' and self.media_was_paused:
+            try:
+                # Send media play/pause key press to resume
+                ctypes.windll.user32.keybd_event(VK_MEDIA_PLAY_PAUSE, 0, KEYEVENTF_EXTENDEDKEY, 0)
+                ctypes.windll.user32.keybd_event(VK_MEDIA_PLAY_PAUSE, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0)
+                self.media_was_paused = False
+                print("Resumed system media playback")
+            except Exception as e:
+                print(f"Error resuming media: {e}")
+
     def select_all_text(self, event):
         self.text_area.tag_add(SEL, "1.0", END)
 
@@ -194,6 +235,9 @@ class MainFrame(ttk.Frame):
         self.stop_requested = False
         self.speak_button['state'] = DISABLED
         self.stop_button['state'] = NORMAL
+        
+        # Pause any system media playing
+        self.pause_system_media()
         print(f"onStart: {name}")
 
     def onStartWord(self, name, location, length):
@@ -253,6 +297,9 @@ class MainFrame(ttk.Frame):
                 pass
             self.highlight_index1 = None
             self.highlight_index2 = None
+        
+        # Resume any system media we paused
+        self.resume_system_media()
 
     def onError(self, name, exception):
         """Called when an error occurs during speech.
@@ -278,6 +325,9 @@ class MainFrame(ttk.Frame):
                 pass
             self.highlight_index1 = None
             self.highlight_index2 = None
+        
+        # Resume any system media we paused
+        self.resume_system_media()
 
     def speak(self, event):
         if self.speak_button['state'].__str__() == NORMAL:

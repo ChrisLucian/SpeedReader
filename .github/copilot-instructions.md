@@ -18,7 +18,9 @@ Frames/                 # UI components (extend ttk.Frame)
 - **Controller as Tk root**: `SpeedReaderController` extends `Tk` directly, not a separate class
 - **Frame-based UI**: UI components are `ttk.Frame` subclasses passed `master=self` from controller
 - **Threaded TTS**: Speech runs in daemon threads via `threading.Thread` to keep UI responsive
-- **Engine lifecycle**: pyttsx3 engine is initialized once and reused (`startLoop()` on first use, then just `say()`)
+- **Fresh engine per session**: pyttsx3 engine is created fresh for each speech session to avoid state issues after interruption
+- **Session ID tracking**: `speech_session_id` increments on new speech; callbacks check `current_session_id` to ignore stale events
+- **Windows media control**: Pauses system music when TTS starts, resumes when finished (via `VK_MEDIA_PLAY_PAUSE` key simulation)
 
 ### Important Code Patterns
 

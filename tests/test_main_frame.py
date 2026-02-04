@@ -715,3 +715,110 @@ class TestMainFrameEngineLifecycle:
         assert frame.engine is None
         assert frame.is_speaking is False
         mock_engine.stop.assert_called_once()
+
+
+class TestMainFrameMediaControl:
+    """Tests for Windows media control (pause/resume music during TTS)."""
+
+    def test_media_was_paused_initially_false(self, frame):
+        """media_was_paused should be False initially."""
+        # Assert
+        assert frame.media_was_paused is False
+
+    @patch('Frames.MainFrame.platform')
+    @patch('Frames.MainFrame.ctypes')
+    def test_pause_system_media_sends_key_on_windows(self, mock_ctypes, mock_platform, frame):
+        """pause_system_media should send media key on Windows."""
+        # Arrange
+        mock_platform.system.return_value = 'Windows'
+        frame.media_was_paused = False
+
+        # Act
+        frame.pause_system_media()
+
+        # Assert
+        assert frame.media_was_paused is True
+        assert mock_ctypes.windll.user32.keybd_event.call_count == 2
+
+    @patch('Frames.MainFrame.platform')
+    def test_pause_system_media_skipped_on_non_windows(self, mock_platform, frame):
+        """pause_system_media should do nothing on non-Windows."""
+        # Arrange
+        mock_platform.system.return_value = 'Linux'
+        frame.media_was_paused = False
+
+        # Act
+        frame.pause_system_media()
+
+        # Assert
+        assert frame.media_was_paused is False
+
+    @patch('Frames.MainFrame.platform')
+    @patch('Frames.MainFrame.ctypes')
+    def test_resume_system_media_sends_key_when_was_paused(self, mock_ctypes, mock_platform, frame):
+        """resume_system_media should send media key if we paused it."""
+        # Arrange
+        mock_platform.system.return_value = 'Windows'
+        frame.media_was_paused = True
+
+        # Act
+        frame.resume_system_media()
+
+        # Assert
+        assert frame.media_was_paused is False
+        assert mock_ctypes.windll.user32.keybd_event.call_count == 2
+
+    @patch('Frames.MainFrame.platform')
+    @patch('Frames.MainFrame.ctypes')
+    def test_resume_system_media_skipped_when_not_paused(self, mock_ctypes, mock_platform, frame):
+        """resume_system_media should do nothing if we didn't pause it."""
+        # Arrange
+        mock_platform.system.return_value = 'Windows'
+        frame.media_was_paused = False
+
+        # Act
+        frame.resume_system_media()
+
+        # Assert
+        assert frame.media_was_paused is False
+        mock_ctypes.windll.user32.keybd_event.assert_not_called()
+
+    def test_on_start_calls_pause_system_media(self, frame):
+        """onStart should call pause_system_media."""
+        # Arrange
+        frame.current_session_id = 1
+        frame.speech_session_id = 1
+        frame.pause_system_media = Mock()
+
+        # Act
+        frame.onStart("test")
+
+        # Assert
+        frame.pause_system_media.assert_called_once()
+
+    def test_on_end_calls_resume_system_media(self, frame):
+        """onEnd should call resume_system_media."""
+        # Arrange
+        frame.current_session_id = 1
+        frame.speech_session_id = 1
+        frame.spoken_text = "test"
+        frame.resume_system_media = Mock()
+
+        # Act
+        frame.onEnd("test", True)
+
+        # Assert
+        frame.resume_system_media.assert_called_once()
+
+    def test_on_error_calls_resume_system_media(self, frame):
+        """onError should call resume_system_media."""
+        # Arrange
+        frame.current_session_id = 1
+        frame.speech_session_id = 1
+        frame.resume_system_media = Mock()
+
+        # Act
+        frame.onError("test", Exception("Test error"))
+
+        # Assert
+        frame.resume_system_media.assert_called_once()
