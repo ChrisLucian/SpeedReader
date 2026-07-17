@@ -18,6 +18,7 @@ import threading
 from mcp.server.fastmcp import FastMCP
 
 from Core.call_detection import microphone_in_use
+import logging
 from Core.config import load_mcp_config
 from Core.speak_service import SpeakService
 from Core.voice_registry import VoiceRegistry
@@ -93,9 +94,11 @@ def build_mcp(service=None, registry=None, host="127.0.0.1", port=8765,
         Returns:
             A short confirmation of what was spoken.
         """
-        if pause_when_mic_in_use and call_active():
+        # If an agent calls the speak tool, we assume they want to speak regardless of mic status.
+        if pause_when_mic_in_use and call_active() and agent is None:
             return "Skipped: a call is in progress (microphone in use); speech was not played."
         chosen = registry.resolve_for_speak(agent=agent, voice=voice)
+        logging.info(f"MCP Speak Tool called with text: '{text}'")
         used = service.speak(text, rate, voice=chosen)
         return "Spoke {} characters at {} WPM.".format(len(text), used)
 
