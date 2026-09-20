@@ -5,6 +5,13 @@
     ],
     "python.testing.pytestEnabled": true,
     "python.testing.unittestEnabled": false,
-    "github.copilot.chat.streamingCompletions": false
+    "github.copilot.chat.streamingCompletions": false,
+    "python-envs.pythonProjects": [
+        {
+            "path": "SpeedReader.py",
+            "envManager": "ms-python.python:venv",
+            "packageManager": "ms-python.python:pip"
+        }
+    ]
 
 }
