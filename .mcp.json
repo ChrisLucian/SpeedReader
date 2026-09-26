@@ -1,0 +1,29 @@
+{
+    "mcpServers": {
+        "racn": {
+            "command": "mise",
+            "args": [
+                "-C",
+                "c:\\Code\\RiskAwareCommitNotationMcp",
+                "run",
+                "run"
+            ]
+        },
+        "tdd": {
+            "command": "mise",
+            "args": [
+                "-C",
+                "c:\\Code\\TDD-MCP",
+                "run",
+                "run"
+            ],
+            "env": {
+                "TDD_MCP_EXEMPT": ""
+            }
+        },
+        "speedreader": {
+            "type": "http",
+            "url": "http://127.0.0.1:8765/mcp"
+        }
+    }
+}
