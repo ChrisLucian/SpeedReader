@@ -30,7 +30,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host "Building executable..." -ForegroundColor Yellow
-pyinstaller SpeedReader.spec
+nuitka --standalone --enable-plugin=tk-inter SpeedReader.py
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host ""
