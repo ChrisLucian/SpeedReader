@@ -101,9 +101,9 @@ python mcp_server.py
 ```
 
 ## Convert to EXE
-The build uses PyInstaller (see SpeedReader.spec). For background on the bootloader fix: https://github.com/pyinstaller/pyinstaller/issues/3268
+The build uses Nuitka. For background on the bootloader fix: https://github.com/pyinstaller/pyinstaller/issues/3268
 
-pyinstaller --clean --onefile --windowed SpeedReader.spec
+nuitka --standalone --onefile --windowed SpeedReader.py
 
 
 # Prompt other agents to use your local agent

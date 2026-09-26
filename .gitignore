@@ -63,3 +63,7 @@ target/
 .vscode/
 
 .roo/mcp.json
+
+
+SpeedReader.build/
+SpeedReader.dist/
