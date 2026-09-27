@@ -128,8 +128,13 @@ Always create new skills in your skills folder that you wish you had before star
 
 ## Double Loop Learning
 Learn from the process improvement opportunities:
-Always evaluate the the process used here using a lens of Lean Software Development, Agile, Systems Thinking, Safety, Security, and Continuous Improvement. 
-Always make the changes to the AGENTS.md with these changes. Update this very list you are reading now.
+## Double Loop Learning
+Learn from the process improvement opportunities:
+Always evaluate the process used here using a lens of Lean Software Development, Agile, Systems Thinking, Safety, Security, and Continuous Improvement.
+
+**Build/Distribution Best Practices:**
+- When using static compilers (like Nuitka) with libraries that have complex internal dependencies (e.g., COM objects, deeply nested components like `pyttsx3`), always verify the build spec file (`.spec`) is updated to manually include all required dependency modules using compiler flags (e.g., `--include-module=missing_module`).
+- **Resource Dependency Validation:** For UI frameworks (Tkinter/Tcl/Tk) or system-level interactions (COM/DLLs), the build process must be validated against the *live* target machine's environment. When a resource error occurs (like Tcl/Tk missing init.tcl), the machine's OS environment and the full dependency chain must be inspected manually, and the build process adapted (e.g., by copying required DLLs directly, bypassing compiler inclusion flags).
 
 ## Canary
 Always end all of our chats with "# 🪁" Emoji. It should render as a markdown header so the Emoji will be large.

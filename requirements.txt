@@ -1,6 +1,7 @@
 pyttsx3==2.71
 pyinstaller
 pytest
+pywin32
 winrt-runtime
 winrt-Windows.Foundation
 winrt-Windows.Media.Control

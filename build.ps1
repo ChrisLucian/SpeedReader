@@ -30,7 +30,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host "Building executable..." -ForegroundColor Yellow
-nuitka --standalone --enable-plugin=tk-inter SpeedReader.py
+nuitka --standalone --enable-plugin=tk-inter --include-module=pyttsx3.drivers.sapi5 --include-module=win32com.server --include-module=win32com.server.util SpeedReader.py
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host ""
