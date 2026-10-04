@@ -158,10 +158,11 @@ class MainFrame(ttk.Frame):
         self.restart_server_button = ttk.Button(
             self.settings_frame, text="Restart Server", command=self.restart_server,
             state=DISABLED)
-        self.restart_server_button.grid(row=1, column=2, columnspan=3, sticky=W, pady=(10, 0))
+        self.restart_server_button.grid(row=1, column=2, columnspan=2, sticky=W, pady=(10, 0))
+        # Status sits on row 2 beside "Server Status…" so it never overlaps Restart.
         self.server_status_var = StringVar(value="")
         self.server_status = ttk.Label(self.settings_frame, textvariable=self.server_status_var)
-        self.server_status.grid(row=1, column=3, columnspan=2, sticky=W, pady=(10, 0))
+        self.server_status.grid(row=2, column=2, columnspan=3, sticky=W, pady=(10, 0))
         self.server_status_button = ttk.Button(
             self.settings_frame, text="Server Status…", command=self.open_server_status)
         self.server_status_button.grid(row=2, column=0, columnspan=2, sticky=W, pady=(10, 0))
