@@ -35,6 +35,27 @@ def test_env_var_is_used_when_path_not_given(tmp_path, monkeypatch):
     assert cfg.enabled is True
 
 
+def test_falls_back_to_config_next_to_executable(tmp_path, monkeypatch):
+    exe_dir = tmp_path / "dist"
+    exe_dir.mkdir()
+    (exe_dir / "config.json").write_text(json.dumps({"mcp": {"enabled": True}}))
+    monkeypatch.delenv("SPEEDREADER_CONFIG", raising=False)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr("sys.argv", [str(exe_dir / "SpeedReader.exe")])
+    assert load_mcp_config().enabled is True
+
+
+def test_working_directory_config_wins_over_executable_dir(tmp_path, monkeypatch):
+    exe_dir = tmp_path / "dist"
+    exe_dir.mkdir()
+    (exe_dir / "config.json").write_text(json.dumps({"mcp": {"enabled": True}}))
+    (tmp_path / "config.json").write_text(json.dumps({"mcp": {"enabled": False}}))
+    monkeypatch.delenv("SPEEDREADER_CONFIG", raising=False)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr("sys.argv", [str(exe_dir / "SpeedReader.exe")])
+    assert load_mcp_config().enabled is False
+
+
 def test_loads_enabled_voices(tmp_path):
     path = tmp_path / "config.json"
     path.write_text(json.dumps({"mcp": {"voices": ["id-1", "id-2"]}}))

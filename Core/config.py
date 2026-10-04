@@ -1,5 +1,6 @@
-import json
+﻿import json
 import os
+import sys
 from dataclasses import dataclass, field
 
 
@@ -15,18 +16,31 @@ class McpConfig:
     pause_media_when_speaking: bool = False # pause media playback when speaking
 
 
+def _default_path():
+    """``config.json`` in the working directory, else next to the executable.
+
+    A double-clicked build runs with its own folder as cwd only sometimes, so
+    fall back to the EXE's directory to keep MCP hosting working there.
+    """
+    if os.path.exists("config.json"):
+        return "config.json"
+    beside_exe = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), "config.json")
+    return beside_exe if os.path.exists(beside_exe) else "config.json"
+
+
 def load_mcp_config(path=None):
     """Load MCP hosting config from a JSON file.
 
     Lookup order: explicit ``path`` arg, then the ``SPEEDREADER_CONFIG``
-    environment variable, then ``config.json`` in the working directory. Missing
+    environment variable, then ``config.json`` in the working directory, then
+    ``config.json`` next to the executable. Missing
     file or keys fall back to the (disabled) defaults, so hosting is strictly
     opt-in.
 
     The JSON may be nested under an ``"mcp"`` key or flat:
         {"mcp": {"enabled": true, "host": "127.0.0.1", "port": 8765}}
     """
-    path = path or os.environ.get("SPEEDREADER_CONFIG") or "config.json"
+    path = path or os.environ.get("SPEEDREADER_CONFIG") or _default_path()
     cfg = McpConfig()
     if path and os.path.exists(path):
         with open(path, "r", encoding="utf-8") as handle:
@@ -52,7 +66,7 @@ def _update_mcp_config(updates, path=None):
 
     Preserves any existing config and other keys. Returns the resolved path.
     """
-    path = path or os.environ.get("SPEEDREADER_CONFIG") or "config.json"
+    path = path or os.environ.get("SPEEDREADER_CONFIG") or _default_path()
     data = {}
     if os.path.exists(path):
         with open(path, "r", encoding="utf-8") as handle:
