@@ -14,11 +14,11 @@ install requirements.txt
 pyttsx3==2.71 due to a bug detailed here: https://github.com/nateshmbhat/pyttsx3/issues/78
 
 ## Controls
-- **Speed** — words per minute (start low, e.g. 200, and work up to 500).
+- **Speed** — words per minute (spin box, steps of 25; start low, e.g. 200, and work up to 500).
 - **Voice** — pick from the text-to-speech voices installed on your system; the choice applies to both your reading and any AI agent speaking through the MCP server.
-- **Voice Settings…** — choose which system voices agents are allowed to use (see below). All voices are enabled by default.
-- **Server port** + **Restart Server** — change the port the MCP server listens on and restart it on the new port without closing the app. The new port is saved to `config.json` (`mcp.port`) so it sticks across sessions. Only active when MCP hosting is enabled (see below).
-- **Server Status…** — open a live dialog showing whether the MCP server is hosting (and on which port), whether pause-while-mic-in-use is on (and your current mic state), and each enabled voice with the agents that have claimed it.
+- **Agent Voices…** — choose which system voices agents are allowed to use (see below). All voices are enabled by default.
+- **Server…** (shows `Server: <port>…` while hosting) — one dialog to change the MCP port and **Restart Server** without closing the app (the port is saved to `config.json` as `mcp.port`), plus live status: hosting state, pause-while-mic-in-use (and your current mic state), and each enabled voice with the agents that claimed it.
+- **Light mode / Dark mode** — toggles the modern Windows 11 look ([sv-ttk](https://github.com/rdbende/Sun-Valley-ttk-theme)), including the title bar. Dark by default; the choice is saved to `config.json` as `ui.theme`.
 - Shortcuts: `Ctrl+B` paste & speak (interrupts and clears anything currently playing or queued, including agent speech, then reads the clipboard now), `Ctrl+A` select all. Agent (MCP) utterances otherwise queue and play in order.
 
 ## MCP server (let AI agents speak through SpeedReader)
@@ -42,7 +42,7 @@ This is the main use case: you keep SpeedReader open to read your own text, and 
    }
    ```
 
-2. Start the app (`python SpeedReader.py`). It hosts the server over HTTP on `http://127.0.0.1:8765/mcp`, bound to localhost only. You can change the port at runtime with the **Server port** field + **Restart Server** button in the app — the new port is persisted to `config.json` for next launch (update your agent's URL to match).
+2. Start the app (`python SpeedReader.py`). It hosts the server over HTTP on `http://127.0.0.1:8765/mcp`, bound to localhost only. You can change the port at runtime in the app's **Server…** dialog (**Restart Server**) — the new port is persisted to `config.json` for next launch (update your agent's URL to match).
 3. Point your agent at it. In VS Code this is already wired in [.vscode/mcp.json](.vscode/mcp.json):
 
    ```json
@@ -56,7 +56,7 @@ This is the main use case: you keep SpeedReader open to read your own text, and 
 The agent now has the tools above. Omit `rate` to use the WPM set in the UI.
 
 ### Per-agent voices (multiple agents, multiple voices)
-Use **Voice Settings…** in the app to enable/disable which installed voices agents may use; the choice is saved to `config.json` under `mcp.voices`. The voice you pick in the **Voice** dropdown is reserved for you — agents avoid it and claim the other voices first (unless it's the only enabled voice). The agent handshake is:
+Use **Agent Voices…** in the app to enable/disable which installed voices agents may use; the choice is saved to `config.json` under `mcp.voices`. The voice you pick in the **Voice** dropdown is reserved for you — agents avoid it and claim the other voices first (unless it's the only enabled voice). The agent handshake is:
 
 1. **(optional) discover** — `list_voices()` shows enabled voices and who holds each.
 2. **reserve** — `claim_voice(agent="my-repo")` reserves a voice and returns it. Use a stable identifier (repo folder name or current task). Re-claiming returns the same voice.
@@ -109,6 +109,8 @@ The build uses Nuitka. For background on the bootloader fix: https://github.com/
 
 - Creates/uses `.venv`, installs `requirements.txt`, runs the tests, then builds with the **venv's** Nuitka (`python -m nuitka`) — a global `nuitka` would bundle global packages (e.g. an incompatible `mcp` 2.x) and the MCP server won't start.
 - Output: `SpeedReader.dist\SpeedReader.exe`. `config.json` is copied next to it; the app reads `config.json` from the working directory first, then from the EXE's folder.
+- The EXE has no console window; errors and server logs go to `SpeedReader.err.txt` (and `SpeedReader.out.txt`) beside it.
+- Close any running `SpeedReader.exe` first — the script refuses to build while it locks `SpeedReader.dist`.
 
 
 # Prompt other agents to use your local agent

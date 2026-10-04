@@ -20,4 +20,7 @@ Bare `nuitka` resolves to the GLOBAL Python and bundles GLOBAL packages (unpinne
 5. `EOFError: marshal data too short` / `Frozen object named 'encodings' is invalid` with
    no traceback = corrupt Nuitka cache. Fix: `python -m nuitka --clean-cache=all`, delete
    `SpeedReader.build`/`SpeedReader.dist`, rebuild. Never run two Nuitka builds in parallel.
-6. REPEAT: pin majors of fast-moving deps (`mcp<2`) in `requirements.txt`.
+6. `Can't find a usable init.tcl` = half-written dist from a build that failed (usually a
+   running SpeedReader.exe locked it). Close the app, delete `SpeedReader.dist`, rebuild.
+   `build.ps1` now refuses to build while the dist EXE is running.
+7. REPEAT: pin majors of fast-moving deps (`mcp<2`) in `requirements.txt`.
