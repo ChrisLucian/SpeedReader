@@ -1,4 +1,4 @@
-﻿# SpeedReader Build Script
+# SpeedReader Build Script
 # Usage: .\build.ps1
 
 $ErrorActionPreference = "Stop"
@@ -8,6 +8,12 @@ Write-Host "=== SpeedReader Build Script ===" -ForegroundColor Cyan
 # Get script directory
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $scriptDir
+
+# Fail fast: a running EXE locks SpeedReader.dist and building anyway leaves a broken dist.
+if (Get-Process SpeedReader -ErrorAction SilentlyContinue | Where-Object { $_.Path -like "$scriptDir\SpeedReader.dist\*" }) {
+    Write-Host "SpeedReader.exe is running from SpeedReader.dist - close it and rebuild." -ForegroundColor Red
+    exit 1
+}
 
 # Check if virtual environment exists
 if (-not (Test-Path ".\.venv\Scripts\Activate.ps1")) {
@@ -32,7 +38,13 @@ if ($LASTEXITCODE -ne 0) {
 Write-Host "Building executable..." -ForegroundColor Yellow
 # HIGH-RISK/REPEAT: run Nuitka from the venv (python -m), never the global `nuitka`,
 # so the EXE bundles the venv's pinned packages (mcp<2), not global ones.
-python -m nuitka --standalone --assume-yes-for-downloads --enable-plugin=tk-inter --include-module=pyttsx3.drivers.sapi5 --include-module=win32com.server --include-module=win32com.server.util SpeedReader.py
+# No console window; stdout/stderr go to SpeedReader.out.txt / .err.txt beside the EXE
+# (uvicorn logs to stderr, which must not be None).
+python -m nuitka --standalone --assume-yes-for-downloads --enable-plugin=tk-inter `
+    --include-module=pyttsx3.drivers.sapi5 --include-module=win32com.server --include-module=win32com.server.util `
+    --windows-icon-from-ico=assets/speedreader.ico --include-data-files=assets/speedreader.ico=assets/speedreader.ico `
+    --windows-console-mode=disable "--force-stdout-spec={PROGRAM_BASE}.out.txt" "--force-stderr-spec={PROGRAM_BASE}.err.txt" `
+    SpeedReader.py
 
 if ($LASTEXITCODE -eq 0) {
     # load_mcp_config falls back to config.json next to the EXE.
