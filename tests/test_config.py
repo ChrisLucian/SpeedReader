@@ -1,7 +1,7 @@
 import json
 import os
 
-from Core.config import load_mcp_config, save_enabled_voices, McpConfig, save_media_pause_setting
+from Core.config import load_mcp_config, save_enabled_voices, McpConfig, save_media_pause_setting, save_mcp_port
 
 
 def test_defaults_are_disabled_when_no_file(tmp_path):
@@ -108,3 +108,12 @@ def test_save_mcp_port_persists_and_preserves_config(tmp_path):
 
     # round-trips through the loader
     assert load_mcp_config(path=str(path)).port == 9100
+
+
+def test_save_mcp_port_writes_port_and_keeps_voices(tmp_path):
+    path = tmp_path / "config.json"
+    path.write_text(json.dumps({"mcp": {"enabled": True, "voices": ["id-1"], "port": 8765}}))
+    save_mcp_port(9200, path=str(path))
+    cfg = load_mcp_config(path=str(path))
+    assert cfg.port == 9200
+    assert cfg.voices == ["id-1"]

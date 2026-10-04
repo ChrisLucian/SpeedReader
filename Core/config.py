@@ -1,4 +1,4 @@
-﻿import json
+import json
 import os
 import sys
 from dataclasses import dataclass, field
@@ -28,6 +28,11 @@ def _default_path():
     return beside_exe if os.path.exists(beside_exe) else "config.json"
 
 
+def resolve_config_path(path=None):
+    """Explicit ``path``, else ``SPEEDREADER_CONFIG``, else the default lookup."""
+    return path or os.environ.get("SPEEDREADER_CONFIG") or _default_path()
+
+
 def load_mcp_config(path=None):
     """Load MCP hosting config from a JSON file.
 
@@ -40,7 +45,7 @@ def load_mcp_config(path=None):
     The JSON may be nested under an ``"mcp"`` key or flat:
         {"mcp": {"enabled": true, "host": "127.0.0.1", "port": 8765}}
     """
-    path = path or os.environ.get("SPEEDREADER_CONFIG") or _default_path()
+    path = resolve_config_path(path)
     cfg = McpConfig()
     if path and os.path.exists(path):
         with open(path, "r", encoding="utf-8") as handle:
@@ -62,17 +67,22 @@ def load_mcp_config(path=None):
 
 
 def _update_mcp_config(updates, path=None):
-    """Merge ``updates`` into the ``mcp`` section of the config file.
+    """Merge ``updates`` into the ``mcp`` section of the config file."""
+    return update_config_section("mcp", updates, path=path)
+
+
+def update_config_section(section, updates, path=None):
+    """Merge ``updates`` into ``section`` of the config file.
 
     Preserves any existing config and other keys. Returns the resolved path.
     """
-    path = path or os.environ.get("SPEEDREADER_CONFIG") or _default_path()
+    path = resolve_config_path(path)
     data = {}
     if os.path.exists(path):
         with open(path, "r", encoding="utf-8") as handle:
             data = json.load(handle) or {}
-    data.setdefault("mcp", {})
-    data["mcp"].update(updates)
+    data.setdefault(section, {})
+    data[section].update(updates)
     with open(path, "w", encoding="utf-8") as handle:
         json.dump(data, handle, indent=4)
     return path
@@ -85,6 +95,11 @@ def save_enabled_voices(voice_ids, path=None):
     Voice Settings dialog.
     """
     return _update_mcp_config({"voices": list(voice_ids)}, path=path)
+
+
+def save_mcp_port(port, path=None):
+    """Persist the MCP port (``mcp.port``) chosen via Restart Server."""
+    return _update_mcp_config({"port": int(port)}, path=path)
 
 
 def save_media_pause_setting(enabled, path=None):
