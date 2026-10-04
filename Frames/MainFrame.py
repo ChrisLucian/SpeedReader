@@ -2,37 +2,24 @@ import threading
 import webbrowser
 import tkinter.ttk as ttk
 from tkinter.constants import END, N, S, E, W, LEFT, RIGHT, CENTER, NORMAL, DISABLED, SEL, INSERT, HORIZONTAL
-from tkinter import Text, StringVar, Toplevel, BooleanVar
+import tkinter as tk
+from tkinter import Text, StringVar
+import sv_ttk
 import pyttsx3
 from pyttsx3 import engine
 import re
-import platform
-import asyncio
-
-# Windows media key support
-if platform.system() == 'Windows':
-    import ctypes
-    VK_MEDIA_PLAY_PAUSE = 0xB3
-    KEYEVENTF_EXTENDEDKEY = 0x0001
-    KEYEVENTF_KEYUP = 0x0002
-    
-    # Try to import Windows Media Session API for detecting playback state
-    try:
-        from winrt.windows.media.control import GlobalSystemMediaTransportControlsSessionManager
-        from winrt.windows.media.control import GlobalSystemMediaTransportControlsSessionPlaybackStatus
-        MEDIA_SESSION_AVAILABLE = True
-    except ImportError:
-        # Fallback for environments where the API is not available (e.g., CI/testing)
-        MEDIA_SESSION_AVAILABLE = False
-        print("Windows Media Session API not available - media detection disabled.")
 
 from Core.speech_engine import SpeechEngine
 from Core.speak_service import SpeakService
-from Core.config import load_mcp_config, save_enabled_voices
+from Core.config import load_mcp_config
 from Core.text_processing import preprocess_text, word_window, highlight_indices
 from Core.voice_registry import VoiceRegistry
+from Core.theme import load_ui_theme, palette, save_ui_theme, text_style, toggled
+from Frames import dialogs
+from Frames.chrome import apply_title_bar
+from Frames.media_control import MediaControlMixin
 
-class MainFrame(ttk.Frame):
+class MainFrame(MediaControlMixin, ttk.Frame):
     def __init__(self, **kw):
         ttk.Frame.__init__(self, **kw)
         self.speech = SpeechEngine(self.onStart, self.onStartWord, self.onEnd)
@@ -57,6 +44,7 @@ class MainFrame(ttk.Frame):
         self.speech_session_id = 0
         # For test compatibility - engine is None initially, then gets set by speech engine
         self.engine = None
+        self.theme = load_ui_theme()
         self.build_frame_content(kw)
 
     def _build_voice_registry(self):
@@ -72,7 +60,7 @@ class MainFrame(ttk.Frame):
         return VoiceRegistry(enabled=enabled)
 
     def build_frame_content(self, kw):
-
+        # Columns: 0 and 3 stretch, 1/2 hold the centred Speak/Stop buttons.
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=0)
         self.grid_columnconfigure(2, weight=0)
@@ -82,17 +70,19 @@ class MainFrame(ttk.Frame):
 
         self.progress = ttk.Progressbar(self, orient=HORIZONTAL, mode="determinate")
         self.progress.grid(row=row_index, columnspan=4, sticky=(W, E))
-
         row_index += 1
 
-
-        self.grid_rowconfigure(row_index, weight=1)
-        self.title = ttk.Label(self, font=("Georgia", "80"), justify=RIGHT, text="Speed Reader", anchor=CENTER)
-        self.title.grid(row=row_index, column=0, columnspan=4, sticky=(N, W, E), pady=15)
+        header = ttk.Frame(self)
+        header.grid(row=row_index, column=0, columnspan=4, sticky=(W, E), pady=(16, 8))
+        header.grid_columnconfigure(0, weight=1)
+        self.title = ttk.Label(header, font=(UI_FONT, "28", "bold"), text="Speed Reader")
+        self.title.grid(row=0, column=0, sticky=W)
+        self.theme_button = ttk.Button(header, command=self.toggle_theme)
+        self.theme_button.grid(row=0, column=1, sticky=E)
         row_index += 1
 
-
-        self.spoken_words_container = ttk.Frame(self, height=40)
+        # Fixed heights in points ("p") so they scale with DPI like the fonts do.
+        self.spoken_words_container = ttk.Frame(self, height="30p")
         self.spoken_words_container.grid(row=row_index, column=0, columnspan=4, sticky=(N, S, W, E))
         self.spoken_words_container.grid_propagate(False)  # lock height so text length never resizes the window
         self.spoken_words_container.grid_rowconfigure(0, weight=1)
@@ -101,42 +91,42 @@ class MainFrame(ttk.Frame):
         self.spoken_words.grid(row=0, column=0, sticky=(N, S, W, E))
         row_index += 1
 
-        self.current_word_container = ttk.Frame(self, height=180)
+        self.current_word_container = ttk.Frame(self, height="135p")
         self.current_word_container.grid(row=row_index, column=0, columnspan=4, sticky=(N, S, W, E))
         self.current_word_container.grid_propagate(False)  # lock height so word length never resizes the window
         self.current_word_container.grid_rowconfigure(0, weight=1)
         self.current_word_container.grid_columnconfigure(0, weight=1)
-        self.current_word_label = ttk.Label(self.current_word_container, font=("Georgia", "120"), anchor=CENTER)
+        self.current_word_label = ttk.Label(self.current_word_container, font=("Georgia", "96"), anchor=CENTER)
         self.current_word_label.grid(row=0, column=0, sticky=(N, S, W, E))
         row_index += 1
 
-        self.next_words_container = ttk.Frame(self, height=40)
+        self.next_words_container = ttk.Frame(self, height="30p")
         self.next_words_container.grid(row=row_index, column=0, columnspan=4, sticky=(N, S, W, E))
         self.next_words_container.grid_propagate(False)  # lock height so text length never resizes the window
         self.next_words_container.grid_rowconfigure(0, weight=1)
         self.next_words_container.grid_columnconfigure(0, weight=1)
         self.next_words = ttk.Label(self.next_words_container, font=("Georgia", "20"), anchor=W)
         self.next_words.grid(row=0, column=0, sticky=(N, S, W, E))
-
         row_index += 1
 
         self.settings_frame = ttk.Frame(self)
-        self.settings_frame.grid(row=row_index, column=0, columnspan=4, pady=10)
+        self.settings_frame.grid(row=row_index, column=0, columnspan=4, sticky=(W, E), pady=12)
+        self.settings_frame.grid_columnconfigure(5, weight=1)
 
-        self.speed_label = ttk.Label(self.settings_frame, text="Speed: ")
-        self.speed_label.grid(row=0, column=0, padx=(0, 5))
-        self.speed_var = StringVar(value="500")
-        self.speed_entry = ttk.Entry(self.settings_frame, width=6, textvariable=self.speed_var)
-        self.speed_entry.grid(row=0, column=1, padx=(0, 20))
+        ttk.Label(self.settings_frame, text="Speed").grid(row=0, column=0, padx=(0, 8))
+        self.speed_var = StringVar(master=self, value="500")
+        self.speed_entry = ttk.Spinbox(
+            self.settings_frame, from_=100, to=1000, increment=25, width=6, textvariable=self.speed_var, font=ENTRY_FONT)
+        self.speed_entry.grid(row=0, column=1, padx=(0, 4))
+        ttk.Label(self.settings_frame, text="WPM").grid(row=0, column=2, padx=(0, 24))
         self.speed_var.trace_add("write", self.on_rate_changed)
 
-        self.voice_label = ttk.Label(self.settings_frame, text="Voice: ")
-        self.voice_label.grid(row=0, column=2, padx=(0, 5))
-        self.voice_var = StringVar()
+        ttk.Label(self.settings_frame, text="Voice").grid(row=0, column=3, padx=(0, 8))
+        self.voice_var = StringVar(master=self)
         self.voice_combo = ttk.Combobox(
             self.settings_frame, textvariable=self.voice_var, state="readonly",
-            width=30, values=[name for _, name in self.voices])
-        self.voice_combo.grid(row=0, column=3)
+            width=30, values=[name for _, name in self.voices], font=ENTRY_FONT)
+        self.voice_combo.grid(row=0, column=4, sticky=W)
         self.voice_combo.bind("<<ComboboxSelected>>", self.on_voice_changed)
         if self.voices:
             self.voice_var.set(self.voices[0][1])
@@ -145,51 +135,40 @@ class MainFrame(ttk.Frame):
             self.voice_registry.set_user_voice(self.voices[0][0])
 
         self.voice_settings_button = ttk.Button(
-            self.settings_frame, text="Voice Settings…", command=self.open_voice_settings)
-        self.voice_settings_button.grid(row=0, column=4, padx=(20, 0))
-
-        # Second row: MCP server port + restart. The restart button is enabled
-        # only once the controller hosts a server (set_server_port enables it).
-        self.server_label = ttk.Label(self.settings_frame, text="Server port: ")
-        self.server_label.grid(row=1, column=0, padx=(0, 5), pady=(10, 0))
-        self.port_var = StringVar(value="8765")
-        self.port_entry = ttk.Entry(self.settings_frame, width=6, textvariable=self.port_var)
-        self.port_entry.grid(row=1, column=1, padx=(0, 20), pady=(10, 0))
-        self.restart_server_button = ttk.Button(
-            self.settings_frame, text="Restart Server", command=self.restart_server,
-            state=DISABLED)
-        self.restart_server_button.grid(row=1, column=2, columnspan=2, sticky=W, pady=(10, 0))
-        # Status sits on row 2 beside "Server Status…" so it never overlaps Restart.
-        self.server_status_var = StringVar(value="")
-        self.server_status = ttk.Label(self.settings_frame, textvariable=self.server_status_var)
-        self.server_status.grid(row=2, column=2, columnspan=3, sticky=W, pady=(10, 0))
-        self.server_status_button = ttk.Button(
-            self.settings_frame, text="Server Status…", command=self.open_server_status)
-        self.server_status_button.grid(row=2, column=0, columnspan=2, sticky=W, pady=(10, 0))
+            self.settings_frame, text="Agent Voices…", command=lambda: dialogs.open_voice_settings(self))
+        self.voice_settings_button.grid(row=0, column=6, padx=(8, 0))
+        self.server_button = ttk.Button(
+            self.settings_frame, text="Server…", command=lambda: dialogs.open_server_dialog(self))
+        self.server_button.grid(row=0, column=7, padx=(8, 0))
         row_index += 1
-
-
 
         self.grid_rowconfigure(row_index, weight=1)
-        self.text_area = Text(self, height=5, width=1, font=("Georgia", "40"))
-        self.text_area.insert(END, '')
-        self.text_area.tag_config(TAG_CURRENT_WORD, foreground="red")
+        self.text_area = Text(self, height=5, width=1, font=("Georgia", "28"), wrap="word",
+                              relief="flat", borderwidth=0, padx=12, pady=10)
         self.text_area.grid(row=row_index, column=0, columnspan=4, sticky=(N, S, E, W))
+        self.placeholder = tk.Label(
+            self.text_area, font=(UI_FONT, "14"), cursor="xterm",
+            text="Paste text here, or press Ctrl+B to paste & speak the clipboard.")
+        self.placeholder.bind("<Button-1>", lambda e: self.text_area.focus_set())
+        self.text_area.bind("<<Modified>>", self._on_text_modified)
         row_index += 1
 
-        self.speak_button = ttk.Button(self, text="Speak")
-        self.speak_button.grid(row=row_index, column=1, pady=10)
+        self.speak_button = ttk.Button(self, text="Speak", style="Accent.TButton", width=10)
+        self.speak_button.grid(row=row_index, column=1, padx=(0, 4), pady=12)
         self.speak_button['state'] = NORMAL
         self.speak_button.bind("<Button-1>", self.speak)
 
-        self.stop_button = ttk.Button(self, text="Stop")
-        self.stop_button.grid(row=row_index, column=2, pady=10)
+        self.stop_button = ttk.Button(self, text="Stop", width=10)
+        self.stop_button.grid(row=row_index, column=2, padx=(4, 0), pady=12)
         self.stop_button['state'] = DISABLED
         self.stop_button.bind("<Button-1>", self.stop)
-        row_index += 1
 
-        self.contribute_button = ttk.Button(self, text="Contribute on GitHub", command=self.open_contribute)
-        self.contribute_button.grid(row=row_index, column=0, columnspan=4, pady=10)
+        self.contribute_link = tk.Label(
+            self, text="Contribute on GitHub", cursor="hand2", font=(UI_FONT, "10", "underline"))
+        self.contribute_link.grid(row=row_index, column=3, sticky=E)
+        self.contribute_link.bind("<Button-1>", lambda e: self.open_contribute())
+        self._apply_theme_colors()
+        self._update_placeholder()
 
         self.text_area.bind("<Control-Key-a>", self.select_all_text)
         self.text_area.bind("<Control-Key-A>", self.select_all_text)
@@ -213,119 +192,36 @@ class MainFrame(ttk.Frame):
     def open_contribute(self):
         webbrowser.open_new_tab(GITHUB_URL)
 
-    def open_voice_settings(self):
-        """Open a dialog to enable/disable which system voices agents may use."""
-        enabled_ids = {vid for vid, _ in self.voice_registry.enabled()}
-        dialog = Toplevel(self)
-        dialog.title("Voice Settings")
-        dialog.transient(self.master)
-        ttk.Label(
-            dialog, text="Voices agents may use via the MCP server:"
-        ).grid(row=0, column=0, sticky=W, padx=12, pady=(12, 6))
+    def toggle_theme(self):
+        """Switch dark <-> light, restyle non-ttk widgets and the title bar, persist."""
+        self.theme = toggled(self.theme)
+        sv_ttk.set_theme(self.theme, self.master)
+        self._apply_theme_colors()
+        apply_title_bar(self.master, self.theme)
+        save_ui_theme(self.theme)
 
-        vars_by_id = {}
-        for i, (vid, name) in enumerate(self.voices, start=1):
-            var = BooleanVar(value=vid in enabled_ids)
-            vars_by_id[vid] = var
-            ttk.Checkbutton(dialog, text=name, variable=var).grid(
-                row=i, column=0, sticky=W, padx=18)
+    def _apply_theme_colors(self):
+        # tk (non-ttk) widgets aren't themed by sv-ttk, so colour them here.
+        colors = palette(self.theme)
+        self.text_area.configure(**text_style(self.theme))
+        self.text_area.tag_config(TAG_CURRENT_WORD, foreground=colors["highlight"])
+        self.placeholder.configure(background=colors["background"], foreground=colors["placeholder"])
+        self.contribute_link.configure(background=colors["window"], foreground=colors["link"])
+        self.theme_button["text"] = "Light mode" if self.theme == "dark" else "Dark mode"
 
-        def save():
-            selected = [(vid, name) for vid, name in self.voices if vars_by_id[vid].get()]
-            self.voice_registry.set_enabled(selected)
-            save_enabled_voices([vid for vid, _ in selected])
-            dialog.destroy()
+    def _on_text_modified(self, event=None):
+        self.text_area.edit_modified(False)  # re-arm <<Modified>> for the next change
+        self._update_placeholder()
 
-        buttons = ttk.Frame(dialog)
-        buttons.grid(row=len(self.voices) + 1, column=0, sticky=E, padx=12, pady=12)
-        ttk.Button(buttons, text="Cancel", command=dialog.destroy).grid(row=0, column=0, padx=(0, 6))
-        ttk.Button(buttons, text="Save", command=save).grid(row=0, column=1)
-
-    def open_server_status(self):
-        """Show MCP server status: hosting state plus per-voice agent claims.
-
-        Refreshes on a timer so claims/releases and live mic state stay current,
-        and cancels that timer when the dialog closes.
-        """
-        dialog = Toplevel(self)
-        dialog.title("MCP Server Status")
-        dialog.transient(self.master)
-
-        body = ttk.Label(dialog, justify=LEFT, anchor=W, font=("Consolas", 11))
-        body.grid(row=0, column=0, sticky=(N, S, W, E), padx=12, pady=12)
-
-        def refresh():
-            body['text'] = self._server_status_text()
-            dialog._status_job = dialog.after(1000, refresh)
-
-        def on_close():
-            job = getattr(dialog, "_status_job", None)
-            if job is not None:
-                dialog.after_cancel(job)
-            dialog.destroy()
-
-        ttk.Button(dialog, text="Close", command=on_close).grid(
-            row=1, column=0, sticky=E, padx=12, pady=(0, 12))
-        dialog.protocol("WM_DELETE_WINDOW", on_close)
-        refresh()
-
-    def _server_status_text(self):
-        """Build the multi-line status text for the Server Status dialog."""
-        lines = []
-        host = self.mcp_host
-        if host is not None and host.is_running():
-            lines.append("Server: running on {}:{}".format(host.host, host.port))
-            paused = getattr(host, "pause_when_mic_in_use", False)
-            lines.append("Pause while mic in use: {}".format("on" if paused else "off"))
-            if paused:
-                from Core.call_detection import microphone_in_use
-                lines.append("Microphone in use now: {}".format(
-                    "yes" if microphone_in_use() else "no"))
+    def _update_placeholder(self):
+        if self.text_area.get("1.0", "end-1c"):
+            self.placeholder.place_forget()
         else:
-            lines.append("Server: not hosting (enable mcp in config.json)")
-
-        lines.append("")
-        lines.append("Voices and the agents that claimed them:")
-        status = self.voice_registry.status()
-        if not status:
-            lines.append("  (no voices enabled)")
-        for entry in status:
-            holders = entry["claimed_by"]
-            who = ", ".join(holders) if holders else "(unclaimed)"
-            lines.append("  {} — {}".format(entry["name"], who))
-        return "\n".join(lines)
+            self.placeholder.place(x=14, y=12)
 
     def set_server_port(self, port):
-        """Reflect the active MCP port in the UI and enable Restart (host is up)."""
-        self.port_var.set(str(port))
-        self.restart_server_button['state'] = NORMAL
-        self.server_status_var.set("running on {}".format(port))
-
-    def restart_server(self):
-        """Restart the MCP server on the port from the entry and persist it."""
-        if self.mcp_host is None:
-            self.server_status_var.set("hosting disabled")
-            return
-        try:
-            port = int(self.port_var.get())
-        except ValueError:
-            self.server_status_var.set("invalid port")
-            return
-        if not (1 <= port <= 65535):
-            self.server_status_var.set("port out of range")
-            return
-        self.server_status_var.set("restarting…")
-        self.restart_server_button['state'] = DISABLED
-        self.update_idletasks()
-        try:
-            self.mcp_host.restart(port=port)
-        except OSError as exc:
-            self.server_status_var.set("failed: {}".format(exc))
-            self.restart_server_button['state'] = NORMAL
-            return
-        save_enabled_voices([vid for vid, _ in self.voices])
-        self.server_status_var.set("running on {}".format(port))
-        self.restart_server_button['state'] = NORMAL
+        """Show the active MCP port on the Server button (host is up)."""
+        self.server_button["text"] = "Server: {}…".format(port)
 
     def on_rate_changed(self, *args):
         # Keep the shared service rate in sync so MCP agents speak at the UI rate.
@@ -405,88 +301,6 @@ class MainFrame(ttk.Frame):
                 pass
             self.highlight_index1 = None
             self.highlight_index2 = None
-
-    def pause_system_media(self):
-        """Pause any currently playing system media (Windows only).
-        
-        Uses Windows Media Session API to check if media is actually playing
-        before sending the pause command. This prevents toggling music that
-        was already paused.
-        """
-        if platform.system() != 'Windows':
-            return
-            
-        # Check if media is actually playing before pausing
-        if not self._is_media_playing():
-            # If media isn't playing, preserve existing media_was_paused flag
-            # (we may have already paused it in a previous session that was interrupted)
-            print("No media playing - skipping pause")
-            return
-            
-        try:
-            # Send media play/pause key press to pause
-            ctypes.windll.user32.keybd_event(VK_MEDIA_PLAY_PAUSE, 0, KEYEVENTF_EXTENDEDKEY, 0)
-            ctypes.windll.user32.keybd_event(VK_MEDIA_PLAY_PAUSE, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0)
-            self.media_was_paused = True
-            print("Paused system media playback")
-        except Exception as e:
-            print(f"Error pausing media: {e}")
-            self.media_was_paused = False
-    
-    def _is_media_playing(self):
-        """Check if system media is currently playing (Windows only).
-        
-        Uses Windows Media Session API to query the current playback state.
-        Returns True if media is playing, False otherwise.
-        """
-        if platform.system() != 'Windows':
-            return False
-            
-        if not MEDIA_SESSION_AVAILABLE:
-            # If API not available, assume nothing is playing to be safe
-            return False
-            
-        try:
-            # Run async check synchronously
-            return asyncio.run(self._check_media_playing_async())
-        except Exception as e:
-            print(f"Error checking media state: {e}")
-            return False
-    
-    async def _check_media_playing_async(self):
-        """Async helper to check media playback state."""
-        try:
-            # Get the media session manager
-            manager = await GlobalSystemMediaTransportControlsSessionManager.request_async()
-            session = manager.get_current_session()
-            
-            if session is None:
-                return False
-                
-            # Get playback info
-            playback_info = session.get_playback_info()
-            status = playback_info.playback_status
-            
-            # Check if currently playing
-            return status == GlobalSystemMediaTransportControlsSessionPlaybackStatus.PLAYING
-        except Exception as e:
-            print(f"Error in async media check: {e}")
-            return False
-    
-    def resume_system_media(self):
-        """Resume system media playback if we previously paused it (Windows only).
-        
-        Only resumes if media_was_paused flag is set.
-        """
-        if platform.system() == 'Windows' and self.media_was_paused:
-            try:
-                # Send media play/pause key press to resume
-                ctypes.windll.user32.keybd_event(VK_MEDIA_PLAY_PAUSE, 0, KEYEVENTF_EXTENDEDKEY, 0)
-                ctypes.windll.user32.keybd_event(VK_MEDIA_PLAY_PAUSE, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0)
-                self.media_was_paused = False
-                print("Resumed system media playback")
-            except Exception as e:
-                print(f"Error resuming media: {e}")
 
     def select_all_text(self, event):
         self.text_area.tag_add(SEL, "1.0", END)
@@ -650,3 +464,6 @@ class MainFrame(ttk.Frame):
 
 TAG_CURRENT_WORD = "current word"
 GITHUB_URL = "https://github.com/ChrisLucian/SpeedReader"
+UI_FONT = "Segoe UI Variable Display"
+# sv-ttk named font; set explicitly because the theme is applied before entries exist.
+ENTRY_FONT = "SunValleyBodyFont"

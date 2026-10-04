@@ -1,4 +1,4 @@
-﻿pyttsx3==2.71
+pyttsx3==2.71
 pyinstaller
 pytest
 pywin32
@@ -7,3 +7,4 @@ winrt-Windows.Foundation
 winrt-Windows.Media.Control
 mcp<2
 nuitka
+sv-ttk

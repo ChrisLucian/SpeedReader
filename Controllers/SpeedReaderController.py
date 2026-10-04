@@ -1,17 +1,29 @@
 from tkinter import Tk
 from tkinter.constants import N, S, E, W
 from Frames.MainFrame import MainFrame
+from Frames.chrome import enable_dpi_awareness, apply_title_bar, set_icon
 from Core.config import load_mcp_config
+from Core.theme import load_ui_theme
+import sv_ttk
 
 
 class SpeedReaderController(Tk):
     def __init__(self):
+        enable_dpi_awareness()  # must precede Tk() so fonts render crisp, not bitmap-scaled
         Tk.__init__(self)
         self.title("Speed Reader")
+        set_icon(self)
+        # Before building widgets: Accent.TButton only exists once sv-ttk is loaded.
+        sv_ttk.set_theme(load_ui_theme(), self)  # explicit root: never tkinter's global default
+        # Flush <<ThemeChanged>> now: sv-ttk's handler runs tk_setPalette, which would
+        # otherwise later overwrite the tk.Text colours MainFrame sets.
+        self.update()
         main_frame = MainFrame(master=self)
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
-        main_frame.grid(padx=50, pady=50, sticky=(N, S, E, W))
+        main_frame.grid(padx=32, pady=(8, 16), sticky=(N, S, E, W))
+        self.minsize(int(self.winfo_fpixels("540p")), int(self.winfo_fpixels("480p")))
+        apply_title_bar(self, main_frame.theme)
         self.maybe_host_mcp(main_frame)
 
     def maybe_host_mcp(self, main_frame):

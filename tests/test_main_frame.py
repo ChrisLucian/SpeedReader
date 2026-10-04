@@ -661,8 +661,8 @@ class TestMainFrameMediaControl:
         # Assert
         assert frame.media_was_paused is False
 
-    @patch('Frames.MainFrame.platform')
-    @patch('Frames.MainFrame.ctypes')
+    @patch('Frames.media_control.platform')
+    @patch('Frames.media_control.ctypes')
     def test_pause_system_media_sends_key_on_windows(self, mock_ctypes, mock_platform, frame):
         """pause_system_media should send media key on Windows when media is playing."""
         # Arrange
@@ -677,8 +677,8 @@ class TestMainFrameMediaControl:
         assert frame.media_was_paused is True
         assert mock_ctypes.windll.user32.keybd_event.call_count == 2
 
-    @patch('Frames.MainFrame.platform')
-    @patch('Frames.MainFrame.ctypes')
+    @patch('Frames.media_control.platform')
+    @patch('Frames.media_control.ctypes')
     def test_pause_system_media_skipped_when_not_playing(self, mock_ctypes, mock_platform, frame):
         """pause_system_media should not send key when no media is playing."""
         # Arrange
@@ -693,7 +693,7 @@ class TestMainFrameMediaControl:
         assert frame.media_was_paused is False
         mock_ctypes.windll.user32.keybd_event.assert_not_called()
 
-    @patch('Frames.MainFrame.platform')
+    @patch('Frames.media_control.platform')
     def test_pause_system_media_skipped_on_non_windows(self, mock_platform, frame):
         """pause_system_media should do nothing on non-Windows."""
         # Arrange
@@ -706,8 +706,8 @@ class TestMainFrameMediaControl:
         # Assert
         assert frame.media_was_paused is False
 
-    @patch('Frames.MainFrame.platform')
-    @patch('Frames.MainFrame.ctypes')
+    @patch('Frames.media_control.platform')
+    @patch('Frames.media_control.ctypes')
     def test_resume_system_media_sends_key_when_was_paused(self, mock_ctypes, mock_platform, frame):
         """resume_system_media should send media key if we paused it."""
         # Arrange
@@ -721,8 +721,8 @@ class TestMainFrameMediaControl:
         assert frame.media_was_paused is False
         assert mock_ctypes.windll.user32.keybd_event.call_count == 2
 
-    @patch('Frames.MainFrame.platform')
-    @patch('Frames.MainFrame.ctypes')
+    @patch('Frames.media_control.platform')
+    @patch('Frames.media_control.ctypes')
     def test_resume_system_media_skipped_when_not_paused(self, mock_ctypes, mock_platform, frame):
         """resume_system_media should do nothing if we didn't pause it."""
         # Arrange
@@ -776,8 +776,8 @@ class TestMainFrameMediaControl:
         # Assert
         frame.resume_system_media.assert_called_once()
 
-    @patch('Frames.MainFrame.platform')
-    @patch('Frames.MainFrame.MEDIA_SESSION_AVAILABLE', False)
+    @patch('Frames.media_control.platform')
+    @patch('Frames.media_control.MEDIA_SESSION_AVAILABLE', False)
     def test_is_media_playing_returns_false_when_api_unavailable(self, mock_platform, frame):
         """_is_media_playing should return False when API is unavailable."""
         # Arrange
@@ -789,7 +789,7 @@ class TestMainFrameMediaControl:
         # Assert
         assert result is False
 
-    @patch('Frames.MainFrame.platform')
+    @patch('Frames.media_control.platform')
     def test_is_media_playing_returns_false_on_non_windows(self, mock_platform, frame):
         """_is_media_playing should return False on non-Windows."""
         # Arrange
