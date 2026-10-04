@@ -48,11 +48,13 @@ python mcp_server.py
 
 - **Hosted in-process by the running GUI (HTTP)** so the user speaks text AND agents speak through the same app. Opt in via [config.json](config.json) (`{"mcp": {"enabled": true, "host": "127.0.0.1", "port": 8765}}`); the GUI then starts the server on a daemon thread at startup. Agent speech uses the **rate currently set in the UI** (shared via `SpeakService`). VS Code connects to the running app via [.vscode/mcp.json](.vscode/mcp.json) (`type: http`, `http://127.0.0.1:8765/mcp`). HIGH-RISK/REPEAT: hosting from the already-running GUI requires HTTP, not stdio, and the uvicorn server must run on a non-main daemon thread.
 
-Build a standalone EXE (config in [SpeedReader.spec](SpeedReader.spec)):
+Build a standalone EXE with Nuitka (output `SpeedReader.dist\SpeedReader.exe`, `config.json` copied beside it):
 
 ```pwsh
-pyinstaller --clean --onefile --windowed SpeedReader.spec
+.\build.ps1
 ```
+
+HIGH-RISK/REPEAT: Nuitka must run from the venv (`python -m nuitka` after activation), never the global `nuitka` — it bundles whatever site-packages its interpreter sees. See the `nuitka-build-debug` skill.
 
 GUI-free logic lives in [Core/](Core/) so it can be unit tested (and is reused by the MCP server) without tkinter or audio. Run the tests with:
 

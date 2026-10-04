@@ -103,7 +103,12 @@ python mcp_server.py
 ## Convert to EXE
 The build uses Nuitka. For background on the bootloader fix: https://github.com/pyinstaller/pyinstaller/issues/3268
 
-nuitka --standalone --onefile --windowed SpeedReader.py
+```pwsh
+.\build.ps1
+```
+
+- Creates/uses `.venv`, installs `requirements.txt`, runs the tests, then builds with the **venv's** Nuitka (`python -m nuitka`) — a global `nuitka` would bundle global packages (e.g. an incompatible `mcp` 2.x) and the MCP server won't start.
+- Output: `SpeedReader.dist\SpeedReader.exe`. `config.json` is copied next to it; the app reads `config.json` from the working directory first, then from the EXE's folder.
 
 
 # Prompt other agents to use your local agent
