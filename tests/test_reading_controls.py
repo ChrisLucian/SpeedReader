@@ -81,6 +81,14 @@ def test_external_speech_resets_speak_offset(frame):
     assert frame.speak_offset == 0
 
 
+def test_pause_button_when_idle_does_nothing(frame):
+    frame.speech.stop = Mock()
+    frame.pause_button.invoke()
+    assert frame.paused_at is None
+    frame.speech.stop.assert_not_called()
+    assert frame.pause_button["text"] == "Pause"
+
+
 def test_speak_resets_speak_offset(frame):
     frame.speak_on_thread = Mock()
     frame.text_area.insert(END, "Hi there")
