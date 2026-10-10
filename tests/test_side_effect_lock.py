@@ -18,3 +18,10 @@ def test_lock_media_session_query():
 def test_lock_config_goes_to_temp_dir(tmp_path):
     from Core.config import resolve_config_path
     assert resolve_config_path().startswith(str(tmp_path))
+
+
+def test_lock_clipboard_is_in_memory(app, fake_clipboard):
+    app.clipboard_clear()
+    app.clipboard_append("x")
+    assert fake_clipboard.text == "x"
+    assert app.clipboard_get() == "x"
