@@ -298,8 +298,9 @@ class MainFrame(UiPumpMixin, MediaControlMixin, ttk.Frame):
         self.current_word_label['text'] = ''
         self.next_words['text'] = ''
         self.progress["value"] = 0
-        
-        # Clear highlighting
+        self._clear_highlight()
+
+    def _clear_highlight(self):
         if self.highlight_index1 is not None:
             try:
                 self.text_area.tag_remove(TAG_CURRENT_WORD, self.highlight_index1, self.highlight_index2)
@@ -390,15 +391,8 @@ class MainFrame(UiPumpMixin, MediaControlMixin, ttk.Frame):
             # Speech was interrupted/stopped
             print(f"onEnd: {name} - interrupted")
         
-        # Clear the current word highlight
-        if self.highlight_index1 is not None:
-            try:
-                self.text_area.tag_remove(TAG_CURRENT_WORD, self.highlight_index1, self.highlight_index2)
-            except Exception:
-                pass
-            self.highlight_index1 = None
-            self.highlight_index2 = None
-        
+        self._clear_highlight()
+
         # Resume any system media we paused, but only if this session wasn't
         # interrupted by a new speech session starting
         self.resume_system_media()
@@ -419,15 +413,8 @@ class MainFrame(UiPumpMixin, MediaControlMixin, ttk.Frame):
         self.stop_button['state'] = DISABLED
         print(f"onError: {name} - {exception}")
         
-        # Clear highlighting on error
-        if self.highlight_index1 is not None:
-            try:
-                self.text_area.tag_remove(TAG_CURRENT_WORD, self.highlight_index1, self.highlight_index2)
-            except Exception:
-                pass
-            self.highlight_index1 = None
-            self.highlight_index2 = None
-        
+        self._clear_highlight()
+
         # Resume any system media we paused
         self.resume_system_media()
 
