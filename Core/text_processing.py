@@ -1,6 +1,7 @@
 import re
 
 URL_PATTERN = re.compile(r'http\S+')
+GUID_PATTERN = re.compile(r'\b[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}\b')
 EMAIL_PATTERN = re.compile(r'[\w.+-]+@[\w-]+(?:\.[\w-]+)+')
 FILE_PATH_PATTERN = re.compile(r'(?:(?<![A-Za-z0-9])[A-Za-z]:[\\/]|\\\\)\S+')
 
@@ -19,6 +20,7 @@ def preprocess_text(text):
     text = URL_PATTERN.sub(' [URL] ', text)
     text = FILE_PATH_PATTERN.sub(' [file path] ', text)
     text = EMAIL_PATTERN.sub(' [email] ', text)
+    text = GUID_PATTERN.sub(' [ID] ', text)
     return text
 
 
