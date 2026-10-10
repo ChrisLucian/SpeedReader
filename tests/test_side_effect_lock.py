@@ -25,3 +25,7 @@ def test_lock_clipboard_is_in_memory(app, fake_clipboard):
     app.clipboard_append("x")
     assert fake_clipboard.text == "x"
     assert app.clipboard_get() == "x"
+
+
+def test_lock_window_never_shown(app):
+    assert app.state() == "withdrawn"
