@@ -20,7 +20,7 @@ class SpeedReaderController(Tk):
         # Flush <<ThemeChanged>> now: sv-ttk's handler runs tk_setPalette, which would
         # otherwise later overwrite the tk.Text colours MainFrame sets.
         self.update()
-        main_frame = MainFrame(master=self)
+        self.main_frame = main_frame = MainFrame(master=self)
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
         main_frame.grid(padx=32, pady=(8, 16), sticky=(N, S, E, W))
@@ -36,6 +36,11 @@ class SpeedReaderController(Tk):
     def show_window(self):
         self.deiconify()
         self.lift()
+
+    def quit_app(self):
+        self.tray.stop()
+        self.hotkey.stop()
+        self.main_frame.on_closing()
 
     def maybe_host_mcp(self, main_frame):
         # Host the MCP server in-process only if the user opted in via config.
