@@ -1,7 +1,7 @@
 """The autouse lock in conftest.py: tests must never touch the real OS."""
 import pytest
 
-from tests.locks import SideEffectLocked
+from testsupport.locks import SideEffectLocked
 
 
 def test_lock_media_keys():
