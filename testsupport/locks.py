@@ -60,6 +60,9 @@ def lock_side_effects(monkeypatch, tmp_path, fake_clipboard):
     monkeypatch.setattr(chrome, "ctypes", Locked("ctypes"))
     import Core.call_detection as call_detection
     monkeypatch.setattr(call_detection, "_scan_windows_microphone", Locked("_scan_windows_microphone"))
+    import webbrowser
+    for name in ("open", "open_new", "open_new_tab"):
+        monkeypatch.setattr(webbrowser, name, Locked("webbrowser." + name))
     import Frames.media_control as media_control
     monkeypatch.setattr(media_control, "ctypes", Locked("ctypes"), raising=False)
     monkeypatch.setattr(media_control, "MEDIA_SESSION_AVAILABLE", False, raising=False)
