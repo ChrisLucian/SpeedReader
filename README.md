@@ -20,6 +20,7 @@ pyttsx3==2.71 due to a bug detailed here: https://github.com/nateshmbhat/pyttsx3
 - **Server…** (shows `Server: <port>…` while hosting) — one dialog to change the MCP port and **Restart Server** without closing the app (the port is saved to `config.json` as `mcp.port`), plus live status: hosting state, pause-while-mic-in-use (and your current mic state), and each enabled voice with the agents that claimed it.
 - **Light mode / Dark mode** — toggles the modern Windows 11 look ([sv-ttk](https://github.com/rdbende/Sun-Valley-ttk-theme)), including the title bar. Dark by default; the choice is saved to `config.json` as `ui.theme`.
 - Shortcuts: `Ctrl+B` paste & speak (interrupts and clears anything currently playing or queued, including agent speech, then reads the clipboard now), `Ctrl+A` select all. Agent (MCP) utterances otherwise queue and play in order.
+- Links and file paths aren't read character by character: URLs are spoken as "[URL]" and Windows paths (`C:\...`, `C:/...`, `\\server\...`) as "[file path]" — for both your text and agent speech.
 
 ## MCP server (let AI agents speak through SpeedReader)
 SpeedReader ships a [Model Context Protocol](https://modelcontextprotocol.io) server so an AI agent (e.g. in VS Code) can read text aloud on your machine. It exposes these tools:
