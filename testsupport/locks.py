@@ -52,6 +52,12 @@ def lock_side_effects(monkeypatch, tmp_path, fake_clipboard):
     monkeypatch.setenv("SPEEDREADER_CONFIG", str(tmp_path / "config.json"))
     import Controllers.SpeedReaderController as controller
     monkeypatch.setattr(controller, "set_icon", lambda root: root.withdraw())
+    monkeypatch.setattr(controller, "enable_dpi_awareness", lambda: None)
+    monkeypatch.setattr(controller, "apply_title_bar", lambda root, theme: None)
+    import Frames.MainFrame as main_frame
+    monkeypatch.setattr(main_frame, "apply_title_bar", lambda root, theme: None)
+    import Frames.chrome as chrome
+    monkeypatch.setattr(chrome, "ctypes", Locked("ctypes"))
     import Frames.media_control as media_control
     monkeypatch.setattr(media_control, "ctypes", Locked("ctypes"), raising=False)
     monkeypatch.setattr(media_control, "MEDIA_SESSION_AVAILABLE", False, raising=False)
