@@ -27,7 +27,7 @@ class ReadingControlsMixin:
     def toggle_pause(self):
         if self.paused_at is not None:
             self.resume_reading()
-        else:
+        elif self.is_speaking:
             self.pause_reading()
 
     def pause_reading(self):
