@@ -23,7 +23,10 @@ class GlobalHotkey:
         self.user32 = user32
 
     def run(self):
-        self.user32.RegisterHotKey(None, HOTKEY_ID, MOD_CONTROL | MOD_ALT | MOD_NOREPEAT, VK_B)
+        self.registered = bool(self.user32.RegisterHotKey(
+            None, HOTKEY_ID, MOD_CONTROL | MOD_ALT | MOD_NOREPEAT, VK_B))
+        if not self.registered:
+            return
         msg = wintypes.MSG()
         while self.user32.GetMessageW(ctypes.byref(msg), None, 0, 0) > 0:
             if msg.message == WM_HOTKEY:
