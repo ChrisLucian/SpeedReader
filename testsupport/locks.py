@@ -58,6 +58,8 @@ STUBS = [
     ("Frames.media_control", "MEDIA_SESSION_AVAILABLE", False),
     ("Controllers.SpeedReaderController", "GlobalHotkey",
      lambda *a, **k: SimpleNamespace(start=lambda: None, stop=lambda: None)),
+    ("Controllers.SpeedReaderController", "TrayIcon",
+     lambda *a, **k: SimpleNamespace(start=lambda: None, stop=lambda: None)),
 ]
 
 LOCKED = [
@@ -70,6 +72,7 @@ LOCKED = [
     ("webbrowser", "get"),
     ("mcp_server", "start_http_in_thread"),
     ("uvicorn", "Server.run"),
+    ("pystray", "Icon"),
 ]
 
 

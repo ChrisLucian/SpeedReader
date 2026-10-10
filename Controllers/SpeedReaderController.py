@@ -2,7 +2,10 @@ import ctypes
 from tkinter import Tk
 from tkinter.constants import N, S, E, W
 from Frames.MainFrame import MainFrame
-from Frames.chrome import enable_dpi_awareness, apply_title_bar, set_icon
+from Frames.chrome import ICON_PATH, enable_dpi_awareness, apply_title_bar, set_icon
+from Frames.tray import TrayIcon
+from PIL import Image
+import pystray
 from Core.config import load_mcp_config
 from Core.global_hotkey import GlobalHotkey
 from Core.theme import load_ui_theme
@@ -29,6 +32,13 @@ class SpeedReaderController(Tk):
         self.maybe_host_mcp(main_frame)
         self.hotkey = GlobalHotkey(main_frame.on_global_hotkey, user32=ctypes.windll.user32)
         self.hotkey.start()
+        post = main_frame.callbacks.post
+        self.tray = TrayIcon(
+            on_show=lambda: post(self.show_window),
+            on_read_clipboard=main_frame.on_global_hotkey,
+            on_quit=lambda: post(self.quit_app),
+            pystray=pystray, load_image=lambda: Image.open(ICON_PATH))
+        self.tray.start()
 
     def hide_to_tray(self):
         self.withdraw()
