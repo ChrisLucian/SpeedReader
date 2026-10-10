@@ -80,6 +80,19 @@ def test_main_publishes_with_flag(tmp_path):
          "--title", "SpeedReader v0.6", "--notes-file", str(notes)], check=True)
 
 
+def test_authenticode_status_reads_powershell_output():
+    from types import SimpleNamespace
+    calls = []
+
+    def fake_run(command, **kwargs):
+        calls.append(command)
+        return SimpleNamespace(stdout="Valid\n")
+
+    assert release.authenticode_status("x.exe", run=fake_run) == "Valid"
+    assert "Get-AuthenticodeSignature" in " ".join(calls[0])
+    assert "x.exe" in " ".join(calls[0])
+
+
 def test_release_files_skip_logs_and_caches(tmp_path):
     dist = make_dist(tmp_path, [
         "SpeedReader.exe", "x.dll", "SpeedReader.err.txt", "SpeedReader.out.txt",
