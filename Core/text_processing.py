@@ -1,30 +1,27 @@
 import re
 
-URL_PATTERN = re.compile(r'http\S+')
-GUID_PATTERN = re.compile(r'\b[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}\b')
-CODE_BLOCK_PATTERN = re.compile(r'```.*?```')
-HASH_PATTERN = re.compile(r'\b(?=[a-fA-F]*\d)[0-9a-fA-F]{7,}\b')
-EMAIL_PATTERN = re.compile(r'[\w.+-]+@[\w-]+(?:\.[\w-]+)+')
-FILE_PATH_PATTERN = re.compile(r'(?:(?<![A-Za-z0-9])[A-Za-z]:[\\/]|\\\\)\S+')
+PLACEHOLDERS = [
+    (re.compile(r'```.*?```'), '[code]'),
+    (re.compile(r'http\S+'), '[URL]'),
+    (re.compile(r'(?:(?<![A-Za-z0-9])[A-Za-z]:[\\/]|\\\\)\S+'), '[file path]'),
+    (re.compile(r'[\w.+-]+@[\w-]+(?:\.[\w-]+)+'), '[email]'),
+    (re.compile(r'\b[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}\b'), '[ID]'),
+    (re.compile(r'\b(?=[a-fA-F]*\d)[0-9a-fA-F]{7,}\b'), '[hash]'),
+    (re.compile(r'\S{40,}'), '[long text]'),
+]
 
 
 def preprocess_text(text):
     """Normalize text for single-line speaking.
 
-    Order matches the original speak() pipeline: newlines are replaced with
-    spaces first, then URLs are collapsed to ``[URL]`` and Windows file paths
-    (``C:\\...``, ``C:/...``, ``\\\\server\\...``) to ``[file path]``; SAPI
-    otherwise spells a path out one character at a time, flooding word
-    callbacks. The text is treated as a
-    single line so that the ``"1.{offset}"`` highlight indices stay valid.
+    Newlines become spaces (one line keeps the ``"1.{offset}"`` highlight
+    indices valid), then each ``PLACEHOLDERS`` pattern is collapsed in order.
+    HIGH-RISK/REPEAT: SAPI spells long unbroken tokens (paths, hashes, URLs)
+    letter by letter and floods word callbacks, so they never reach it.
     """
     text = text.replace('\n', ' ')
-    text = CODE_BLOCK_PATTERN.sub(' [code] ', text)
-    text = URL_PATTERN.sub(' [URL] ', text)
-    text = FILE_PATH_PATTERN.sub(' [file path] ', text)
-    text = EMAIL_PATTERN.sub(' [email] ', text)
-    text = GUID_PATTERN.sub(' [ID] ', text)
-    text = HASH_PATTERN.sub(' [hash] ', text)
+    for pattern, placeholder in PLACEHOLDERS:
+        text = pattern.sub(' {} '.format(placeholder), text)
     return text
 
 
