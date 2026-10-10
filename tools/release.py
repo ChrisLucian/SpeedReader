@@ -34,5 +34,15 @@ def write_sha256(path):
     return digest
 
 
+class ReleaseError(Exception):
+    pass
+
+
+def require_signed(exe, verify):
+    """HIGH-RISK/REPEAT: never publish an unsigned build (Smart App Control blocks it)."""
+    status = verify(exe)
+    raise ReleaseError("{} signature is {}, expected Valid".format(exe, status))
+
+
 def asset_name(version):
     return "SpeedReader-{}-win-x64.zip".format(version)
