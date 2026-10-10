@@ -425,20 +425,24 @@ class MainFrame(UiPumpMixin, MediaControlMixin, ttk.Frame):
             self.spoken_text = preprocess_text(self.text_area.get("1.0", END))
             self.text_area.delete("1.0", END)
             self.text_area.insert(END, self.spoken_text)
+            self.speak_from(0, interrupt)
 
-            speech_speed = int(self.speed_entry.get())
-            
-            # Increment session ID for this new speech and mark it active so the
-            # engine callbacks (onStart/onStartWord/onEnd) recognize it instead
-            # of treating it as a stale session and bailing out — that bail-out
-            # is what previously left the Stop button disabled while speaking.
-            self.speech_session_id += 1
-            session_id = self.speech_session_id
-            self.current_session_id = session_id
-
-            self.thread = threading.Thread(target=self.speak_on_thread, args=(speech_speed, self.spoken_text, interrupt, session_id))
-            self.thread.daemon = True
-            self.thread.start()
+    def speak_from(self, offset, interrupt=False):
+        """Speak ``spoken_text`` from character ``offset`` on a worker thread."""
+        self.speak_offset = offset
+        speech_speed = int(self.speed_entry.get())
+        # Increment session ID for this new speech and mark it active so the
+        # engine callbacks (onStart/onStartWord/onEnd) recognize it instead
+        # of treating it as a stale session and bailing out — that bail-out
+        # is what previously left the Stop button disabled while speaking.
+        self.speech_session_id += 1
+        session_id = self.speech_session_id
+        self.current_session_id = session_id
+        self.thread = threading.Thread(
+            target=self.speak_on_thread,
+            args=(speech_speed, self.spoken_text[offset:], interrupt, session_id))
+        self.thread.daemon = True
+        self.thread.start()
 
     def speak_on_thread(self, speech_speed, spoken_text, interrupt=False, name=None):
         self.speech.speak(spoken_text, speech_speed, interrupt=interrupt, name=name)
