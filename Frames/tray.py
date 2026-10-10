@@ -21,6 +21,9 @@ class TrayIcon:
         self.icon = self.pystray.Icon("SpeedReader", self.load_image(), "SpeedReader", menu)
         self.icon.run_detached()
 
+    def stop(self):
+        self.icon.stop()
+
     def menu_items(self):
         return [
             ("Show SpeedReader", self.on_show),
