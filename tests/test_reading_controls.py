@@ -63,6 +63,16 @@ def test_pause_before_first_word_resumes_from_start(frame):
     assert frame.paused_at == 0
 
 
+def test_read_from_index_preprocesses_raw_text(frame):
+    frame.speak_on_thread = Mock()
+    frame.text_area.insert(END, "see http://x.com\nnow")
+    frame.read_from_index("2.0")
+    frame.thread.join(1)
+    assert frame.speak_on_thread.call_args.args[1] == "now"
+    shown = frame.text_area.get("1.0", "end-1c")
+    assert "\n" not in shown and "[URL]" in shown
+
+
 def test_speak_resets_speak_offset(frame):
     frame.speak_on_thread = Mock()
     frame.text_area.insert(END, "Hi there")
