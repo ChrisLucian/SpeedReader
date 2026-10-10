@@ -38,6 +38,11 @@ def test_preprocess_replaces_unc_path():
     assert 'server' not in out
 
 
+def test_preprocess_keeps_colons_that_are_not_paths():
+    text = 'Note: meet at 10:30 a:b Re:/r/python'
+    assert preprocess_text(text) == text
+
+
 def test_word_window_basic_slices():
     text = 'the quick brown fox'
     spoken, current, next_ = word_window(text, 4, 5)  # 'quick'
