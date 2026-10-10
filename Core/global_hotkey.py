@@ -15,6 +15,7 @@ MOD_NOREPEAT = 0x4000
 VK_B = 0x42
 HOTKEY_ID = 1
 WM_HOTKEY = 0x0312
+WM_QUIT = 0x0012
 
 
 class GlobalHotkey:
@@ -32,3 +33,6 @@ class GlobalHotkey:
             if msg.message == WM_HOTKEY:
                 self.on_press()
         self.user32.UnregisterHotKey(None, HOTKEY_ID)
+
+    def stop(self):
+        self.user32.PostThreadMessageW(self.thread_id, WM_QUIT, 0, 0)
