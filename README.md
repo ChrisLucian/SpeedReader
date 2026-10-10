@@ -116,7 +116,7 @@ The build uses Nuitka. For background on the bootloader fix: https://github.com/
 Windows Smart App Control blocks unsigned EXEs/DLLs. A self-signed certificate does **not** help — the signature must chain to a Microsoft-trusted CA. The build signs with [Azure Artifact Signing](https://learn.microsoft.com/azure/artifact-signing/) (formerly Trusted Signing, ~$10/month) when configured:
 
 1. In Azure: create an Artifact Signing account, complete identity validation, create a *Public Trust* certificate profile, and give yourself the *… Certificate Profile Signer* role on the account.
-2. Sign in: `az login --scope "https://codesigning.azure.net/.default"`.
+2. Install the Azure CLI (`winget install -e --id Microsoft.AzureCLI`, then open a new terminal) and sign in: `az login --tenant <your-tenant> --scope "https://codesigning.azure.net/.default"`. `--tenant` is required for personal Microsoft accounts (otherwise `AADSTS500200`); the build signs with this CLI login.
 3. Set env vars and build:
 
 ```pwsh

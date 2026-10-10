@@ -10,6 +10,7 @@ description: Use when Windows Smart App Control / SmartScreen blocks the SpeedRe
 - Cheapest trusted path: Azure Artifact Signing (formerly Trusted Signing). `build.ps1` uses Microsoft's `sign` dotnet tool:
   `sign code artifact-signing <files> -ase <endpoint> -asa <account> -ascp <profile>` (`trusted-signing` subcommand is deprecated). Verify flags with `sign code artifact-signing --help`.
 - Config: env vars `ARTIFACT_SIGNING_ENDPOINT`, `ARTIFACT_SIGNING_ACCOUNT`, `ARTIFACT_SIGNING_PROFILE`. No secrets in the repo; auth is `DefaultAzureCredential` (`az login --scope "https://codesigning.azure.net/.default"`).
+- HIGH-RISK/REPEAT: personal Microsoft accounts (gmail/outlook) fail with AADSTS500200 unless the tenant is explicit: `az login --tenant <tenant> --scope ...`, and `sign` must use `-act azure-cli` (its default credential chain opens a tenant-less browser login). Most reliable: a work account `user@<tenant>.onmicrosoft.com` with only the Signer role.
 - Endpoint must match the account's region (e.g. `https://eus.codesigning.azure.net`). Signer needs the *Certificate Profile Signer* role.
 - Certs live 72h; always timestamp (the tool's default does). Never pin thumbprints.
 - Check SAC state: `(Get-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Control\CI\Policy).VerifiedAndReputablePolicyState` (0 off, 1 on, 2 evaluation).

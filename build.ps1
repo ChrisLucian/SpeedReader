@@ -57,7 +57,7 @@ if ($LASTEXITCODE -eq 0) {
         if (-not (Get-Command sign -ErrorAction SilentlyContinue)) { dotnet tool install --global sign --prerelease }
         $unsigned = Get-ChildItem SpeedReader.dist -Recurse -Include *.exe, *.dll, *.pyd |
             Where-Object { (Get-AuthenticodeSignature $_.FullName).Status -ne 'Valid' } | ForEach-Object FullName
-        sign code artifact-signing $unsigned -v Warning `
+        sign code artifact-signing $unsigned -v Warning -act azure-cli `
             -ase $env:ARTIFACT_SIGNING_ENDPOINT -asa $env:ARTIFACT_SIGNING_ACCOUNT -ascp $env:ARTIFACT_SIGNING_PROFILE
         if ($LASTEXITCODE -ne 0 -or (Get-AuthenticodeSignature SpeedReader.dist\SpeedReader.exe).Status -ne 'Valid') {
             Write-Host "Signing failed! (az login? Signer role? env vars?)" -ForegroundColor Red
