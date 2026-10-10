@@ -44,3 +44,9 @@ def test_hotkey_message_calls_on_press():
     presses = []
     GlobalHotkey(lambda: presses.append(1), user32=FakeUser32([WM_HOTKEY])).run()
     assert presses == [1]
+
+
+def test_hotkey_ignores_other_messages():
+    presses = []
+    GlobalHotkey(lambda: presses.append(1), user32=FakeUser32([WM_TIMER])).run()
+    assert presses == []
