@@ -1,5 +1,14 @@
 """Engine callbacks reach widgets only via the UI-thread pump."""
 import time
+from unittest.mock import Mock
+
+
+def test_external_speech_renders_via_pump(frame):
+    frame.speech.speak = Mock()
+    frame.speak_external("agent text", 300)
+    assert frame.text_area.get("1.0", "end-1c") == ""
+    frame.pump_callbacks()
+    assert frame.text_area.get("1.0", "end-1c") == "agent text"
 
 
 def test_pump_reschedules_itself(frame):
