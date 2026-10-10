@@ -44,11 +44,19 @@ python -m nuitka --standalone --assume-yes-for-downloads --enable-plugin=tk-inte
     --include-module=pyttsx3.drivers.sapi5 --include-module=win32com.server --include-module=win32com.server.util `
     --windows-icon-from-ico=assets/speedreader.ico --include-data-files=assets/speedreader.ico=assets/speedreader.ico `
     --windows-console-mode=disable "--force-stdout-spec={PROGRAM_BASE}.out.txt" "--force-stderr-spec={PROGRAM_BASE}.err.txt" `
+    --nofollow-import-to=pystray --nofollow-import-to=six `
+    --include-module=inspect --include-module=tempfile --include-module=queue --include-module=logging `
+    --include-module=PIL.Image --include-module=PIL.IcoImagePlugin --include-module=PIL.PngImagePlugin `
     SpeedReader.py
 
 if ($LASTEXITCODE -eq 0) {
     # load_mcp_config falls back to config.json next to the EXE.
     if (Test-Path config.json) { Copy-Item config.json SpeedReader.dist\ -Force }
+    # HIGH-RISK/REPEAT: pystray is LGPL-3.0, so it ships as plain, user-replaceable .py
+    # files beside the EXE (not compiled in); six (its dependency) rides along.
+    $site = python -c "import site; print(site.getsitepackages()[-1])"
+    Copy-Item "$site\pystray" SpeedReader.dist\pystray -Recurse -Force -Exclude __pycache__
+    Copy-Item "$site\six.py" SpeedReader.dist\ -Force
 
     # HIGH-RISK/REPEAT: Smart App Control only trusts a CA-chained signature (Azure Artifact
     # Signing), never self-signed. Opt in via env vars; sign every unsigned binary, not just the EXE.
