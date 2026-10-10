@@ -460,6 +460,7 @@ class MainFrame(ReadingControlsMixin, UiPumpMixin, MediaControlMixin, ttk.Frame)
 
     def _render_external(self, text):
         self.spoken_text = text
+        self.speak_offset = 0
         self.text_area.delete("1.0", END)
         self.text_area.insert(END, text)
 
