@@ -75,5 +75,10 @@ def winget_manifests(version, sha256, url):
     }
 
 
+def publish(version, zip_path, sha_path, notes_path, run):
+    run(["gh", "release", "create", version, str(zip_path), str(sha_path),
+         "--title", "SpeedReader " + version, "--notes-file", str(notes_path)], check=True)
+
+
 def asset_name(version):
     return "SpeedReader-{}-win-x64.zip".format(version)
