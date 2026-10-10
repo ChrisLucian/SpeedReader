@@ -7,10 +7,16 @@ image loader are injectable so tests never create a real tray icon.
 
 
 class TrayIcon:
-    def __init__(self, on_show, on_read_clipboard, on_quit):
+    def __init__(self, on_show, on_read_clipboard, on_quit, pystray=None, load_image=None):
         self.on_show = on_show
         self.on_read_clipboard = on_read_clipboard
         self.on_quit = on_quit
+        self.pystray = pystray
+        self.load_image = load_image
+
+    def start(self):
+        self.icon = self.pystray.Icon("SpeedReader", self.load_image())
+        self.icon.run_detached()
 
     def menu_items(self):
         return [
