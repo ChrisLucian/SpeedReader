@@ -49,6 +49,12 @@ def test_preprocess_replaces_email_with_placeholder():
     assert 'example' not in out
 
 
+def test_preprocess_replaces_guid_with_placeholder():
+    out = preprocess_text('id 123e4567-e89b-12d3-a456-426614174000 ok')
+    assert '[ID]' in out
+    assert 'e89b' not in out
+
+
 def test_word_window_basic_slices():
     text = 'the quick brown fox'
     spoken, current, next_ = word_window(text, 4, 5)  # 'quick'
