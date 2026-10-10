@@ -13,3 +13,8 @@ def test_lock_media_keys():
 def test_lock_media_session_query():
     import Frames.media_control as media_control
     assert media_control.MEDIA_SESSION_AVAILABLE is False
+
+
+def test_lock_config_goes_to_temp_dir(tmp_path):
+    from Core.config import resolve_config_path
+    assert resolve_config_path().startswith(str(tmp_path))
