@@ -11,6 +11,7 @@ import re
 
 from Core.speech_engine import SpeechEngine
 from Core.speak_service import SpeakService
+from Core.ui_dispatch import CallbackQueue
 from Core.config import load_mcp_config
 from Core.text_processing import preprocess_text, word_window, highlight_indices
 from Core.voice_registry import VoiceRegistry
@@ -18,11 +19,14 @@ from Core.theme import load_ui_theme, palette, save_ui_theme, text_style, toggle
 from Frames import dialogs
 from Frames.chrome import apply_title_bar
 from Frames.media_control import MediaControlMixin
+from Frames.ui_pump import UiPumpMixin
 
-class MainFrame(MediaControlMixin, ttk.Frame):
+class MainFrame(UiPumpMixin, MediaControlMixin, ttk.Frame):
     def __init__(self, **kw):
         ttk.Frame.__init__(self, **kw)
-        self.speech = SpeechEngine(self.onStart, self.onStartWord, self.onEnd)
+        self.callbacks = CallbackQueue()
+        self.speech = SpeechEngine(
+            self._queued(self.onStart), self._queued(self.onStartWord), self._queued(self.onEnd))
         self.speak_service = SpeakService(rate=500, speak_fn=self.speak_external)
         # Create + pump the pyttsx3 COM engine on ONE dedicated daemon thread.
         # It MUST NOT be created on this (tkinter main) thread, or SAPI5's word
