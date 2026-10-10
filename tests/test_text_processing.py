@@ -55,6 +55,12 @@ def test_preprocess_replaces_guid_with_placeholder():
     assert 'e89b' not in out
 
 
+def test_preprocess_replaces_long_hex_hash():
+    out = preprocess_text('commit 3e03be647ce7a1b2 done')
+    assert '[hash]' in out
+    assert '3e03' not in out
+
+
 def test_word_window_basic_slices():
     text = 'the quick brown fox'
     spoken, current, next_ = word_window(text, 4, 5)  # 'quick'
