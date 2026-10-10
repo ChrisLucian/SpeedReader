@@ -19,3 +19,8 @@ class ReadingControlsMixin:
         self.paused_at = self.current_location
         self.speech.stop()
         self.pause_button["text"] = "Resume"
+
+    def resume_reading(self):
+        offset, self.paused_at = self.paused_at, None
+        self.pause_button["text"] = "Pause"
+        self.speak_from(offset)
