@@ -38,3 +38,9 @@ def test_hotkey_registers_ctrl_alt_b():
     fake = FakeUser32()
     GlobalHotkey(lambda: None, user32=fake).run()
     assert fake.called("RegisterHotKey") == [(None, 1, MOD_CONTROL | MOD_ALT | MOD_NOREPEAT, 0x42)]
+
+
+def test_hotkey_message_calls_on_press():
+    presses = []
+    GlobalHotkey(lambda: presses.append(1), user32=FakeUser32([WM_HOTKEY])).run()
+    assert presses == [1]
