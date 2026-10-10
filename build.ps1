@@ -26,6 +26,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
 . .\.venv\Scripts\Activate.ps1
 
 Write-Host "Installing/updating dependencies..." -ForegroundColor Yellow
+python -m pip install --upgrade pip --quiet
 pip install -r requirements.txt --quiet
 
 Write-Host "Running tests..." -ForegroundColor Yellow
