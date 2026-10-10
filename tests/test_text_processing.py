@@ -26,6 +26,12 @@ def test_preprocess_replaces_windows_drive_path_with_placeholder():
     assert out.startswith('run') and out.endswith('now')
 
 
+def test_preprocess_replaces_forward_slash_drive_path():
+    out = preprocess_text('open C:/Users/me/file.txt')
+    assert '[file path]' in out
+    assert 'Users' not in out
+
+
 def test_word_window_basic_slices():
     text = 'the quick brown fox'
     spoken, current, next_ = word_window(text, 4, 5)  # 'quick'
