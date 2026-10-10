@@ -59,3 +59,9 @@ def test_lock_mcp_http_host():
     import mcp_server
     with pytest.raises(SideEffectLocked):
         mcp_server.start_http_in_thread(None, None, "127.0.0.1", 1)
+
+
+def test_lock_mcp_http_host_uvicorn_server_run():
+    import uvicorn
+    with pytest.raises(SideEffectLocked):
+        uvicorn.Server.run(None)
