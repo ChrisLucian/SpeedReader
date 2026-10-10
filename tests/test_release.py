@@ -23,6 +23,15 @@ def test_build_zip_nests_files_under_speedreader_folder(tmp_path):
     assert zipfile.ZipFile(zip_path).namelist() == ["SpeedReader/SpeedReader.exe"]
 
 
+def test_write_sha256_file(tmp_path):
+    import hashlib
+    path = tmp_path / "a.zip"
+    path.write_bytes(b"speed")
+    expected = hashlib.sha256(b"speed").hexdigest()
+    assert release.write_sha256(path) == expected
+    assert (tmp_path / "a.zip.sha256").read_text() == expected + "  a.zip\n"
+
+
 def test_release_files_skip_logs_and_caches(tmp_path):
     dist = make_dist(tmp_path, [
         "SpeedReader.exe", "x.dll", "SpeedReader.err.txt", "SpeedReader.out.txt",
