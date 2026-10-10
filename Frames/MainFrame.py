@@ -433,6 +433,7 @@ class MainFrame(ReadingControlsMixin, UiPumpMixin, MediaControlMixin, ttk.Frame)
     def speak_from(self, offset, interrupt=False):
         """Speak ``spoken_text`` from character ``offset`` on a worker thread."""
         self.speak_offset = offset
+        self._clear_pause()
         speech_speed = int(self.speed_entry.get())
         self.thread = threading.Thread(
             target=self.speak_on_thread,

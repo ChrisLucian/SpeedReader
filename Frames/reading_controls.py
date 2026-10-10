@@ -36,9 +36,11 @@ class ReadingControlsMixin:
         self.pause_button["text"] = "Resume"
 
     def resume_reading(self):
-        offset, self.paused_at = self.paused_at, None
+        self.speak_from(self.paused_at)
+
+    def _clear_pause(self):
+        self.paused_at = None
         self.pause_button["text"] = "Pause"
-        self.speak_from(offset)
 
     def read_from_index(self, index):
         clicked = len(preprocess_text(self.text_area.get("1.0", index)))
