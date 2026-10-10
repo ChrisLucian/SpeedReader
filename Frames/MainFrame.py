@@ -431,18 +431,18 @@ class MainFrame(UiPumpMixin, MediaControlMixin, ttk.Frame):
         """Speak ``spoken_text`` from character ``offset`` on a worker thread."""
         self.speak_offset = offset
         speech_speed = int(self.speed_entry.get())
-        # Increment session ID for this new speech and mark it active so the
-        # engine callbacks (onStart/onStartWord/onEnd) recognize it instead
-        # of treating it as a stale session and bailing out — that bail-out
-        # is what previously left the Stop button disabled while speaking.
-        self.speech_session_id += 1
-        session_id = self.speech_session_id
-        self.current_session_id = session_id
         self.thread = threading.Thread(
             target=self.speak_on_thread,
-            args=(speech_speed, self.spoken_text[offset:], interrupt, session_id))
+            args=(speech_speed, self.spoken_text[offset:], interrupt, self._begin_session()))
         self.thread.daemon = True
         self.thread.start()
+
+    def _begin_session(self):
+        """New session id, marked active so its engine callbacks aren't treated
+        as stale (that bail-out once left Stop disabled while speaking)."""
+        self.speech_session_id += 1
+        self.current_session_id = self.speech_session_id
+        return self.speech_session_id
 
     def speak_on_thread(self, speech_speed, spoken_text, interrupt=False, name=None):
         self.speech.speak(spoken_text, speech_speed, interrupt=interrupt, name=name)
