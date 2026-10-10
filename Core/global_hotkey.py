@@ -14,6 +14,7 @@ MOD_CONTROL = 0x0002
 MOD_NOREPEAT = 0x4000
 VK_B = 0x42
 HOTKEY_ID = 1
+WM_HOTKEY = 0x0312
 
 
 class GlobalHotkey:
@@ -25,4 +26,5 @@ class GlobalHotkey:
         self.user32.RegisterHotKey(None, HOTKEY_ID, MOD_CONTROL | MOD_ALT | MOD_NOREPEAT, VK_B)
         msg = wintypes.MSG()
         while self.user32.GetMessageW(ctypes.byref(msg), None, 0, 0) > 0:
-            self.on_press()
+            if msg.message == WM_HOTKEY:
+                self.on_press()
