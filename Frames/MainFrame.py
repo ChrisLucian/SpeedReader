@@ -38,6 +38,7 @@ class MainFrame(UiPumpMixin, MediaControlMixin, ttk.Frame):
         self.voice_registry = self._build_voice_registry()
         self.mcp_host = None  # set by the controller when MCP hosting is enabled
         self.spoken_text = ''
+        self.speak_offset = 0
         self.highlight_index1 = None
         self.highlight_index2 = None
         self.media_was_paused = False  # Track if we paused media playback
@@ -350,6 +351,7 @@ class MainFrame(UiPumpMixin, MediaControlMixin, ttk.Frame):
     def onStartWord(self, name, location, length):
         if self._is_stale_utterance(name):
             return
+        location += self.speak_offset
         spoken, current, next_ = word_window(self.spoken_text, location, length)
         self.spoken_words['text'] = spoken
         self.current_word_label['text'] = current
