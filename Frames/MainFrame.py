@@ -20,8 +20,9 @@ from Frames import dialogs
 from Frames.chrome import apply_title_bar
 from Frames.media_control import MediaControlMixin
 from Frames.ui_pump import UiPumpMixin
+from Frames.reading_controls import ReadingControlsMixin
 
-class MainFrame(UiPumpMixin, MediaControlMixin, ttk.Frame):
+class MainFrame(ReadingControlsMixin, UiPumpMixin, MediaControlMixin, ttk.Frame):
     def __init__(self, **kw):
         ttk.Frame.__init__(self, **kw)
         self.callbacks = CallbackQueue()
@@ -168,6 +169,7 @@ class MainFrame(UiPumpMixin, MediaControlMixin, ttk.Frame):
         self.stop_button.grid(row=row_index, column=2, padx=(4, 0), pady=12)
         self.stop_button['state'] = DISABLED
         self.stop_button.bind("<Button-1>", self.stop)
+        self._build_pause_button(row_index)
 
         self.contribute_link = tk.Label(
             self, text="Contribute on GitHub", cursor="hand2", font=(UI_FONT, "10", "underline"))
@@ -352,6 +354,7 @@ class MainFrame(UiPumpMixin, MediaControlMixin, ttk.Frame):
         if self._is_stale_utterance(name):
             return
         location += self.speak_offset
+        self.current_location = location
         spoken, current, next_ = word_window(self.spoken_text, location, length)
         self.spoken_words['text'] = spoken
         self.current_word_label['text'] = current
