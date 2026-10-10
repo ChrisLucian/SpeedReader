@@ -30,6 +30,9 @@ class SpeedReaderController(Tk):
         self.hotkey = GlobalHotkey(main_frame.on_global_hotkey, user32=ctypes.windll.user32)
         self.hotkey.start()
 
+    def hide_to_tray(self):
+        self.withdraw()
+
     def maybe_host_mcp(self, main_frame):
         # Host the MCP server in-process only if the user opted in via config.
         # Imported lazily so the GUI doesn't require the mcp package otherwise.
