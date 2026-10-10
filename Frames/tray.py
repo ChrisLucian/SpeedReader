@@ -15,7 +15,10 @@ class TrayIcon:
         self.load_image = load_image
 
     def start(self):
-        self.icon = self.pystray.Icon("SpeedReader", self.load_image())
+        menu = self.pystray.Menu(*[
+            self.pystray.MenuItem(label, _menu_action(callback))
+            for label, callback in self.menu_items()])
+        self.icon = self.pystray.Icon("SpeedReader", self.load_image(), "SpeedReader", menu)
         self.icon.run_detached()
 
     def menu_items(self):
@@ -24,3 +27,7 @@ class TrayIcon:
             ("Read clipboard (Ctrl+Alt+B)", self.on_read_clipboard),
             ("Quit", self.on_quit),
         ]
+
+
+def _menu_action(callback):
+    return lambda icon, item: callback()
