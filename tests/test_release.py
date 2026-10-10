@@ -68,6 +68,18 @@ def test_main_packages_without_publishing_by_default(tmp_path):
     run.assert_not_called()
 
 
+def test_main_publishes_with_flag(tmp_path):
+    from unittest.mock import Mock
+    dist = make_dist(tmp_path, ["SpeedReader.exe"])
+    out, run, notes = tmp_path / "release", Mock(), tmp_path / "notes.md"
+    release.main(["v0.6", "--dist", str(dist), "--out", str(out), "--publish", "--notes", str(notes)],
+                 run=run, verify=lambda path: "Valid")
+    zip_path = out / "SpeedReader-v0.6-win-x64.zip"
+    run.assert_called_once_with(
+        ["gh", "release", "create", "v0.6", str(zip_path), str(zip_path) + ".sha256",
+         "--title", "SpeedReader v0.6", "--notes-file", str(notes)], check=True)
+
+
 def test_release_files_skip_logs_and_caches(tmp_path):
     dist = make_dist(tmp_path, [
         "SpeedReader.exe", "x.dll", "SpeedReader.err.txt", "SpeedReader.out.txt",
