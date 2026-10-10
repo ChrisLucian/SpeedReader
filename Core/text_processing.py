@@ -8,7 +8,10 @@ def preprocess_text(text):
     """Normalize text for single-line speaking.
 
     Order matches the original speak() pipeline: newlines are replaced with
-    spaces first, then URLs are collapsed to ``[URL]``. The text is treated as a
+    spaces first, then URLs are collapsed to ``[URL]`` and Windows file paths
+    (``C:\\...``, ``C:/...``, ``\\\\server\\...``) to ``[file path]``; SAPI
+    otherwise spells a path out one character at a time, flooding word
+    callbacks. The text is treated as a
     single line so that the ``"1.{offset}"`` highlight indices stay valid.
     """
     text = text.replace('\n', ' ')
