@@ -43,6 +43,12 @@ def test_preprocess_keeps_colons_that_are_not_paths():
     assert preprocess_text(text) == text
 
 
+def test_preprocess_replaces_email_with_placeholder():
+    out = preprocess_text('mail me@example.com today')
+    assert '[email]' in out
+    assert 'example' not in out
+
+
 def test_word_window_basic_slices():
     text = 'the quick brown fox'
     spoken, current, next_ = word_window(text, 4, 5)  # 'quick'
