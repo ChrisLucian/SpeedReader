@@ -73,6 +73,12 @@ def test_preprocess_replaces_fenced_code_block():
     assert out.endswith('end')
 
 
+def test_preprocess_replaces_very_long_token():
+    out = preprocess_text('key ' + 'Ab9_' * 15 + ' end')
+    assert '[long text]' in out
+    assert 'Ab9_' not in out
+
+
 def test_word_window_basic_slices():
     text = 'the quick brown fox'
     spoken, current, next_ = word_window(text, 4, 5)  # 'quick'
