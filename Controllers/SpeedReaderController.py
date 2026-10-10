@@ -30,6 +30,13 @@ class SpeedReaderController(Tk):
         self.minsize(int(self.winfo_fpixels("540p")), int(self.winfo_fpixels("480p")))
         apply_title_bar(self, main_frame.theme)
         self.maybe_host_mcp(main_frame)
+        self._start_background(main_frame)
+
+    def _start_background(self, main_frame):
+        """System-wide hotkey + tray icon; closing the window hides it to the tray.
+
+        Both run on their own threads, so their actions are posted to the UI queue.
+        """
         self.hotkey = GlobalHotkey(main_frame.on_global_hotkey, user32=ctypes.windll.user32)
         self.hotkey.start()
         post = main_frame.callbacks.post
@@ -39,6 +46,7 @@ class SpeedReaderController(Tk):
             on_quit=lambda: post(self.quit_app),
             pystray=pystray, load_image=lambda: Image.open(ICON_PATH))
         self.tray.start()
+        self.protocol("WM_DELETE_WINDOW", self.hide_to_tray)
 
     def hide_to_tray(self):
         self.withdraw()
