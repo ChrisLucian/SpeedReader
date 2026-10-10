@@ -50,6 +50,8 @@ def fake_clipboard(monkeypatch):
 @pytest.fixture(autouse=True)
 def lock_side_effects(monkeypatch, tmp_path, fake_clipboard):
     monkeypatch.setenv("SPEEDREADER_CONFIG", str(tmp_path / "config.json"))
+    import Controllers.SpeedReaderController as controller
+    monkeypatch.setattr(controller, "set_icon", lambda root: root.withdraw())
     import Frames.media_control as media_control
     monkeypatch.setattr(media_control, "ctypes", Locked("ctypes"), raising=False)
     monkeypatch.setattr(media_control, "MEDIA_SESSION_AVAILABLE", False, raising=False)
