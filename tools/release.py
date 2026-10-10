@@ -6,6 +6,7 @@ Usage (after .\\build.ps1 produced a signed build):
 """
 
 
+import zipfile
 from pathlib import Path
 
 SKIPPED_SUFFIXES = (".err.txt", ".out.txt", ".pyc")
@@ -17,6 +18,12 @@ def release_files(dist):
     return sorted(
         path.relative_to(dist).as_posix() for path in dist.rglob("*")
         if path.is_file() and not path.name.endswith(SKIPPED_SUFFIXES))
+
+
+def build_zip(dist, zip_path):
+    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as archive:
+        for name in release_files(dist):
+            archive.write(Path(dist) / name, "SpeedReader/" + name)
 
 
 def asset_name(version):
