@@ -6,6 +6,9 @@ thread. ``on_press`` runs on that thread: callers must hand off to the UI
 thread (MainFrame posts to its CallbackQueue). ``user32`` is injectable so the
 logic is unit tested without touching the real OS.
 """
+import ctypes
+from ctypes import wintypes
+
 MOD_ALT = 0x0001
 MOD_CONTROL = 0x0002
 MOD_NOREPEAT = 0x4000
@@ -20,3 +23,6 @@ class GlobalHotkey:
 
     def run(self):
         self.user32.RegisterHotKey(None, HOTKEY_ID, MOD_CONTROL | MOD_ALT | MOD_NOREPEAT, VK_B)
+        msg = wintypes.MSG()
+        while self.user32.GetMessageW(ctypes.byref(msg), None, 0, 0) > 0:
+            self.on_press()
