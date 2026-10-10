@@ -33,6 +33,10 @@ class SpeedReaderController(Tk):
     def hide_to_tray(self):
         self.withdraw()
 
+    def show_window(self):
+        self.deiconify()
+        self.lift()
+
     def maybe_host_mcp(self, main_frame):
         # Host the MCP server in-process only if the user opted in via config.
         # Imported lazily so the GUI doesn't require the mcp package otherwise.
