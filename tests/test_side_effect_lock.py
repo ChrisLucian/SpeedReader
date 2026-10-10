@@ -35,3 +35,9 @@ def test_lock_os_window_chrome():
     import Frames.chrome as chrome
     with pytest.raises(SideEffectLocked):
         chrome.ctypes.windll.dwmapi.DwmSetWindowAttribute(0, 20, None, 4)
+
+
+def test_lock_microphone_scan():
+    import Core.call_detection as call_detection
+    with pytest.raises(SideEffectLocked):
+        call_detection._scan_windows_microphone()
