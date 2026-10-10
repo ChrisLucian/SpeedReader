@@ -112,6 +112,23 @@ The build uses Nuitka. For background on the bootloader fix: https://github.com/
 - The EXE has no console window; errors and server logs go to `SpeedReader.err.txt` (and `SpeedReader.out.txt`) beside it.
 - Close any running `SpeedReader.exe` first — the script refuses to build while it locks `SpeedReader.dist`.
 
+### Code signing (Smart App Control)
+Windows Smart App Control blocks unsigned EXEs/DLLs. A self-signed certificate does **not** help — the signature must chain to a Microsoft-trusted CA. The build signs with [Azure Artifact Signing](https://learn.microsoft.com/azure/artifact-signing/) (formerly Trusted Signing, ~$10/month) when configured:
+
+1. In Azure: create an Artifact Signing account, complete identity validation, create a *Public Trust* certificate profile, and give yourself the *… Certificate Profile Signer* role on the account.
+2. Sign in: `az login --scope "https://codesigning.azure.net/.default"`.
+3. Set env vars and build:
+
+```pwsh
+$env:SPEEDREADER_SIGN_ENDPOINT = "https://eus.codesigning.azure.net"  # your account's region
+$env:SPEEDREADER_SIGN_ACCOUNT  = "<account>"
+$env:SPEEDREADER_SIGN_PROFILE  = "<certificate profile>"
+.\build.ps1
+```
+
+- Installs the `sign` dotnet tool if missing, signs every not-yet-signed `.exe`/`.dll`/`.pyd` in `SpeedReader.dist`, and fails the build if `SpeedReader.exe` isn't validly signed afterwards.
+- Without the env vars, the build is unsigned and prints a warning.
+
 
 # Prompt other agents to use your local agent
 ```
