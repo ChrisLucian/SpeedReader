@@ -6,7 +6,7 @@ PLACEHOLDERS = [
     (re.compile(r'(?:(?<![A-Za-z0-9])[A-Za-z]:[\\/]|\\\\)\S+'), '[file path]'),
     (re.compile(r'[\w.+-]+@[\w-]+(?:\.[\w-]+)+'), '[email]'),
     (re.compile(r'\b[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}\b'), '[ID]'),
-    (re.compile(r'\b(?=[a-fA-F]*\d)[0-9a-fA-F]{7,}\b'), '[hash]'),
+    (re.compile(r'\b(?=[a-fA-F]*\d)(?=\d*[a-fA-F])[0-9a-fA-F]{7,}\b'), '[hash]'),
     (re.compile(r'\S{40,}'), '[long text]'),
 ]
 
