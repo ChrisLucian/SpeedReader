@@ -23,8 +23,32 @@ class Locked:
         raise SideEffectLocked("{} is locked in tests; mock it explicitly".format(self._name))
 
 
+class FakeClipboard:
+    def __init__(self):
+        self.text = ""
+
+    def clear(self, *args, **kwargs):
+        self.text = ""
+
+    def append(self, text, **kwargs):
+        self.text += text
+
+    def get(self, **kwargs):
+        return self.text
+
+
+@pytest.fixture
+def fake_clipboard(monkeypatch):
+    import tkinter
+    clipboard = FakeClipboard()
+    monkeypatch.setattr(tkinter.Misc, "clipboard_clear", lambda self, **kw: clipboard.clear())
+    monkeypatch.setattr(tkinter.Misc, "clipboard_append", lambda self, text, **kw: clipboard.append(text))
+    monkeypatch.setattr(tkinter.Misc, "clipboard_get", lambda self, **kw: clipboard.get())
+    return clipboard
+
+
 @pytest.fixture(autouse=True)
-def lock_side_effects(monkeypatch, tmp_path):
+def lock_side_effects(monkeypatch, tmp_path, fake_clipboard):
     monkeypatch.setenv("SPEEDREADER_CONFIG", str(tmp_path / "config.json"))
     import Frames.media_control as media_control
     monkeypatch.setattr(media_control, "ctypes", Locked("ctypes"), raising=False)
