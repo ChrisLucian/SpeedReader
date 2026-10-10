@@ -32,6 +32,12 @@ def test_preprocess_replaces_forward_slash_drive_path():
     assert 'Users' not in out
 
 
+def test_preprocess_replaces_unc_path():
+    out = preprocess_text('share \\\\server\\share\\doc.txt here')
+    assert '[file path]' in out
+    assert 'server' not in out
+
+
 def test_word_window_basic_slices():
     text = 'the quick brown fox'
     spoken, current, next_ = word_window(text, 4, 5)  # 'quick'
