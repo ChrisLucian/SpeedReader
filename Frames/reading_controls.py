@@ -16,6 +16,11 @@ class ReadingControlsMixin:
         self.paused_at = None
         self.pause_button = ttk.Button(self, text="Pause", width=10)
         self.pause_button.grid(row=row, column=0, sticky=E, padx=(0, 4), pady=12)
+        self.text_area.bind("<Double-Button-1>", self.on_text_double_click)
+
+    def on_text_double_click(self, event):
+        self.read_from_index("@{},{}".format(event.x, event.y))
+        return "break"
 
     def pause_reading(self):
         self.paused_at = self.current_location
