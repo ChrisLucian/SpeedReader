@@ -18,5 +18,5 @@ class CallbackQueue:
     def drain(self):
         with self._lock:
             calls, self._calls = self._calls, []
-        fn, args = calls[0]
-        fn(*args)
+        for fn, args in calls:
+            fn(*args)
