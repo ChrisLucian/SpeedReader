@@ -42,6 +42,21 @@ def test_double_click_reads_from_word(frame):
     frame.read_from_index.assert_called_once_with("@5,5")
 
 
+def test_pause_button_toggles_pause_and_resume(frame):
+    frame.speech.stop = Mock()
+    frame.speak_on_thread = Mock()
+    frame.spoken_text = "Hello World"
+    frame.is_speaking = True
+    frame.onStartWord(None, 6, 5)
+    frame.pause_button.invoke()
+    assert frame.paused_at == 6
+    assert frame.pause_button["text"] == "Resume"
+    frame.pause_button.invoke()
+    frame.thread.join(1)
+    assert frame.speak_on_thread.call_args.args[1] == "World"
+    assert frame.pause_button["text"] == "Pause"
+
+
 def test_speak_resets_speak_offset(frame):
     frame.speak_on_thread = Mock()
     frame.text_area.insert(END, "Hi there")
