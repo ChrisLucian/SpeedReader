@@ -13,7 +13,8 @@ class CallbackQueue:
 
     def post(self, fn, *args):
         with self._lock:
-            self._calls.append((fn, args))
+            if not self._calls or self._calls[-1] != (fn, args):
+                self._calls.append((fn, args))
 
     def drain(self):
         with self._lock:
