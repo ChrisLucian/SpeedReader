@@ -12,6 +12,10 @@ class UiPumpMixin:
     def _queued(self, fn):
         return lambda *args: self.callbacks.post(fn, *args)
 
+    def on_global_hotkey(self):
+        """Ctrl+Alt+B from any app (hotkey thread): paste & speak on the UI thread."""
+        self.callbacks.post(self.paste_and_speak, None)
+
     def pump_callbacks(self):
         self.callbacks.drain()
         self.after(PUMP_MS, self.pump_callbacks)
