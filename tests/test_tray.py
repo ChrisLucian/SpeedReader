@@ -25,6 +25,14 @@ def test_tray_menu_item_invokes_callback():
     tray.on_quit.assert_called_once()
 
 
+def test_tray_stop_stops_icon():
+    fake_pystray = Mock()
+    tray = make_tray(pystray=fake_pystray, load_image=lambda: None)
+    tray.start()
+    tray.stop()
+    fake_pystray.Icon.return_value.stop.assert_called_once()
+
+
 def test_tray_menu_has_show_read_quit():
     tray = make_tray()
     items = tray.menu_items()
