@@ -16,6 +16,15 @@ def test_tray_start_runs_icon_detached():
     fake_pystray.Icon.return_value.run_detached.assert_called_once()
 
 
+def test_tray_menu_item_invokes_callback():
+    fake_pystray = Mock()
+    tray = make_tray(pystray=fake_pystray, load_image=lambda: None)
+    tray.start()
+    actions = {call.args[0]: call.args[1] for call in fake_pystray.MenuItem.call_args_list}
+    actions["Quit"](Mock(), Mock())
+    tray.on_quit.assert_called_once()
+
+
 def test_tray_menu_has_show_read_quit():
     tray = make_tray()
     items = tray.menu_items()
