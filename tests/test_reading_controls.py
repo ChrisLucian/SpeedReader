@@ -3,6 +3,16 @@ from tkinter import END
 from unittest.mock import Mock
 
 
+def test_pause_stops_and_remembers_current_word(frame):
+    frame.speech.stop = Mock()
+    frame.spoken_text = "Hello World"
+    frame.onStartWord(None, 6, 5)
+    frame.pause_reading()
+    assert frame.paused_at == 6
+    frame.speech.stop.assert_called_once()
+    assert frame.pause_button["text"] == "Resume"
+
+
 def test_speak_resets_speak_offset(frame):
     frame.speak_on_thread = Mock()
     frame.text_area.insert(END, "Hi there")
