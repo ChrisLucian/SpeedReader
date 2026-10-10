@@ -18,13 +18,13 @@ def tmp_config(tmp_path, monkeypatch):
 
 def test_placeholder_shows_only_when_text_area_is_empty(frame):
     frame.update()
-    assert frame.placeholder.winfo_ismapped()
+    assert frame.placeholder.place_info()
     frame.text_area.insert(END, "hello")
     frame.update()
-    assert not frame.placeholder.winfo_ismapped()
+    assert not frame.placeholder.place_info()
     frame.text_area.delete("1.0", END)
     frame.update()
-    assert frame.placeholder.winfo_ismapped()
+    assert frame.placeholder.place_info()
 
 
 def test_toggle_theme_flips_restyles_and_persists(frame, tmp_config):
