@@ -89,6 +89,17 @@ def test_pause_button_when_idle_does_nothing(frame):
     assert frame.pause_button["text"] == "Pause"
 
 
+def test_speak_clears_paused_state(frame):
+    frame.speak_on_thread = Mock()
+    frame.paused_at = 6
+    frame.pause_button["text"] = "Resume"
+    frame.text_area.insert(END, "Hi")
+    frame.speak(None)
+    frame.thread.join(1)
+    assert frame.paused_at is None
+    assert frame.pause_button["text"] == "Pause"
+
+
 def test_speak_resets_speak_offset(frame):
     frame.speak_on_thread = Mock()
     frame.text_area.insert(END, "Hi there")
