@@ -27,3 +27,4 @@ class Locked:
 def lock_side_effects(monkeypatch):
     import Frames.media_control as media_control
     monkeypatch.setattr(media_control, "ctypes", Locked("ctypes"), raising=False)
+    monkeypatch.setattr(media_control, "MEDIA_SESSION_AVAILABLE", False, raising=False)
