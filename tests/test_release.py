@@ -32,6 +32,12 @@ def test_write_sha256_file(tmp_path):
     assert (tmp_path / "a.zip.sha256").read_text() == expected + "  a.zip\n"
 
 
+def test_refuses_unsigned_exe(tmp_path):
+    import pytest
+    with pytest.raises(release.ReleaseError):
+        release.require_signed(tmp_path / "SpeedReader.exe", verify=lambda path: "NotSigned")
+
+
 def test_release_files_skip_logs_and_caches(tmp_path):
     dist = make_dist(tmp_path, [
         "SpeedReader.exe", "x.dll", "SpeedReader.err.txt", "SpeedReader.out.txt",
