@@ -40,6 +40,14 @@ def test_controller_hide_to_tray_withdraws_window(app):
     assert app.winfo_exists()
 
 
+def test_controller_show_window_restores(app):
+    app.deiconify = Mock()
+    app.lift = Mock()
+    app.show_window()
+    app.deiconify.assert_called_once()
+    app.lift.assert_called_once()
+
+
 def test_tray_menu_has_show_read_quit():
     tray = make_tray()
     items = tray.menu_items()
