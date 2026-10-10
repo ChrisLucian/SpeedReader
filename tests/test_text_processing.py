@@ -19,6 +19,13 @@ def test_preprocess_runs_newline_then_url_substitution():
     assert out.endswith(' line2')
 
 
+def test_preprocess_replaces_windows_drive_path_with_placeholder():
+    out = preprocess_text('run C:\\GitLab\\SpeedReader\\SpeedReader.exe now')
+    assert '[file path]' in out
+    assert 'GitLab' not in out
+    assert out.startswith('run') and out.endswith('now')
+
+
 def test_word_window_basic_slices():
     text = 'the quick brown fox'
     spoken, current, next_ = word_window(text, 4, 5)  # 'quick'
