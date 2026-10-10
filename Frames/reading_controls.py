@@ -7,6 +7,7 @@ import tkinter.ttk as ttk
 from tkinter.constants import E
 
 from Core.reading_position import word_start
+from Core.text_processing import preprocess_text
 
 
 class ReadingControlsMixin:
@@ -40,6 +41,8 @@ class ReadingControlsMixin:
         self.speak_from(offset)
 
     def read_from_index(self, index):
-        self.spoken_text = self.text_area.get("1.0", "end-1c")
-        clicked = len(self.text_area.get("1.0", index))
+        clicked = len(preprocess_text(self.text_area.get("1.0", index)))
+        self.spoken_text = preprocess_text(self.text_area.get("1.0", "end-1c"))
+        self.text_area.delete("1.0", "end")
+        self.text_area.insert("end", self.spoken_text)
         self.speak_from(word_start(self.spoken_text, clicked), interrupt=True)
