@@ -6,6 +6,7 @@ Every such API is swapped for a ``Locked`` stand-in that raises
 ``SideEffectLocked`` if a test reaches it without mocking it explicitly.
 """
 import importlib
+from types import SimpleNamespace
 
 import pytest
 
@@ -55,6 +56,8 @@ STUBS = [
     ("Controllers.SpeedReaderController", "apply_title_bar", lambda root, theme: None),
     ("Frames.MainFrame", "apply_title_bar", lambda root, theme: None),
     ("Frames.media_control", "MEDIA_SESSION_AVAILABLE", False),
+    ("Controllers.SpeedReaderController", "GlobalHotkey",
+     lambda *a, **k: SimpleNamespace(start=lambda: None, stop=lambda: None)),
 ]
 
 LOCKED = [

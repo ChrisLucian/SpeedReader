@@ -1,8 +1,10 @@
+import ctypes
 from tkinter import Tk
 from tkinter.constants import N, S, E, W
 from Frames.MainFrame import MainFrame
 from Frames.chrome import enable_dpi_awareness, apply_title_bar, set_icon
 from Core.config import load_mcp_config
+from Core.global_hotkey import GlobalHotkey
 from Core.theme import load_ui_theme
 import sv_ttk
 
@@ -25,6 +27,8 @@ class SpeedReaderController(Tk):
         self.minsize(int(self.winfo_fpixels("540p")), int(self.winfo_fpixels("480p")))
         apply_title_bar(self, main_frame.theme)
         self.maybe_host_mcp(main_frame)
+        self.hotkey = GlobalHotkey(main_frame.on_global_hotkey, user32=ctypes.windll.user32)
+        self.hotkey.start()
 
     def maybe_host_mcp(self, main_frame):
         # Host the MCP server in-process only if the user opted in via config.
