@@ -4,8 +4,16 @@ from unittest.mock import Mock
 from Frames.tray import TrayIcon
 
 
-def make_tray():
-    return TrayIcon(on_show=Mock(), on_read_clipboard=Mock(), on_quit=Mock())
+def make_tray(**kwargs):
+    return TrayIcon(on_show=Mock(), on_read_clipboard=Mock(), on_quit=Mock(), **kwargs)
+
+
+def test_tray_start_runs_icon_detached():
+    fake_pystray, image = Mock(), object()
+    tray = make_tray(pystray=fake_pystray, load_image=lambda: image)
+    tray.start()
+    assert fake_pystray.Icon.call_args.args[:2] == ("SpeedReader", image)
+    fake_pystray.Icon.return_value.run_detached.assert_called_once()
 
 
 def test_tray_menu_has_show_read_quit():
