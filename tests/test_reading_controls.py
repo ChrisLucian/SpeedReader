@@ -25,6 +25,15 @@ def test_resume_speaks_rest_from_paused_word(frame):
     assert frame.pause_button["text"] == "Pause"
 
 
+def test_read_from_index_starts_at_clicked_word(frame):
+    frame.speak_on_thread = Mock()
+    frame.text_area.insert(END, "Hello World")
+    frame.read_from_index("1.8")
+    frame.thread.join(1)
+    assert frame.speak_on_thread.call_args.args[1] == "World"
+    assert frame.speak_offset == 6
+
+
 def test_speak_resets_speak_offset(frame):
     frame.speak_on_thread = Mock()
     frame.text_area.insert(END, "Hi there")
