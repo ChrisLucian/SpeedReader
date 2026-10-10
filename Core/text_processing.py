@@ -2,6 +2,7 @@ import re
 
 URL_PATTERN = re.compile(r'http\S+')
 GUID_PATTERN = re.compile(r'\b[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}\b')
+CODE_BLOCK_PATTERN = re.compile(r'```.*?```')
 HASH_PATTERN = re.compile(r'\b(?=[a-fA-F]*\d)[0-9a-fA-F]{7,}\b')
 EMAIL_PATTERN = re.compile(r'[\w.+-]+@[\w-]+(?:\.[\w-]+)+')
 FILE_PATH_PATTERN = re.compile(r'(?:(?<![A-Za-z0-9])[A-Za-z]:[\\/]|\\\\)\S+')
@@ -18,6 +19,7 @@ def preprocess_text(text):
     single line so that the ``"1.{offset}"`` highlight indices stay valid.
     """
     text = text.replace('\n', ' ')
+    text = CODE_BLOCK_PATTERN.sub(' [code] ', text)
     text = URL_PATTERN.sub(' [URL] ', text)
     text = FILE_PATH_PATTERN.sub(' [file path] ', text)
     text = EMAIL_PATTERN.sub(' [email] ', text)
