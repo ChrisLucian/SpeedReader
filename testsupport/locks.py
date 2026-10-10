@@ -66,6 +66,7 @@ LOCKED = [
     ("webbrowser", "open_new_tab"),
     ("webbrowser", "get"),
     ("mcp_server", "start_http_in_thread"),
+    ("uvicorn", "Server.run"),
 ]
 
 
@@ -75,4 +76,8 @@ def lock_side_effects(monkeypatch, tmp_path, fake_clipboard):
     for module, attr, stub in STUBS:
         monkeypatch.setattr(importlib.import_module(module), attr, stub, raising=False)
     for module, attr in LOCKED:
-        monkeypatch.setattr(importlib.import_module(module), attr, Locked(module + "." + attr), raising=False)
+        owner = importlib.import_module(module)
+        *path, name = attr.split(".")
+        for part in path:
+            owner = getattr(owner, part)
+        monkeypatch.setattr(owner, name, Locked(module + "." + attr), raising=False)
