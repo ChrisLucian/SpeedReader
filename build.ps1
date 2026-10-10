@@ -44,7 +44,7 @@ python -m nuitka --standalone --assume-yes-for-downloads --enable-plugin=tk-inte
     --include-module=pyttsx3.drivers.sapi5 --include-module=win32com.server --include-module=win32com.server.util `
     --windows-icon-from-ico=assets/speedreader.ico --include-data-files=assets/speedreader.ico=assets/speedreader.ico `
     --windows-console-mode=disable "--force-stdout-spec={PROGRAM_BASE}.out.txt" "--force-stderr-spec={PROGRAM_BASE}.err.txt" `
-    --nofollow-import-to=pystray --nofollow-import-to=six `
+    --nofollow-import-to=pystray --nofollow-import-to=six --no-deployment-flag=excluded-module-usage `
     --include-module=inspect --include-module=tempfile --include-module=queue --include-module=logging `
     --include-module=PIL.Image --include-module=PIL.IcoImagePlugin --include-module=PIL.PngImagePlugin `
     SpeedReader.py
