@@ -1,6 +1,7 @@
 import re
 
 URL_PATTERN = re.compile(r'http\S+')
+FILE_PATH_PATTERN = re.compile(r'[A-Za-z]:\\\S+')
 
 
 def preprocess_text(text):
@@ -12,6 +13,7 @@ def preprocess_text(text):
     """
     text = text.replace('\n', ' ')
     text = URL_PATTERN.sub(' [URL] ', text)
+    text = FILE_PATH_PATTERN.sub(' [file path] ', text)
     return text
 
 
