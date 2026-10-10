@@ -64,3 +64,11 @@ def test_hotkey_unregisters_when_loop_ends():
     fake = FakeUser32()
     GlobalHotkey(lambda: None, user32=fake).run()
     assert fake.called("UnregisterHotKey") == [(None, 1)]
+
+
+def test_hotkey_stop_posts_quit_to_its_thread():
+    fake = FakeUser32()
+    hotkey = GlobalHotkey(lambda: None, user32=fake)
+    hotkey.thread_id = 42
+    hotkey.stop()
+    assert fake.called("PostThreadMessageW") == [(42, 0x0012, 0, 0)]
