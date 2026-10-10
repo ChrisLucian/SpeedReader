@@ -14,6 +14,7 @@ class ReadingControlsMixin:
 
     def _build_pause_button(self, row):
         self.paused_at = None
+        self.current_location = 0
         self.pause_button = ttk.Button(self, text="Pause", width=10, command=self.toggle_pause)
         self.pause_button.grid(row=row, column=0, sticky=E, padx=(0, 4), pady=12)
         self.text_area.bind("<Double-Button-1>", self.on_text_double_click)
