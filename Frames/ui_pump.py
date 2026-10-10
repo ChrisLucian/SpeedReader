@@ -14,3 +14,7 @@ class UiPumpMixin:
 
     def pump_callbacks(self):
         self.callbacks.drain()
+        self.after(PUMP_MS, self.pump_callbacks)
+
+
+PUMP_MS = 15

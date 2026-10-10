@@ -50,6 +50,7 @@ class MainFrame(UiPumpMixin, MediaControlMixin, ttk.Frame):
         self.engine = None
         self.theme = load_ui_theme()
         self.build_frame_content(kw)
+        self.pump_callbacks()
 
     def _build_voice_registry(self):
         """Build the agent voice registry from system voices + saved config.
