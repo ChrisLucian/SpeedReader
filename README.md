@@ -120,9 +120,9 @@ Windows Smart App Control blocks unsigned EXEs/DLLs. A self-signed certificate d
 3. Set env vars and build:
 
 ```pwsh
-$env:SPEEDREADER_SIGN_ENDPOINT = "https://eus.codesigning.azure.net"  # your account's region
-$env:SPEEDREADER_SIGN_ACCOUNT  = "<account>"
-$env:SPEEDREADER_SIGN_PROFILE  = "<certificate profile>"
+$env:ARTIFACT_SIGNING_ENDPOINT = "https://eus.codesigning.azure.net"  # your account's region
+$env:ARTIFACT_SIGNING_ACCOUNT  = "<account>"
+$env:ARTIFACT_SIGNING_PROFILE  = "<certificate profile>"
 .\build.ps1
 ```
 

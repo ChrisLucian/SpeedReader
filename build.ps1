@@ -52,19 +52,19 @@ if ($LASTEXITCODE -eq 0) {
 
     # HIGH-RISK/REPEAT: Smart App Control only trusts a CA-chained signature (Azure Artifact
     # Signing), never self-signed. Opt in via env vars; sign every unsigned binary, not just the EXE.
-    if ($env:SPEEDREADER_SIGN_ACCOUNT) {
+    if ($env:ARTIFACT_SIGNING_ACCOUNT) {
         Write-Host "Signing with Azure Artifact Signing..." -ForegroundColor Yellow
         if (-not (Get-Command sign -ErrorAction SilentlyContinue)) { dotnet tool install --global sign --prerelease }
         $unsigned = Get-ChildItem SpeedReader.dist -Recurse -Include *.exe, *.dll, *.pyd |
             Where-Object { (Get-AuthenticodeSignature $_.FullName).Status -ne 'Valid' } | ForEach-Object FullName
         sign code artifact-signing $unsigned -v Warning `
-            -ase $env:SPEEDREADER_SIGN_ENDPOINT -asa $env:SPEEDREADER_SIGN_ACCOUNT -ascp $env:SPEEDREADER_SIGN_PROFILE
+            -ase $env:ARTIFACT_SIGNING_ENDPOINT -asa $env:ARTIFACT_SIGNING_ACCOUNT -ascp $env:ARTIFACT_SIGNING_PROFILE
         if ($LASTEXITCODE -ne 0 -or (Get-AuthenticodeSignature SpeedReader.dist\SpeedReader.exe).Status -ne 'Valid') {
             Write-Host "Signing failed! (az login? Signer role? env vars?)" -ForegroundColor Red
             exit 1
         }
     } else {
-        Write-Host "Unsigned build (set SPEEDREADER_SIGN_* to sign) - Smart App Control will block it." -ForegroundColor Yellow
+        Write-Host "Unsigned build (set ARTIFACT_SIGNING_* to sign) - Smart App Control will block it." -ForegroundColor Yellow
     }
     Write-Host ""
     Write-Host "=== Build Complete ===" -ForegroundColor Green

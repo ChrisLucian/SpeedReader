@@ -56,7 +56,7 @@ Build a standalone EXE with Nuitka (output `SpeedReader.dist\SpeedReader.exe`, `
 .\build.ps1
 ```
 
-HIGH-RISK/REPEAT: Smart App Control only trusts CA-chained signatures — never self-signed. `build.ps1` signs via Azure Artifact Signing when `SPEEDREADER_SIGN_ENDPOINT/ACCOUNT/PROFILE` are set (see README, `windows-code-signing` skill). Any binary added to the dist must be signed too.
+HIGH-RISK/REPEAT: Smart App Control only trusts CA-chained signatures — never self-signed. `build.ps1` signs via Azure Artifact Signing when `ARTIFACT_SIGNING_ENDPOINT/ACCOUNT/PROFILE` are set (see README, `windows-code-signing` skill). Any binary added to the dist must be signed too.
 
 HIGH-RISK/REPEAT: Nuitka must run from the venv (`python -m nuitka` after activation), never the global `nuitka` — it bundles whatever site-packages its interpreter sees. See the `nuitka-build-debug` skill.
 
