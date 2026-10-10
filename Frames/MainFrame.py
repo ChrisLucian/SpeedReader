@@ -459,7 +459,7 @@ class MainFrame(UiPumpMixin, MediaControlMixin, ttk.Frame):
         # Update the UI on the tkinter main thread, but run the BLOCKING speak on
         # this server thread (never inside `after`, which would freeze the UI).
         # Blocking serializes per-utterance voices so agents don't bleed voices.
-        self.after(0, lambda: self._render_external(text))
+        self.callbacks.post(self._render_external, text)
         self.speech.speak(text, rate, voice=voice, block=True)
 
     def _render_external(self, text):
