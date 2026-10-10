@@ -57,6 +57,12 @@ def test_pause_button_toggles_pause_and_resume(frame):
     assert frame.pause_button["text"] == "Pause"
 
 
+def test_pause_before_first_word_resumes_from_start(frame):
+    frame.speech.stop = Mock()
+    frame.pause_reading()
+    assert frame.paused_at == 0
+
+
 def test_speak_resets_speak_offset(frame):
     frame.speak_on_thread = Mock()
     frame.text_area.insert(END, "Hi there")
