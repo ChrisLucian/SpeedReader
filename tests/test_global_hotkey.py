@@ -58,3 +58,9 @@ def test_hotkey_failed_registration_skips_pump():
     hotkey.run()
     assert hotkey.registered is False
     assert fake.called("GetMessageW") == []
+
+
+def test_hotkey_unregisters_when_loop_ends():
+    fake = FakeUser32()
+    GlobalHotkey(lambda: None, user32=fake).run()
+    assert fake.called("UnregisterHotKey") == [(None, 1)]
