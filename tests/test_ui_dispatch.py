@@ -8,3 +8,12 @@ def test_post_does_not_run_until_drain():
     assert calls == []
     queue.drain()
     assert calls == [1]
+
+
+def test_drain_runs_calls_in_order():
+    calls = []
+    queue = CallbackQueue()
+    queue.post(calls.append, 1)
+    queue.post(calls.append, 2)
+    queue.drain()
+    assert calls == [1, 2]
