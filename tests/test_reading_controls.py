@@ -73,6 +73,14 @@ def test_read_from_index_preprocesses_raw_text(frame):
     assert "\n" not in shown and "[URL]" in shown
 
 
+def test_external_speech_resets_speak_offset(frame):
+    frame.speech.speak = Mock()
+    frame.speak_offset = 6
+    frame.speak_external("agent", 300)
+    frame.pump_callbacks()
+    assert frame.speak_offset == 0
+
+
 def test_speak_resets_speak_offset(frame):
     frame.speak_on_thread = Mock()
     frame.text_area.insert(END, "Hi there")
