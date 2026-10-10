@@ -31,3 +31,4 @@ class GlobalHotkey:
         while self.user32.GetMessageW(ctypes.byref(msg), None, 0, 0) > 0:
             if msg.message == WM_HOTKEY:
                 self.on_press()
+        self.user32.UnregisterHotKey(None, HOTKEY_ID)
