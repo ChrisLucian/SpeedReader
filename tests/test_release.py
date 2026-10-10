@@ -38,6 +38,16 @@ def test_refuses_unsigned_exe(tmp_path):
         release.require_signed(tmp_path / "SpeedReader.exe", verify=lambda path: "NotSigned")
 
 
+def test_winget_installer_manifest_has_url_and_hash():
+    url = "https://github.com/ChrisLucian/SpeedReader/releases/download/v0.6/SpeedReader-v0.6-win-x64.zip"
+    manifests = release.winget_manifests("0.6", "ABC", url)
+    installer = manifests["ChrisLucian.SpeedReader.installer.yaml"]
+    for line in ("PackageVersion: 0.6", "InstallerUrl: " + url, "InstallerSha256: ABC",
+                 "InstallerType: zip", "NestedInstallerType: portable",
+                 "RelativeFilePath: SpeedReader\\SpeedReader.exe"):
+        assert line in installer
+
+
 def test_release_files_skip_logs_and_caches(tmp_path):
     dist = make_dist(tmp_path, [
         "SpeedReader.exe", "x.dll", "SpeedReader.err.txt", "SpeedReader.out.txt",
