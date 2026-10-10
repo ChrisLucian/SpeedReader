@@ -48,6 +48,15 @@ def test_winget_installer_manifest_has_url_and_hash():
         assert line in installer
 
 
+def test_publish_runs_gh_release_create():
+    from unittest.mock import Mock
+    run = Mock()
+    release.publish("v0.6", "a.zip", "a.zip.sha256", "notes.md", run=run)
+    run.assert_called_once_with(
+        ["gh", "release", "create", "v0.6", "a.zip", "a.zip.sha256",
+         "--title", "SpeedReader v0.6", "--notes-file", "notes.md"], check=True)
+
+
 def test_release_files_skip_logs_and_caches(tmp_path):
     dist = make_dist(tmp_path, [
         "SpeedReader.exe", "x.dll", "SpeedReader.err.txt", "SpeedReader.out.txt",
