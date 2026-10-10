@@ -94,6 +94,8 @@ def main(argv, run, verify):
     parser.add_argument("version")
     parser.add_argument("--dist", default="SpeedReader.dist")
     parser.add_argument("--out", default="release")
+    parser.add_argument("--publish", action="store_true")
+    parser.add_argument("--notes", default="release-notes.md")
     args = parser.parse_args(argv)
     dist, out = Path(args.dist), Path(args.out)
     require_signed(dist / "SpeedReader.exe", verify)
@@ -106,3 +108,5 @@ def main(argv, run, verify):
     winget.mkdir(exist_ok=True)
     for name, text in winget_manifests(args.version.lstrip("v"), digest, url).items():
         (winget / name).write_text(text)
+    if args.publish:
+        publish(args.version, zip_path, str(zip_path) + ".sha256", args.notes, run)
