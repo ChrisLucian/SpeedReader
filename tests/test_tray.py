@@ -58,6 +58,28 @@ def test_controller_quit_stops_tray_and_hotkey(app):
     frame.on_closing.assert_called_once()
 
 
+def test_controller_starts_tray_with_ui_thread_actions(monkeypatch):
+    import Controllers.SpeedReaderController as module
+    tray_cls = Mock()
+    monkeypatch.setattr(module, "TrayIcon", tray_cls, raising=False)
+    monkeypatch.setattr(module.SpeedReaderController, "maybe_host_mcp", lambda self, frame: None)
+    app = module.SpeedReaderController()
+    try:
+        frame = app.main_frame
+        tray_cls.return_value.start.assert_called_once()
+        actions = tray_cls.call_args.kwargs
+        assert actions["on_read_clipboard"] == frame.on_global_hotkey
+        app.show_window, app.quit_app = Mock(), Mock()
+        actions["on_show"]()
+        actions["on_quit"]()
+        app.show_window.assert_not_called()
+        frame.pump_callbacks()
+        app.show_window.assert_called_once()
+        app.quit_app.assert_called_once()
+    finally:
+        app.destroy()
+
+
 def test_tray_menu_has_show_read_quit():
     tray = make_tray()
     items = tray.menu_items()
