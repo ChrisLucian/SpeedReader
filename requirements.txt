@@ -8,3 +8,6 @@ winrt-Windows.Media.Control
 mcp<2
 nuitka
 sv-ttk
+pystray==0.19.5
+Pillow>=12.3
+six
