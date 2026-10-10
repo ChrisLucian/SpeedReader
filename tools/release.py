@@ -6,6 +6,7 @@ Usage (after .\\build.ps1 produced a signed build):
 """
 
 
+import argparse
 import hashlib
 import zipfile
 from pathlib import Path
@@ -41,7 +42,8 @@ class ReleaseError(Exception):
 def require_signed(exe, verify):
     """HIGH-RISK/REPEAT: never publish an unsigned build (Smart App Control blocks it)."""
     status = verify(exe)
-    raise ReleaseError("{} signature is {}, expected Valid".format(exe, status))
+    if status != "Valid":
+        raise ReleaseError("{} signature is {}, expected Valid".format(exe, status))
 
 
 PACKAGE_ID = "ChrisLucian.SpeedReader"
@@ -82,3 +84,25 @@ def publish(version, zip_path, sha_path, notes_path, run):
 
 def asset_name(version):
     return "SpeedReader-{}-win-x64.zip".format(version)
+
+
+DOWNLOAD_URL = "https://github.com/ChrisLucian/SpeedReader/releases/download/{version}/{asset}"
+
+
+def main(argv, run, verify):
+    parser = argparse.ArgumentParser(description="Package a signed SpeedReader release.")
+    parser.add_argument("version")
+    parser.add_argument("--dist", default="SpeedReader.dist")
+    parser.add_argument("--out", default="release")
+    args = parser.parse_args(argv)
+    dist, out = Path(args.dist), Path(args.out)
+    require_signed(dist / "SpeedReader.exe", verify)
+    out.mkdir(parents=True, exist_ok=True)
+    zip_path = out / asset_name(args.version)
+    build_zip(dist, zip_path)
+    digest = write_sha256(zip_path)
+    url = DOWNLOAD_URL.format(version=args.version, asset=zip_path.name)
+    winget = out / "winget"
+    winget.mkdir(exist_ok=True)
+    for name, text in winget_manifests(args.version.lstrip("v"), digest, url).items():
+        (winget / name).write_text(text)
