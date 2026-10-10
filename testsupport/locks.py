@@ -24,7 +24,8 @@ class Locked:
 
 
 @pytest.fixture(autouse=True)
-def lock_side_effects(monkeypatch):
+def lock_side_effects(monkeypatch, tmp_path):
+    monkeypatch.setenv("SPEEDREADER_CONFIG", str(tmp_path / "config.json"))
     import Frames.media_control as media_control
     monkeypatch.setattr(media_control, "ctypes", Locked("ctypes"), raising=False)
     monkeypatch.setattr(media_control, "MEDIA_SESSION_AVAILABLE", False, raising=False)
