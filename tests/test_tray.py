@@ -48,6 +48,16 @@ def test_controller_show_window_restores(app):
     app.lift.assert_called_once()
 
 
+def test_controller_quit_stops_tray_and_hotkey(app):
+    frame = app.winfo_children()[0]
+    app.tray, app.hotkey = Mock(), Mock()
+    frame.on_closing = Mock()
+    app.quit_app()
+    app.tray.stop.assert_called_once()
+    app.hotkey.stop.assert_called_once()
+    frame.on_closing.assert_called_once()
+
+
 def test_tray_menu_has_show_read_quit():
     tray = make_tray()
     items = tray.menu_items()
