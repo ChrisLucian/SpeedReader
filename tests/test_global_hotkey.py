@@ -50,3 +50,11 @@ def test_hotkey_ignores_other_messages():
     presses = []
     GlobalHotkey(lambda: presses.append(1), user32=FakeUser32([WM_TIMER])).run()
     assert presses == []
+
+
+def test_hotkey_failed_registration_skips_pump():
+    fake = FakeUser32([WM_HOTKEY], registers=False)
+    hotkey = GlobalHotkey(lambda: None, user32=fake)
+    hotkey.run()
+    assert hotkey.registered is False
+    assert fake.called("GetMessageW") == []
