@@ -44,5 +44,36 @@ def require_signed(exe, verify):
     raise ReleaseError("{} signature is {}, expected Valid".format(exe, status))
 
 
+PACKAGE_ID = "ChrisLucian.SpeedReader"
+MANIFEST_HEADER = "ManifestVersion: 1.6.0\nPackageIdentifier: {id}\nPackageVersion: {version}\n"
+
+
+def winget_manifests(version, sha256, url):
+    """winget-pkgs manifests (portable app inside a zip) for one release."""
+    header = MANIFEST_HEADER.format(id=PACKAGE_ID, version=version)
+    return {
+        PACKAGE_ID + ".yaml": header + "DefaultLocale: en-US\nManifestType: version\n",
+        PACKAGE_ID + ".installer.yaml": header + (
+            "InstallerType: zip\n"
+            "NestedInstallerType: portable\n"
+            "NestedInstallerFiles:\n"
+            "- RelativeFilePath: SpeedReader\\SpeedReader.exe\n"
+            "  PortableCommandAlias: speedreader\n"
+            "Installers:\n"
+            "- Architecture: x64\n"
+            "  InstallerUrl: {url}\n"
+            "  InstallerSha256: {sha256}\n"
+            "ManifestType: installer\n").format(url=url, sha256=sha256),
+        PACKAGE_ID + ".locale.en-US.yaml": header + (
+            "PackageLocale: en-US\n"
+            "Publisher: Christopher Lucian\n"
+            "PackageName: SpeedReader\n"
+            "License: MIT\n"
+            "ShortDescription: Read text aloud at high speed with the current word highlighted.\n"
+            "PackageUrl: https://github.com/ChrisLucian/SpeedReader\n"
+            "ManifestType: defaultLocale\n"),
+    }
+
+
 def asset_name(version):
     return "SpeedReader-{}-win-x64.zip".format(version)
