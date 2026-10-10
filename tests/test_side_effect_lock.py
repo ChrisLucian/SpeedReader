@@ -29,3 +29,9 @@ def test_lock_clipboard_is_in_memory(app, fake_clipboard):
 
 def test_lock_window_never_shown(app):
     assert app.state() == "withdrawn"
+
+
+def test_lock_os_window_chrome():
+    import Frames.chrome as chrome
+    with pytest.raises(SideEffectLocked):
+        chrome.ctypes.windll.dwmapi.DwmSetWindowAttribute(0, 20, None, 4)
