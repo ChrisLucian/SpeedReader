@@ -7,6 +7,7 @@ thread (MainFrame posts to its CallbackQueue). ``user32`` is injectable so the
 logic is unit tested without touching the real OS.
 """
 import ctypes
+import threading
 from ctypes import wintypes
 
 MOD_ALT = 0x0001
@@ -23,7 +24,12 @@ class GlobalHotkey:
         self.on_press = on_press
         self.user32 = user32
 
+    def start(self):
+        self.thread = threading.Thread(target=self.run, daemon=True)
+        self.thread.start()
+
     def run(self):
+        self.thread_id = threading.get_native_id()
         self.registered = bool(self.user32.RegisterHotKey(
             None, HOTKEY_ID, MOD_CONTROL | MOD_ALT | MOD_NOREPEAT, VK_B))
         if not self.registered:
