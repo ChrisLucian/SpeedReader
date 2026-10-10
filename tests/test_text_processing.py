@@ -66,6 +66,13 @@ def test_preprocess_keeps_short_hex_like_words():
     assert preprocess_text(text) == text
 
 
+def test_preprocess_replaces_fenced_code_block():
+    out = preprocess_text('see ```x = 1\ny = 2``` end')
+    assert '[code]' in out
+    assert 'x = 1' not in out
+    assert out.endswith('end')
+
+
 def test_word_window_basic_slices():
     text = 'the quick brown fox'
     spoken, current, next_ = word_window(text, 4, 5)  # 'quick'
