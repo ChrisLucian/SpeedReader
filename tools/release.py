@@ -6,6 +6,7 @@ Usage (after .\\build.ps1 produced a signed build):
 """
 
 
+import hashlib
 import zipfile
 from pathlib import Path
 
@@ -24,6 +25,13 @@ def build_zip(dist, zip_path):
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as archive:
         for name in release_files(dist):
             archive.write(Path(dist) / name, "SpeedReader/" + name)
+
+
+def write_sha256(path):
+    path = Path(path)
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    Path(str(path) + ".sha256").write_text("{}  {}\n".format(digest, path.name))
+    return digest
 
 
 def asset_name(version):
