@@ -33,6 +33,13 @@ def test_tray_stop_stops_icon():
     fake_pystray.Icon.return_value.stop.assert_called_once()
 
 
+def test_controller_hide_to_tray_withdraws_window(app):
+    app.withdraw = Mock()
+    app.hide_to_tray()
+    app.withdraw.assert_called_once()
+    assert app.winfo_exists()
+
+
 def test_tray_menu_has_show_read_quit():
     tray = make_tray()
     items = tray.menu_items()
