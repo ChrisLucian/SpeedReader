@@ -84,6 +84,14 @@ def test_preprocess_keeps_plain_numbers():
     assert preprocess_text(text) == text
 
 
+def test_preprocess_handles_huge_token_quickly():
+    import time
+    start = time.perf_counter()
+    out = preprocess_text('a' * 200000)
+    assert time.perf_counter() - start < 1
+    assert '[long text]' in out
+
+
 def test_word_window_basic_slices():
     text = 'the quick brown fox'
     spoken, current, next_ = word_window(text, 4, 5)  # 'quick'
