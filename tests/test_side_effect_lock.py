@@ -49,6 +49,12 @@ def test_lock_browser():
         webbrowser.open_new_tab("https://example.com")
 
 
+def test_lock_browser_controller_lookup():
+    import webbrowser
+    with pytest.raises(SideEffectLocked):
+        webbrowser.get()
+
+
 def test_lock_mcp_http_host():
     import mcp_server
     with pytest.raises(SideEffectLocked):
