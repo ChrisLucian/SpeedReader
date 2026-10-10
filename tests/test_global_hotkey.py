@@ -81,6 +81,16 @@ def test_controller_starts_global_hotkey_for_frame(monkeypatch):
         app.destroy()
 
 
+def test_hotkey_start_runs_loop_on_daemon_thread():
+    fake = FakeUser32()
+    hotkey = GlobalHotkey(lambda: None, user32=fake)
+    hotkey.start()
+    hotkey.thread.join(1)
+    assert hotkey.thread.daemon
+    assert fake.called("RegisterHotKey")
+    assert hotkey.thread_id == hotkey.thread.native_id
+
+
 def test_hotkey_stop_posts_quit_to_its_thread():
     fake = FakeUser32()
     hotkey = GlobalHotkey(lambda: None, user32=fake)
