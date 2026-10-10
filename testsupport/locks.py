@@ -64,6 +64,7 @@ LOCKED = [
     ("webbrowser", "open"),
     ("webbrowser", "open_new"),
     ("webbrowser", "open_new_tab"),
+    ("webbrowser", "get"),
     ("mcp_server", "start_http_in_thread"),
 ]
 
