@@ -41,3 +41,9 @@ def test_lock_microphone_scan():
     import Core.call_detection as call_detection
     with pytest.raises(SideEffectLocked):
         call_detection._scan_windows_microphone()
+
+
+def test_lock_browser():
+    import webbrowser
+    with pytest.raises(SideEffectLocked):
+        webbrowser.open_new_tab("https://example.com")
