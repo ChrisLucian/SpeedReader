@@ -1,5 +1,6 @@
 """Pause/Resume and read-from-word, driven without real speech."""
 from tkinter import END
+from types import SimpleNamespace
 from unittest.mock import Mock
 
 
@@ -32,6 +33,13 @@ def test_read_from_index_starts_at_clicked_word(frame):
     frame.thread.join(1)
     assert frame.speak_on_thread.call_args.args[1] == "World"
     assert frame.speak_offset == 6
+
+
+def test_double_click_reads_from_word(frame):
+    frame.read_from_index = Mock()
+    assert frame.text_area.bind("<Double-Button-1>")
+    frame.on_text_double_click(SimpleNamespace(x=5, y=5))
+    frame.read_from_index.assert_called_once_with("@5,5")
 
 
 def test_speak_resets_speak_offset(frame):
