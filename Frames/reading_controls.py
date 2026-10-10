@@ -6,6 +6,8 @@ remembers the current word; Resume speaks the rest of the text from it.
 import tkinter.ttk as ttk
 from tkinter.constants import E
 
+from Core.reading_position import word_start
+
 
 class ReadingControlsMixin:
     """Mixed into MainFrame; uses ``speech``, ``current_location``, ``speak_from``."""
@@ -24,3 +26,8 @@ class ReadingControlsMixin:
         offset, self.paused_at = self.paused_at, None
         self.pause_button["text"] = "Pause"
         self.speak_from(offset)
+
+    def read_from_index(self, index):
+        self.spoken_text = self.text_area.get("1.0", "end-1c")
+        clicked = len(self.text_area.get("1.0", index))
+        self.speak_from(word_start(self.spoken_text, clicked), interrupt=True)
