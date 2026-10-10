@@ -80,6 +80,12 @@ def test_controller_starts_tray_with_ui_thread_actions(monkeypatch):
         app.destroy()
 
 
+def test_close_button_hides_to_tray(app):
+    app.tk.call(app.protocol("WM_DELETE_WINDOW"))
+    assert app.winfo_exists()
+    assert app.state() == "withdrawn"
+
+
 def test_tray_menu_has_show_read_quit():
     tray = make_tray()
     items = tray.menu_items()
