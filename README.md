@@ -19,8 +19,12 @@ pyttsx3==2.71 due to a bug detailed here: https://github.com/nateshmbhat/pyttsx3
 - **Agent Voices…** — choose which system voices agents are allowed to use (see below). All voices are enabled by default.
 - **Server…** (shows `Server: <port>…` while hosting) — one dialog to change the MCP port and **Restart Server** without closing the app (the port is saved to `config.json` as `mcp.port`), plus live status: hosting state, pause-while-mic-in-use (and your current mic state), and each enabled voice with the agents that claimed it.
 - **Light mode / Dark mode** — toggles the modern Windows 11 look ([sv-ttk](https://github.com/rdbende/Sun-Valley-ttk-theme)), including the title bar. Dark by default; the choice is saved to `config.json` as `ui.theme`.
+- **Pause / Resume** (left of Speak) — pause mid-text; Resume picks up at the same word.
+- **Double-click a word** — start reading from that word.
 - Shortcuts: `Ctrl+B` paste & speak (interrupts and clears anything currently playing or queued, including agent speech, then reads the clipboard now), `Ctrl+A` select all. Agent (MCP) utterances otherwise queue and play in order.
-- Links and file paths aren't read character by character: URLs are spoken as "[URL]" and Windows paths (`C:\...`, `C:/...`, `\\server\...`) as "[file path]" — for both your text and agent speech.
+- **`Ctrl+Alt+B` from any app** — system-wide paste & speak, even while SpeedReader is hidden. If another app already owns that hotkey, SpeedReader just skips it.
+- **System tray** — closing the window hides SpeedReader to the tray (so agents can keep speaking). Tray menu: *Show SpeedReader*, *Read clipboard*, *Quit* (Quit is how you exit).
+- Junk isn't read character by character — for both your text and agent speech: code blocks → "[code]", links → "[URL]", Windows paths (`C:\...`, `C:/...`, `\\server\...`) → "[file path]", emails → "[email]", GUIDs → "[ID]", hex hashes → "[hash]", any 40+ character token → "[long text]". Plain numbers and words stay as they are.
 
 ## MCP server (let AI agents speak through SpeedReader)
 SpeedReader ships a [Model Context Protocol](https://modelcontextprotocol.io) server so an AI agent (e.g. in VS Code) can read text aloud on your machine. It exposes these tools:
@@ -112,6 +116,7 @@ The build uses Nuitka. For background on the bootloader fix: https://github.com/
 - Output: `SpeedReader.dist\SpeedReader.exe`. `config.json` is copied next to it; the app reads `config.json` from the working directory first, then from the EXE's folder.
 - The EXE has no console window; errors and server logs go to `SpeedReader.err.txt` (and `SpeedReader.out.txt`) beside it.
 - Close any running `SpeedReader.exe` first — the script refuses to build while it locks `SpeedReader.dist`.
+- The tray icon uses [pystray](https://github.com/moses-palmer/pystray) (LGPL-3.0). It is **not** compiled into the EXE: `pystray` (and its `six` dependency) ship as plain, replaceable `.py` files in `SpeedReader.dist\pystray\`.
 
 ### Code signing (Smart App Control)
 Windows Smart App Control blocks unsigned EXEs/DLLs. A self-signed certificate does **not** help — the signature must chain to a Microsoft-trusted CA. The build signs with [Azure Artifact Signing](https://learn.microsoft.com/azure/artifact-signing/) (formerly Trusted Signing, ~$10/month) when configured:
@@ -129,6 +134,25 @@ $env:ARTIFACT_SIGNING_PROFILE  = "<certificate profile>"
 
 - Installs the `sign` dotnet tool if missing, signs every not-yet-signed `.exe`/`.dll`/`.pyd` in `SpeedReader.dist`, and fails the build if `SpeedReader.exe` isn't validly signed afterwards.
 - Without the env vars, the build is unsigned and prints a warning.
+
+## Release (GitHub + winget)
+After a **signed** `.\build.ps1`:
+
+```pwsh
+python -m tools.release v0.6                # release\SpeedReader-v0.6-win-x64.zip + .sha256 + release\winget\*.yaml
+python -m tools.release v0.6 --publish      # ...then gh release create v0.6 (uses release-notes.md)
+```
+
+- Refuses to package if `SpeedReader.exe` isn't validly signed; leaves out the local `*.err.txt`/`*.out.txt` logs.
+- `--publish` needs the [GitHub CLI](https://cli.github.com) (`winget install -e --id GitHub.cli`, then `gh auth login`) and should run from `master` after the release commit is pushed.
+- winget: copy `release\winget\*.yaml` into a fork of [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs) under `manifests/c/ChrisLucian/SpeedReader/<version>/` and open a PR (or use `wingetcreate submit`).
+
+## Tests
+```pwsh
+pip install -r requirements-dev.txt
+python -m pytest -q
+```
+- ~230 tests in ~10 s. GUI tests use a hidden window; every real OS side effect (media keys, clipboard, config file, title bar/DPI, microphone registry, browser, MCP server/port, global hotkey, tray icon) is **locked** by `testsupport/locks.py` — a test that reaches one without mocking it fails with `SideEffectLocked`.
 
 
 # Prompt other agents to use your local agent
