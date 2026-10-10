@@ -196,6 +196,7 @@ class MainFrame(MediaControlMixin, ttk.Frame):
         """Switch dark <-> light, restyle non-ttk widgets and the title bar, persist."""
         self.theme = toggled(self.theme)
         sv_ttk.set_theme(self.theme, self.master)
+        self.master.update()
         self._apply_theme_colors()
         apply_title_bar(self.master, self.theme)
         save_ui_theme(self.theme)
