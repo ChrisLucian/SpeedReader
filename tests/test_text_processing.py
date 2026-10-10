@@ -79,6 +79,11 @@ def test_preprocess_replaces_very_long_token():
     assert 'Ab9_' not in out
 
 
+def test_preprocess_keeps_plain_numbers():
+    text = 'pay 1250000 by 20261010'
+    assert preprocess_text(text) == text
+
+
 def test_word_window_basic_slices():
     text = 'the quick brown fox'
     spoken, current, next_ = word_window(text, 4, 5)  # 'quick'
