@@ -3,6 +3,14 @@ import time
 from unittest.mock import Mock
 
 
+def test_global_hotkey_pastes_and_speaks_via_pump(frame):
+    frame.paste_and_speak = Mock()
+    frame.on_global_hotkey()
+    frame.paste_and_speak.assert_not_called()
+    frame.pump_callbacks()
+    frame.paste_and_speak.assert_called_once_with(None)
+
+
 def test_external_speech_renders_via_pump(frame):
     frame.speech.speak = Mock()
     frame.speak_external("agent text", 300)
