@@ -57,6 +57,17 @@ def test_publish_runs_gh_release_create():
          "--title", "SpeedReader v0.6", "--notes-file", "notes.md"], check=True)
 
 
+def test_main_packages_without_publishing_by_default(tmp_path):
+    from unittest.mock import Mock
+    dist = make_dist(tmp_path, ["SpeedReader.exe"])
+    out, run = tmp_path / "release", Mock()
+    release.main(["v0.6", "--dist", str(dist), "--out", str(out)], run=run, verify=lambda path: "Valid")
+    assert (out / "SpeedReader-v0.6-win-x64.zip").exists()
+    assert (out / "SpeedReader-v0.6-win-x64.zip.sha256").exists()
+    assert (out / "winget" / "ChrisLucian.SpeedReader.installer.yaml").exists()
+    run.assert_not_called()
+
+
 def test_release_files_skip_logs_and_caches(tmp_path):
     dist = make_dist(tmp_path, [
         "SpeedReader.exe", "x.dll", "SpeedReader.err.txt", "SpeedReader.out.txt",
