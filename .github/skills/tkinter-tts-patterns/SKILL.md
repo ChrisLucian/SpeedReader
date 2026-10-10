@@ -45,6 +45,10 @@ description: 'Use when adding or changing tkinter/ttk UI or pyttsx3 text-to-spee
 - Build widgets with manual `grid` using the running `row_index` counter; increment after each row. Don't hardcode rows.
 - Set state: `widget['state'] = NORMAL | DISABLED`. Read state: `widget['state'].__str__() == NORMAL`. Guard new handlers like `speak()`/`stop()` do.
 
+## Long unbroken tokens (paths, URLs)
+- HIGH-RISK/REPEAT: SAPI spells a long token (e.g. `C:\a\b\c.exe`) letter by letter and fires `started-word` for the SAME `(location, length)` dozens of times in a burst; each one hits tkinter from the loop thread and crashed the EXE natively (no traceback). Collapse such tokens in `Core/text_processing.preprocess_text` (`[URL]`, `[file path]`) so they never reach SAPI.
+- Repro without the GUI: pyttsx3 with `volume=0.0`, print each `started-word`; count events per token.
+
 ## Verify
 1. `pip install -r requirements.txt` (`pyttsx3` pinned to `2.71` — do not bump).
 2. Unit tests cover GUI-free logic in `Core/` (mock `pyttsx3`, do not test the library): `pip install -r requirements-dev.txt` then `python -m pytest -q`.
