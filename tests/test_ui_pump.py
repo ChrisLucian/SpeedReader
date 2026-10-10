@@ -1,4 +1,15 @@
 """Engine callbacks reach widgets only via the UI-thread pump."""
+import time
+
+
+def test_pump_reschedules_itself(frame):
+    from Frames.ui_pump import PUMP_MS
+    calls = []
+    for value in (1, 2):
+        frame.callbacks.post(calls.append, value)
+        time.sleep(PUMP_MS * 3 / 1000)
+        frame.update()
+    assert calls == [1, 2]
 
 
 def test_engine_word_callback_waits_for_ui_pump(frame):
