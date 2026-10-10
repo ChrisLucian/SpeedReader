@@ -7,7 +7,10 @@ Usage (after .\\build.ps1 produced a signed build):
 
 
 import argparse
+import functools
 import hashlib
+import subprocess
+import sys
 import zipfile
 from pathlib import Path
 
@@ -37,6 +40,15 @@ def write_sha256(path):
 
 class ReleaseError(Exception):
     pass
+
+
+def authenticode_status(path, run):
+    """Windows Authenticode status of ``path`` (e.g. 'Valid', 'NotSigned')."""
+    literal = "'" + str(path).replace("'", "''") + "'"
+    result = run(["powershell", "-NoProfile", "-Command",
+                  "(Get-AuthenticodeSignature -LiteralPath {}).Status.ToString()".format(literal)],
+                 capture_output=True, text=True, check=True)
+    return result.stdout.strip()
 
 
 def require_signed(exe, verify):
@@ -110,3 +122,8 @@ def main(argv, run, verify):
         (winget / name).write_text(text)
     if args.publish:
         publish(args.version, zip_path, str(zip_path) + ".sha256", args.notes, run)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:], run=subprocess.run,
+         verify=functools.partial(authenticode_status, run=subprocess.run))
