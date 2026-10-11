@@ -12,7 +12,7 @@ def next_sentence(text, index):
 
 def previous_sentence(text, index):
     """Offset where the sentence containing ``index`` starts."""
-    starts = [0] + [m.end() for m in SENTENCE_END.finditer(text, 0, index)]
+    starts = [0] + [m.end() for m in SENTENCE_END.finditer(text, 0, index - 1)]
     return starts[-1]
 
 
