@@ -19,6 +19,14 @@ def test_drain_runs_calls_in_order():
     assert calls == [1, 2]
 
 
+def test_post_passes_keyword_args():
+    calls = []
+    queue = CallbackQueue()
+    queue.post(lambda *a, **k: calls.append((a, k)), 1, b=2)
+    queue.drain()
+    assert calls == [((1,), {"b": 2})]
+
+
 def test_consecutive_identical_calls_collapse():
     calls = []
     queue = CallbackQueue()
