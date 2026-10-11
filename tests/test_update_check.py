@@ -30,6 +30,7 @@ def test_check_in_background_reports_update():
     thread = update_check.check_in_background("0.6", on_update, fetch)
     thread.join(1)
     assert thread.daemon
+    update_check.check_in_background("0.7", on_update, fetch).join(1)
     on_update.assert_called_once_with("v0.7", URL)
 
 
