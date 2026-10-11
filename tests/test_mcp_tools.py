@@ -14,3 +14,9 @@ def test_mcp_stop_tool_stops_service():
     service = MagicMock()
     _call(service, "stop_speaking")
     service.stop.assert_called_once_with()
+
+
+def test_mcp_status_tool_reports_service_status():
+    from Core.speak_service import SpeakService
+    result = str(_call(SpeakService(speak_fn=MagicMock()), "speech_status"))
+    assert '"speaking": false' in result and '"pending": 0' in result
