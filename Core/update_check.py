@@ -1,5 +1,6 @@
 """GUI-free check for a newer SpeedReader release on GitHub."""
 import json
+import threading
 import urllib.request
 
 LATEST_URL = "https://api.github.com/repos/ChrisLucian/SpeedReader/releases/latest"
@@ -34,3 +35,14 @@ def check_for_update(current, fetch):
         return (tag, release["html_url"]) if is_newer(tag, current) else None
     except Exception:
         return None
+
+
+def check_in_background(current, on_update, fetch=fetch_release_json):
+    """Check on a daemon thread; call ``on_update(tag, url)`` (off the UI thread) if newer."""
+    def run():
+        found = check_for_update(current, fetch)
+        if found:
+            on_update(*found)
+    thread = threading.Thread(target=run, name="speedreader-update-check", daemon=True)
+    thread.start()
+    return thread
