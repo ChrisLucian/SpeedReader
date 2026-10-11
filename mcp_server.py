@@ -108,6 +108,11 @@ def build_mcp(service=None, registry=None, host="127.0.0.1", port=8765,
         service.stop()
         return "Stopped."
 
+    @server.tool()
+    def speech_status() -> dict:
+        """``{speaking, pending}``: is agent speech playing, and how many speak calls are in flight."""
+        return service.status()
+
     return server, service, registry
 
 
