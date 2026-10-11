@@ -10,5 +10,6 @@ description: Use when adding a SpeedReader UI feature or shortcut (key binding, 
 3. **Test through the `frame` fixture** — call the handler directly (`frame.on_open_file(None)`), assert widget state (`grid_info()`, `["text"]`, `text_area.get`). Assert the binding exists with `frame.master.bind("<Key>")`.
 4. **OS touch = lock** — dialogs, network, registry, clipboard, hotkeys: add to `testsupport/locks.py` `LOCKED`/`STUBS` in the SAME change, plus an `isinstance(..., Locked)`-first lock test (see `test-side-effect-locks`). Resolve the API at call time so the lock applies.
 5. **Threads** — anything from a non-UI thread posts via `main_frame.callbacks.post(...)`; never touch widgets off the UI thread.
-6. **Docs** — README *Controls* (or MCP tools list), `release-notes.md`, AGENTS.md architecture list. REPEAT: not done until README reflects it.
-7. **Verify by hand** — `python SpeedReader.py`, exercise the shortcut while speaking and idle.
+6. **Shortcut page** — HIGH-RISK/REPEAT: any new key binding/hidden option gets a row in `Core/shortcuts.py` `SHORTCUTS` (keys, action, Tk sequences, `master`/`text_area`) so F1 shows it and the binding test covers it.
+7. **Docs** — README *Controls* (or MCP tools list), `release-notes.md`, AGENTS.md architecture list. REPEAT: not done until README reflects it.
+8. **Verify by hand** — `python SpeedReader.py`, exercise the shortcut while speaking and idle.
