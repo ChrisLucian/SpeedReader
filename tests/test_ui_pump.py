@@ -35,3 +35,12 @@ def test_engine_word_callback_waits_for_ui_pump(frame):
     assert frame.current_word_label["text"] == ""
     frame.pump_callbacks()
     assert frame.current_word_label["text"] == "Hello"
+
+
+def test_engine_word_callback_with_pyttsx3_keywords_highlights(frame):
+    """pyttsx3 2.71 notifies with cb(**kwargs) and silently swallows TypeErrors."""
+    frame.spoken_text = "Hello World"
+    frame.speech._on_word(name=None, location=6, length=5)
+    frame.pump_callbacks()
+    assert frame.current_word_label["text"] == "World"
+    assert frame.text_area.tag_ranges("current word")
