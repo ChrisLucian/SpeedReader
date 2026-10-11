@@ -9,6 +9,8 @@ import pystray
 from Core.config import load_mcp_config
 from Core.global_hotkey import GlobalHotkey
 from Core.theme import load_ui_theme
+from Core.update_check import check_in_background
+from Core.version import __version__
 import sv_ttk
 
 
@@ -47,6 +49,8 @@ class SpeedReaderController(Tk):
             pystray=pystray, load_image=lambda: Image.open(ICON_PATH))
         self.tray.start()
         self.protocol("WM_DELETE_WINDOW", self.hide_to_tray)
+        check_in_background(
+            __version__, lambda tag, url: post(lambda: main_frame.show_update(tag, url)))
 
     def hide_to_tray(self):
         self.withdraw()
