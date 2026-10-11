@@ -16,6 +16,12 @@ def previous_sentence(text, index):
     return starts[-1]
 
 
+def time_left_text(text, index, wpm):
+    """``"m:ss left"`` for the words from ``index`` on, read at ``wpm``."""
+    seconds = round(len(text[index:].split()) * 60 / wpm)
+    return "{}:{:02d} left".format(seconds // 60, seconds % 60)
+
+
 def word_start(text, index):
     """Offset of the first character of the word at (or after) ``index``."""
     while index < len(text) and text[index].isspace():
