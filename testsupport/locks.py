@@ -75,6 +75,7 @@ LOCKED = [
     ("uvicorn", "Server.run"),
     ("pystray", "Icon"),
     ("urllib.request", "urlopen"),
+    ("tkinter.filedialog", "askopenfilename"),
 ]
 
 
