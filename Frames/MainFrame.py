@@ -24,8 +24,9 @@ from Frames.ui_pump import UiPumpMixin
 from Frames.reading_controls import ReadingControlsMixin
 from Frames.file_open import FileOpenMixin
 from Frames.focus_mode import FocusModeMixin
+from Frames.shortcuts_help import ShortcutsHelpMixin
 
-class MainFrame(FocusModeMixin, FileOpenMixin, ReadingControlsMixin, UiPumpMixin, MediaControlMixin, ttk.Frame):
+class MainFrame(ShortcutsHelpMixin, FocusModeMixin, FileOpenMixin, ReadingControlsMixin, UiPumpMixin, MediaControlMixin, ttk.Frame):
     def __init__(self, **kw):
         ttk.Frame.__init__(self, **kw)
         self.callbacks = CallbackQueue()
@@ -153,6 +154,7 @@ class MainFrame(FocusModeMixin, FileOpenMixin, ReadingControlsMixin, UiPumpMixin
         self.server_button = ttk.Button(
             self.settings_frame, text="Server…", command=lambda: dialogs.open_server_dialog(self))
         self.server_button.grid(row=0, column=7, padx=(8, 0))
+        self._build_shortcuts_button(self.settings_frame, 8)
         row_index += 1
 
         self.grid_rowconfigure(row_index, weight=1)
@@ -196,7 +198,7 @@ class MainFrame(FocusModeMixin, FileOpenMixin, ReadingControlsMixin, UiPumpMixin
         self.master.bind("<Control-KeyRelease-B>", self.paste_and_speak)
         self.master.bind("<Control-o>", self.on_open_file)
         self.master.bind("<F11>", self.toggle_focus)
-        self.master.bind("<F1>", lambda e: dialogs.open_shortcuts_dialog(self))
+        self.master.bind("<F1>", self.show_shortcuts)
 
         self.master.protocol("WM_DELETE_WINDOW", self.on_closing)
 
