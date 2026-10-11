@@ -22,8 +22,9 @@ from Frames.chrome import apply_title_bar
 from Frames.media_control import MediaControlMixin
 from Frames.ui_pump import UiPumpMixin
 from Frames.reading_controls import ReadingControlsMixin
+from Frames.file_open import FileOpenMixin
 
-class MainFrame(ReadingControlsMixin, UiPumpMixin, MediaControlMixin, ttk.Frame):
+class MainFrame(FileOpenMixin, ReadingControlsMixin, UiPumpMixin, MediaControlMixin, ttk.Frame):
     def __init__(self, **kw):
         ttk.Frame.__init__(self, **kw)
         self.callbacks = CallbackQueue()
