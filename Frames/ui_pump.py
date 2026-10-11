@@ -10,7 +10,7 @@ class UiPumpMixin:
     """Mixed into MainFrame; expects a ``callbacks`` CallbackQueue attribute."""
 
     def _queued(self, fn):
-        return lambda *args: self.callbacks.post(fn, *args)
+        return lambda *args, **kwargs: self.callbacks.post(fn, *args, **kwargs)
 
     def on_global_hotkey(self):
         """Ctrl+Alt+B from any app (hotkey thread): paste & speak on the UI thread."""
