@@ -1,3 +1,5 @@
+import threading
+
 from Core.speech import speak_blocking
 from Core.text_processing import preprocess_text
 
@@ -14,6 +16,8 @@ class SpeakService:
     def __init__(self, rate=500, speak_fn=None):
         self._rate = int(rate)
         self._speak_fn = speak_fn or speak_blocking
+        self._lock = threading.Lock()
+        self._pending = 0
 
     @property
     def rate(self):
@@ -29,5 +33,16 @@ class SpeakService:
         speak in an agent's claimed voice). Returns the rate actually used.
         """
         used = self._rate if rate is None else int(rate)
-        self._speak_fn(preprocess_text(text), used, voice)
+        with self._lock:
+            self._pending += 1
+        try:
+            self._speak_fn(preprocess_text(text), used, voice)
+        finally:
+            with self._lock:
+                self._pending -= 1
         return used
+
+    def status(self):
+        """``{speaking, pending}``: whether speech is in flight and how many calls wait."""
+        with self._lock:
+            return {'speaking': self._pending > 0, 'pending': self._pending}
