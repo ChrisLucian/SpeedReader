@@ -6,7 +6,7 @@ remembers the current word; Resume speaks the rest of the text from it.
 import tkinter.ttk as ttk
 from tkinter.constants import E
 
-from Core.reading_position import next_sentence, word_start
+from Core.reading_position import next_sentence, previous_sentence, word_start
 from Core.text_processing import preprocess_text
 
 
@@ -43,7 +43,8 @@ class ReadingControlsMixin:
         self.pause_button["text"] = "Pause"
 
     def skip_sentence(self, direction):
-        self.speak_from(next_sentence(self.spoken_text, self.current_location), interrupt=True)
+        find = next_sentence if direction > 0 else previous_sentence
+        self.speak_from(find(self.spoken_text, self.current_location), interrupt=True)
 
     def read_from_index(self, index):
         clicked = len(preprocess_text(self.text_area.get("1.0", index)))
