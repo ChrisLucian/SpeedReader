@@ -60,6 +60,7 @@ STUBS = [
      lambda *a, **k: SimpleNamespace(start=lambda: None, stop=lambda: None)),
     ("Controllers.SpeedReaderController", "TrayIcon",
      lambda *a, **k: SimpleNamespace(start=lambda: None, stop=lambda: None)),
+    ("Controllers.SpeedReaderController", "check_in_background", lambda *a, **k: None),
 ]
 
 LOCKED = [
