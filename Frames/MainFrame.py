@@ -11,6 +11,7 @@ import re
 
 from Core.speech_engine import SpeechEngine
 from Core.speak_service import SpeakService
+from Core.reading_position import time_left_text
 from Core.ui_dispatch import CallbackQueue
 from Core.config import load_mcp_config
 from Core.text_processing import preprocess_text, word_window, highlight_indices
@@ -85,8 +86,10 @@ class MainFrame(ReadingControlsMixin, UiPumpMixin, MediaControlMixin, ttk.Frame)
         header.grid_columnconfigure(0, weight=1)
         self.title = ttk.Label(header, font=(UI_FONT, "28", "bold"), text="Speed Reader")
         self.title.grid(row=0, column=0, sticky=W)
+        self.time_left = ttk.Label(header, text="")
+        self.time_left.grid(row=0, column=1, sticky=E, padx=(0, 12))
         self.theme_button = ttk.Button(header, command=self.toggle_theme)
-        self.theme_button.grid(row=0, column=1, sticky=E)
+        self.theme_button.grid(row=0, column=2, sticky=E)
         row_index += 1
 
         # Fixed heights in points ("p") so they scale with DPI like the fonts do.
@@ -374,6 +377,7 @@ class MainFrame(ReadingControlsMixin, UiPumpMixin, MediaControlMixin, ttk.Frame)
 
         self.progress["maximum"] = self.spoken_text.__len__()
         self.progress["value"] = location
+        self.time_left["text"] = time_left_text(self.spoken_text, location, self.speak_service.rate)
 
     def onEnd(self, name, completed):
         """Called when an utterance finishes.
