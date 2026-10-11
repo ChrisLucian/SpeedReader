@@ -19,6 +19,7 @@ pyttsx3==2.71 due to a bug detailed here: https://github.com/nateshmbhat/pyttsx3
 - **Agent Voices…** — choose which system voices agents are allowed to use (see below). All voices are enabled by default.
 - **Server…** (shows `Server: <port>…` while hosting) — one dialog to change the MCP port and **Restart Server** without closing the app (the port is saved to `config.json` as `mcp.port`), plus live status: hosting state, pause-while-mic-in-use (and your current mic state), and each enabled voice with the agents that claimed it.
 - **Light mode / Dark mode** — toggles the modern Windows 11 look ([sv-ttk](https://github.com/rdbende/Sun-Valley-ttk-theme)), including the title bar. Dark by default; the choice is saved to `config.json` as `ui.theme`.
+- **Shortcuts… / `F1`** — a page listing every keyboard shortcut and hidden option (paste & speak, sentence skip, focus mode, tray behaviour…).
 - **Pause / Resume** (left of Speak) — pause mid-text; Resume picks up at the same word.
 - **Double-click a word** — start reading from that word.
 - **← / →** (while speaking, with the text box focused) — rewind to the start of the sentence (again to go back one more) / skip to the next sentence.
