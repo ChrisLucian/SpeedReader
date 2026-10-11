@@ -196,6 +196,7 @@ class MainFrame(FocusModeMixin, FileOpenMixin, ReadingControlsMixin, UiPumpMixin
         self.master.bind("<Control-KeyRelease-B>", self.paste_and_speak)
         self.master.bind("<Control-o>", self.on_open_file)
         self.master.bind("<F11>", self.toggle_focus)
+        self.master.bind("<F1>", lambda e: dialogs.open_shortcuts_dialog(self))
 
         self.master.protocol("WM_DELETE_WINDOW", self.on_closing)
 
