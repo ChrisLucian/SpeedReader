@@ -4,6 +4,7 @@ from tkinter import StringVar, BooleanVar, Toplevel
 from tkinter.constants import N, S, E, W, LEFT, NORMAL, DISABLED
 
 from Core.config import load_mcp_config, save_enabled_voices, save_mcp_port
+from Core.shortcuts import SHORTCUTS
 
 
 def _dialog(frame, title):
@@ -11,6 +12,21 @@ def _dialog(frame, title):
     dialog.title(title)
     dialog.transient(frame.master)
     dialog.resizable(False, False)
+    return dialog
+
+
+def open_shortcuts_dialog(frame):
+    """Keyboard shortcuts and other options that have no button (F1)."""
+    dialog = _dialog(frame, "Keyboard Shortcuts")
+    ttk.Label(dialog, text="Keyboard shortcuts", font=("Segoe UI Variable Display", "14", "bold")).grid(
+        row=0, column=0, columnspan=2, sticky=W, padx=16, pady=(16, 8))
+    for row, shortcut in enumerate(SHORTCUTS, start=1):
+        ttk.Label(dialog, text=shortcut.keys, font=("Segoe UI", "10", "bold")).grid(
+            row=row, column=0, sticky=W, padx=(16, 12), pady=3)
+        ttk.Label(dialog, text=shortcut.action).grid(row=row, column=1, sticky=W, padx=(0, 16), pady=3)
+    ttk.Button(dialog, text="Close", command=dialog.destroy).grid(
+        row=len(SHORTCUTS) + 1, column=1, sticky=E, padx=16, pady=16)
+    dialog.bind("<Escape>", lambda e: dialog.destroy())
     return dialog
 
 
