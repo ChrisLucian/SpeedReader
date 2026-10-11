@@ -102,6 +102,12 @@ def build_mcp(service=None, registry=None, host="127.0.0.1", port=8765,
         used = service.speak(text, rate, voice=chosen)
         return "Spoke {} characters at {} WPM.".format(len(text), used)
 
+    @server.tool()
+    def stop_speaking() -> str:
+        """Stop whatever SpeedReader is saying right now (yours or anyone's)."""
+        service.stop()
+        return "Stopped."
+
     return server, service, registry
 
 
