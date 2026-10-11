@@ -44,7 +44,9 @@ class ReadingControlsMixin:
 
     def skip_sentence(self, direction):
         find = next_sentence if direction > 0 else previous_sentence
-        self.speak_from(find(self.spoken_text, self.current_location), interrupt=True)
+        offset = find(self.spoken_text, self.current_location)
+        if offset is not None:
+            self.speak_from(offset, interrupt=True)
 
     def read_from_index(self, index):
         clicked = len(preprocess_text(self.text_area.get("1.0", index)))
