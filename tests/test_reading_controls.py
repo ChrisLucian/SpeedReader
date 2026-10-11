@@ -136,6 +136,20 @@ def test_skip_past_last_sentence_does_nothing(frame):
     frame.speak_from.assert_not_called()
 
 
+def test_arrow_keys_skip_only_while_speaking(frame):
+    frame.skip_sentence = Mock()
+    assert frame.text_area.bind("<Right>") and frame.text_area.bind("<Left>")
+    frame.is_speaking = True
+    assert frame.on_skip_key(SimpleNamespace(keysym="Right")) == "break"
+    frame.skip_sentence.assert_called_once_with(1)
+    frame.on_skip_key(SimpleNamespace(keysym="Left"))
+    frame.skip_sentence.assert_called_with(-1)
+    frame.is_speaking = False
+    frame.skip_sentence.reset_mock()
+    assert frame.on_skip_key(SimpleNamespace(keysym="Right")) is None
+    frame.skip_sentence.assert_not_called()
+
+
 def test_word_location_is_shifted_by_speak_offset(frame):
     frame.spoken_text = "Hello World"
     frame.speak_offset = 6
