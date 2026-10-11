@@ -34,6 +34,16 @@ def test_explicit_rate_overrides_ui_rate():
     speak_fn.assert_called_once_with('hi', 120, None)
 
 
+def test_service_status_reports_in_flight_speech():
+    seen = []
+    service = SpeakService(rate=500, speak_fn=lambda *a: seen.append(service.status()))
+
+    service.speak('hi')
+
+    assert seen == [{'speaking': True, 'pending': 1}]
+    assert service.status() == {'speaking': False, 'pending': 0}
+
+
 def test_voice_is_passed_through_to_speak_fn():
     speak_fn = MagicMock()
     service = SpeakService(rate=500, speak_fn=speak_fn)
