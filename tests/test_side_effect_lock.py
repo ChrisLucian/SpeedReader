@@ -61,6 +61,14 @@ def test_lock_mcp_http_host():
         mcp_server.start_http_in_thread(None, None, "127.0.0.1", 1)
 
 
+def test_lock_update_network():
+    import urllib.request
+    from testsupport.locks import Locked
+    assert isinstance(urllib.request.urlopen, Locked)
+    with pytest.raises(SideEffectLocked):
+        urllib.request.urlopen("https://api.github.com")
+
+
 def test_lock_mcp_http_host_uvicorn_server_run():
     import uvicorn
     with pytest.raises(SideEffectLocked):
