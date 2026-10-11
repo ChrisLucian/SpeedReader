@@ -25,6 +25,15 @@ def _texts(widget):
     return texts
 
 
+def test_f1_and_button_open_shortcuts(frame):
+    from unittest.mock import patch
+    assert "show_shortcuts" in frame.master.bind("<F1>")
+    with patch("Frames.dialogs.open_shortcuts_dialog") as opener:
+        frame.shortcuts_button.invoke()
+        frame.show_shortcuts(None)
+    assert opener.call_count == 2
+
+
 def test_shortcuts_dialog_lists_every_shortcut(frame):
     from Frames import dialogs
     dialog = dialogs.open_shortcuts_dialog(frame)
