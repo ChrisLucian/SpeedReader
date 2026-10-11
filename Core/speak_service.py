@@ -13,9 +13,10 @@ class SpeakService:
     MCP server thread. ``speak_fn`` is injectable for testing.
     """
 
-    def __init__(self, rate=500, speak_fn=None):
+    def __init__(self, rate=500, speak_fn=None, stop_fn=None):
         self._rate = int(rate)
         self._speak_fn = speak_fn or speak_blocking
+        self._stop_fn = stop_fn or (lambda: None)
         self._lock = threading.Lock()
         self._pending = 0
 
@@ -41,6 +42,10 @@ class SpeakService:
             with self._lock:
                 self._pending -= 1
         return used
+
+    def stop(self):
+        """Stop whatever is being spoken right now."""
+        self._stop_fn()
 
     def status(self):
         """``{speaking, pending}``: whether speech is in flight and how many calls wait."""
