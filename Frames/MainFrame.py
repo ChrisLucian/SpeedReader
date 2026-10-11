@@ -199,7 +199,13 @@ class MainFrame(ReadingControlsMixin, UiPumpMixin, MediaControlMixin, ttk.Frame)
         self.master.quit()
 
     def open_contribute(self):
-        webbrowser.open_new_tab(GITHUB_URL)
+        webbrowser.open_new_tab(getattr(self, "link_url", GITHUB_URL))
+
+    def show_update(self, tag, url):
+        """Advertise a newer release (from the update check) in the title and link."""
+        self.master.title("Speed Reader — {} available".format(tag))
+        self.contribute_link["text"] = "Get {}".format(tag)
+        self.link_url = url
 
     def toggle_theme(self):
         """Switch dark <-> light, restyle non-ttk widgets and the title bar, persist."""
