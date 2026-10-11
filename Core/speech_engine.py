@@ -96,8 +96,8 @@ class SpeechEngine:
 
         Bumps the flush generation so any callers blocked waiting for the speak
         lock abort instead of speaking, then stops the engine to interrupt the
-        current utterance. Used by the GUI 'barge in' (Ctrl+B) path. The MCP
-        server never flushes, so agent utterances queue and play in order.
+        current utterance. Used by the GUI 'barge in' (Ctrl+B) path and the MCP
+        ``stop_speaking`` tool; plain agent ``speak`` calls queue and play in order.
         """
         self._flush_generation += 1
         if self.engine is not None:
