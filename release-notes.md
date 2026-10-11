@@ -7,6 +7,11 @@ First downloadable release: a **signed** Windows build (Azure Artifact Signing, 
 - **System tray icon** — Show / Read clipboard / Quit. Closing the window hides it to the tray so agents can keep speaking; use **Quit** in the tray to exit.
 - **Pause / Resume** — pause mid-text and pick up at the same word.
 - **Double-click a word** to start reading from there.
+- **← / → sentence rewind/skip** while speaking, and a **time left** readout.
+- **Open files** — `Ctrl+O` for `.txt`/`.md`, or drop a file onto `SpeedReader.exe`.
+- **F11 focus mode** — just the big word.
+- **Update check** — the title tells you when a newer release is on GitHub.
+- **MCP `stop_speaking` and `speech_status` tools** for agents.
 - **Smarter reading** — links, file paths, emails, GUIDs, hashes, code blocks and very long tokens are spoken as `[URL]`, `[file path]`, `[email]`, `[ID]`, `[hash]`, `[code]`, `[long text]` instead of being spelled out.
 - **MCP server** for AI agents (per-agent voices, pauses while you're on a call), modern light/dark UI.
 

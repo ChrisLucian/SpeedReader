@@ -21,6 +21,11 @@ pyttsx3==2.71 due to a bug detailed here: https://github.com/nateshmbhat/pyttsx3
 - **Light mode / Dark mode** — toggles the modern Windows 11 look ([sv-ttk](https://github.com/rdbende/Sun-Valley-ttk-theme)), including the title bar. Dark by default; the choice is saved to `config.json` as `ui.theme`.
 - **Pause / Resume** (left of Speak) — pause mid-text; Resume picks up at the same word.
 - **Double-click a word** — start reading from that word.
+- **← / →** (while speaking, with the text box focused) — rewind to the start of the sentence (again to go back one more) / skip to the next sentence.
+- **Time left** — `m:ss left` in the header, from the remaining words and the current WPM.
+- **`Ctrl+O`** — open a `.txt`/`.md` file (UTF-8, falls back to Windows-1252). You can also drop a file onto `SpeedReader.exe` (or pass it as the first argument) to open it.
+- **`F11` focus mode** — hide the text box and settings so only the big current word (and its neighbours) shows; `F11` again restores.
+- **Update check** — at startup SpeedReader asks GitHub Releases for a newer version (one anonymous HTTPS GET, failures ignored); if found, the title says `vX.Y available` and the bottom-right link becomes *Get vX.Y*.
 - Shortcuts: `Ctrl+B` paste & speak (interrupts and clears anything currently playing or queued, including agent speech, then reads the clipboard now), `Ctrl+A` select all. Agent (MCP) utterances otherwise queue and play in order.
 - **`Ctrl+Alt+B` from any app** — system-wide paste & speak, even while SpeedReader is hidden. If another app already owns that hotkey, SpeedReader just skips it.
 - **System tray** — closing the window hides SpeedReader to the tray (so agents can keep speaking). Tray menu: *Show SpeedReader*, *Read clipboard*, *Quit* (Quit is how you exit).
@@ -33,6 +38,8 @@ SpeedReader ships a [Model Context Protocol](https://modelcontextprotocol.io) se
 - `list_voices()` — list the voices the user enabled for agents, with claim status.
 - `claim_voice(agent?, voice?)` — claim a voice to speak with (see *Per-agent voices* below).
 - `release_voice(agent)` — release a claimed voice.
+- `stop_speaking()` — stop whatever SpeedReader is saying now and drop queued speech.
+- `speech_status()` — `{speaking, pending}`: whether agent speech is playing and how many `speak` calls are in flight.
 
 There are two ways to run it:
 
