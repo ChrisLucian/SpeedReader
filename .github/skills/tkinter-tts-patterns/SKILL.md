@@ -49,6 +49,8 @@ description: 'Use when adding or changing tkinter/ttk UI or pyttsx3 text-to-spee
 - HIGH-RISK/REPEAT: SAPI spells a long token (e.g. `C:\a\b\c.exe`) letter by letter and fires `started-word` for the SAME `(location, length)` dozens of times in a burst; each one hits tkinter from the loop thread and crashed the EXE natively (no traceback). Collapse such tokens in `Core/text_processing.preprocess_text` (`[URL]`, `[file path]`) so they never reach SAPI.
 - Repro without the GUI: pyttsx3 with `volume=0.0`, print each `started-word`; count events per token.
 - Root fix: engine callbacks are wrapped with `self._queued(...)` and only `post` to `CallbackQueue`; `pump_callbacks` (every 15 ms via `after`) runs them on the UI thread. Identical back-to-back word events collapse. Same rule for MCP (`speak_external`), the global hotkey and the tray.
+- Sentence skip (←/→): `Core/reading_position.next_sentence/previous_sentence` + `skip_sentence` → `speak_from(offset, interrupt=True)`; keys only act while `is_speaking` (else the Text widget keeps normal cursor movement).
+- MCP `stop_speaking` → `SpeakService.stop` → `speech.flush()` (lambda, so tests can swap `speech.flush`).
 - Mid-text speech (Pause/Resume, double-click): `speak_from(offset)` speaks `spoken_text[offset:]` and `onStartWord` adds `speak_offset` so highlights stay aligned; every new start clears the paused state.
 
 ## Verify
