@@ -150,6 +150,13 @@ def test_arrow_keys_skip_only_while_speaking(frame):
     frame.skip_sentence.assert_not_called()
 
 
+def test_word_callback_updates_time_left(frame):
+    frame.spoken_text = "word " * 1000
+    frame.speed_var.set("500")
+    frame.onStartWord(None, 0, 4)
+    assert frame.time_left["text"] == "2:00 left"
+
+
 def test_word_location_is_shifted_by_speak_offset(frame):
     frame.spoken_text = "Hello World"
     frame.speak_offset = 6
