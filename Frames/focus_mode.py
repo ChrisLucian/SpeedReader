@@ -5,5 +5,9 @@ class FocusModeMixin:
     """Mixed into MainFrame; uses ``text_area`` and ``settings_frame``."""
 
     def toggle_focus(self, event=None):
+        focused = bool(self.text_area.grid_info())
         for widget in (self.text_area, self.settings_frame):
-            widget.grid_remove()
+            if focused:
+                widget.grid_remove()
+            else:
+                widget.grid()
