@@ -12,3 +12,25 @@ def test_every_in_window_shortcut_is_bound(frame):
     unbound = [seq for s in shortcuts.SHORTCUTS for seq in s.sequences
                if not getattr(frame, s.on).bind(seq)]
     assert unbound == []
+
+
+def _texts(widget):
+    texts = []
+    for child in widget.winfo_children():
+        try:
+            texts.append(child.cget("text"))
+        except Exception:
+            pass
+        texts.extend(_texts(child))
+    return texts
+
+
+def test_shortcuts_dialog_lists_every_shortcut(frame):
+    from Frames import dialogs
+    dialog = dialogs.open_shortcuts_dialog(frame)
+    try:
+        texts = _texts(dialog)
+        for s in shortcuts.SHORTCUTS:
+            assert s.keys in texts and s.action in texts
+    finally:
+        dialog.destroy()
