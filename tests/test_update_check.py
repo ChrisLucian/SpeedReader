@@ -23,6 +23,16 @@ def test_check_for_update_returns_none_on_error():
     assert update_check.check_for_update("0.6", fetch) is None
 
 
+def test_check_in_background_reports_update():
+    from unittest.mock import Mock
+    on_update = Mock()
+    fetch = lambda: {"tag_name": "v0.7", "html_url": URL}
+    thread = update_check.check_in_background("0.6", on_update, fetch)
+    thread.join(1)
+    assert thread.daemon
+    on_update.assert_called_once_with("v0.7", URL)
+
+
 def test_fetch_release_json_reads_github_api():
     import io
     seen = []
