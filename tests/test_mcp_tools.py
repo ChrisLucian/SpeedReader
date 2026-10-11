@@ -16,6 +16,12 @@ def test_mcp_stop_tool_stops_service():
     service.stop.assert_called_once_with()
 
 
+def test_frame_service_stop_flushes_engine(frame):
+    frame.speech.flush = MagicMock()
+    frame.speak_service.stop()
+    frame.speech.flush.assert_called_once_with()
+
+
 def test_mcp_status_tool_reports_service_status():
     from Core.speak_service import SpeakService
     result = str(_call(SpeakService(speak_fn=MagicMock()), "speech_status"))
