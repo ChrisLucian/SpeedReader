@@ -44,6 +44,15 @@ def test_service_status_reports_in_flight_speech():
     assert service.status() == {'speaking': False, 'pending': 0}
 
 
+def test_service_stop_calls_stop_fn():
+    stop_fn = MagicMock()
+    service = SpeakService(rate=500, speak_fn=MagicMock(), stop_fn=stop_fn)
+
+    service.stop()
+
+    stop_fn.assert_called_once_with()
+
+
 def test_voice_is_passed_through_to_speak_fn():
     speak_fn = MagicMock()
     service = SpeakService(rate=500, speak_fn=speak_fn)
