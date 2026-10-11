@@ -20,6 +20,15 @@ def test_ctrl_o_opens_chosen_file(frame, tmp_path):
     assert frame.text_area.get("1.0", "end-1c") == "# notes"
 
 
+def test_controller_opens_file_from_args(app, tmp_path):
+    path = tmp_path / "dropped.txt"
+    path.write_text("dropped text", encoding="utf-8")
+    app.open_from_args(["SpeedReader.exe"])
+    assert app.main_frame.text_area.get("1.0", "end-1c") == ""
+    app.open_from_args(["SpeedReader.exe", str(path)])
+    assert app.main_frame.text_area.get("1.0", "end-1c") == "dropped text"
+
+
 def test_ctrl_o_cancel_keeps_text(frame):
     frame.text_area.insert("end", "keep me")
     with patch("tkinter.filedialog.askopenfilename", return_value=""):
