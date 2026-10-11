@@ -119,6 +119,15 @@ def test_skip_sentence_forward_speaks_from_next_sentence(frame):
     assert frame.speak_offset == 5
 
 
+def test_skip_sentence_back_rewinds(frame):
+    frame.speak_on_thread = Mock()
+    frame.spoken_text = "One. Two words."
+    frame.current_location = 10
+    frame.skip_sentence(-1)
+    frame.thread.join(1)
+    assert frame.speak_on_thread.call_args.args[1] == "Two words."
+
+
 def test_word_location_is_shifted_by_speak_offset(frame):
     frame.spoken_text = "Hello World"
     frame.speak_offset = 6
