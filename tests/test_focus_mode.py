@@ -5,3 +5,11 @@ def test_focus_mode_hides_text_and_settings(frame):
     frame.toggle_focus()
     assert frame.text_area.grid_info() == {}
     assert frame.settings_frame.grid_info() == {}
+
+
+def test_focus_mode_toggle_restores(frame):
+    assert frame.master.bind("<F11>")
+    frame.toggle_focus()
+    frame.toggle_focus()
+    assert frame.text_area.grid_info()
+    assert frame.settings_frame.grid_info()
