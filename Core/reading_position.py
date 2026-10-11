@@ -10,6 +10,12 @@ def next_sentence(text, index):
     return match.end() if match else None
 
 
+def previous_sentence(text, index):
+    """Offset where the sentence containing ``index`` starts."""
+    starts = [0] + [m.end() for m in SENTENCE_END.finditer(text, 0, index)]
+    return starts[-1]
+
+
 def word_start(text, index):
     """Offset of the first character of the word at (or after) ``index``."""
     while index < len(text) and text[index].isspace():
