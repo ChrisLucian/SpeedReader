@@ -61,6 +61,14 @@ def test_lock_mcp_http_host():
         mcp_server.start_http_in_thread(None, None, "127.0.0.1", 1)
 
 
+def test_lock_file_dialog():
+    from tkinter import filedialog
+    from testsupport.locks import Locked
+    assert isinstance(filedialog.askopenfilename, Locked)
+    with pytest.raises(SideEffectLocked):
+        filedialog.askopenfilename()
+
+
 def test_lock_update_network():
     import urllib.request
     from testsupport.locks import Locked
