@@ -19,6 +19,14 @@ class ReadingControlsMixin:
         self.pause_button = ttk.Button(self, text="Pause", width=10, command=self.toggle_pause)
         self.pause_button.grid(row=row, column=0, sticky=E, padx=(0, 4), pady=12)
         self.text_area.bind("<Double-Button-1>", self.on_text_double_click)
+        self.text_area.bind("<Right>", self.on_skip_key)
+        self.text_area.bind("<Left>", self.on_skip_key)
+
+    def on_skip_key(self, event):
+        if not self.is_speaking:
+            return None
+        self.skip_sentence(1 if event.keysym == "Right" else -1)
+        return "break"
 
     def on_text_double_click(self, event):
         self.read_from_index("@{},{}".format(event.x, event.y))
