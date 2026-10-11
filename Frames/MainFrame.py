@@ -28,7 +28,8 @@ class MainFrame(ReadingControlsMixin, UiPumpMixin, MediaControlMixin, ttk.Frame)
         self.callbacks = CallbackQueue()
         self.speech = SpeechEngine(
             self._queued(self.onStart), self._queued(self.onStartWord), self._queued(self.onEnd))
-        self.speak_service = SpeakService(rate=500, speak_fn=self.speak_external)
+        self.speak_service = SpeakService(
+            rate=500, speak_fn=self.speak_external, stop_fn=lambda: self.speech.flush())
         # Create + pump the pyttsx3 COM engine on ONE dedicated daemon thread.
         # It MUST NOT be created on this (tkinter main) thread, or SAPI5's word
         # callbacks fire on the pump thread with no Python thread state and crash
