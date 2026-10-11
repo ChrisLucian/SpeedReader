@@ -11,6 +11,15 @@ def test_open_file_loads_text_area(frame, tmp_path):
     assert frame.text_area.get("1.0", "end-1c") == "hello file"
 
 
+def test_ctrl_o_opens_chosen_file(frame, tmp_path):
+    path = tmp_path / "b.md"
+    path.write_text("# notes", encoding="utf-8")
+    assert frame.master.bind("<Control-o>")
+    with patch("tkinter.filedialog.askopenfilename", return_value=str(path)):
+        assert frame.on_open_file(None) == "break"
+    assert frame.text_area.get("1.0", "end-1c") == "# notes"
+
+
 def test_open_file_loads_text_area_and_clears_old_word(frame, tmp_path):
     path = tmp_path / "a.txt"
     path.write_text("hello file", encoding="utf-8")
