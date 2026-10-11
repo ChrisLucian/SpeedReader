@@ -15,3 +15,9 @@ def test_check_for_update_returns_newer_release():
     fetch = lambda: {"tag_name": "v0.7", "html_url": URL}
     assert update_check.check_for_update("0.6", fetch) == ("v0.7", URL)
     assert update_check.check_for_update("0.7", fetch) is None
+
+
+def test_check_for_update_returns_none_on_error():
+    def fetch():
+        raise OSError("offline")
+    assert update_check.check_for_update("0.6", fetch) is None
