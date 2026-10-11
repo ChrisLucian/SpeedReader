@@ -21,3 +21,15 @@ def test_check_for_update_returns_none_on_error():
     def fetch():
         raise OSError("offline")
     assert update_check.check_for_update("0.6", fetch) is None
+
+
+def test_fetch_release_json_reads_github_api():
+    import io
+    seen = []
+
+    def fake_urlopen(request, timeout):
+        seen.append(request.full_url)
+        return io.BytesIO(b'{"tag_name": "v0.7"}')
+
+    assert update_check.fetch_release_json(urlopen=fake_urlopen) == {"tag_name": "v0.7"}
+    assert seen == ["https://api.github.com/repos/ChrisLucian/SpeedReader/releases/latest"]
