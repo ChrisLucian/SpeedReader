@@ -11,7 +11,13 @@ def is_newer(latest, current):
 
 
 def check_for_update(current, fetch):
-    """``(tag, url)`` of the latest release when it is newer than ``current``, else None."""
-    release = fetch()
-    tag = release["tag_name"]
-    return (tag, release["html_url"]) if is_newer(tag, current) else None
+    """``(tag, url)`` of the latest release when it is newer than ``current``, else None.
+
+    Never raises: offline, rate-limited or odd tags just mean "no update".
+    """
+    try:
+        release = fetch()
+        tag = release["tag_name"]
+        return (tag, release["html_url"]) if is_newer(tag, current) else None
+    except Exception:
+        return None
