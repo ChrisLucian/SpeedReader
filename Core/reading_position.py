@@ -6,7 +6,8 @@ SENTENCE_END = re.compile(r'[.!?]+\s+')
 
 def next_sentence(text, index):
     """Offset where the sentence after the one containing ``index`` starts."""
-    return SENTENCE_END.search(text, index).end()
+    match = SENTENCE_END.search(text, index)
+    return match.end() if match else None
 
 
 def word_start(text, index):
