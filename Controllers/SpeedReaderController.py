@@ -52,6 +52,11 @@ class SpeedReaderController(Tk):
         check_in_background(
             __version__, lambda tag, url: post(lambda: main_frame.show_update(tag, url)))
 
+    def open_from_args(self, argv):
+        """Load a file passed on the command line (e.g. dropped onto the EXE)."""
+        if len(argv) > 1:
+            self.main_frame.open_file(argv[1])
+
     def hide_to_tray(self):
         self.withdraw()
 

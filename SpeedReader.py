@@ -1,3 +1,8 @@
+import sys
+
 from Controllers.SpeedReaderController import SpeedReaderController
-app = SpeedReaderController()
-app.mainloop()
+
+if __name__ == "__main__":
+    app = SpeedReaderController()
+    app.open_from_args(sys.argv)
+    app.mainloop()
