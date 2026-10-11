@@ -66,13 +66,13 @@ def test_hotkey_unregisters_when_loop_ends():
     assert fake.called("UnregisterHotKey") == [(None, 1)]
 
 
-def test_controller_starts_global_hotkey_for_frame(monkeypatch):
+def test_controller_starts_global_hotkey_for_frame(monkeypatch, new_controller):
     from unittest.mock import Mock
     import Controllers.SpeedReaderController as module
     hotkey_cls = Mock()
     monkeypatch.setattr(module, "GlobalHotkey", hotkey_cls, raising=False)
     monkeypatch.setattr(module.SpeedReaderController, "maybe_host_mcp", lambda self, frame: None)
-    app = module.SpeedReaderController()
+    app = new_controller()
     try:
         frame = app.winfo_children()[0]
         assert hotkey_cls.call_args.args[0] == frame.on_global_hotkey

@@ -87,6 +87,28 @@ def _make_controller(SpeedReaderController):
 
 
 @pytest.fixture
+def new_controller():
+    """Factory for tests that patch the controller module before building it.
+
+    HIGH-RISK/REPEAT: never call ``SpeedReaderController()`` directly in a test —
+    Tk init intermittently fails on Windows ("couldn't read file init.tcl: No
+    error") and only this retry (like the ``app`` fixture's) absorbs it.
+    """
+    from tkinter import TclError
+
+    def make():
+        from Controllers.SpeedReaderController import SpeedReaderController
+        for attempt in range(3):
+            try:
+                return SpeedReaderController()
+            except TclError:
+                gc.collect()
+                time.sleep(0.1 * (attempt + 1))
+        return SpeedReaderController()
+    return make
+
+
+@pytest.fixture
 def frame(app):
     """Get the MainFrame from the controller."""
     return app.winfo_children()[0]

@@ -38,12 +38,12 @@ def test_toggle_theme_flips_restyles_and_persists(frame, tmp_config):
     assert json.loads(tmp_config.read_text())["ui"]["theme"] == frame.theme
 
 
-def test_light_theme_at_startup_keeps_text_area_colours(tmp_config, monkeypatch):
+def test_light_theme_at_startup_keeps_text_area_colours(tmp_config, monkeypatch, new_controller):
     from Controllers.SpeedReaderController import SpeedReaderController
     from Core.theme import save_ui_theme
     save_ui_theme("light", path=str(tmp_config))
     monkeypatch.setattr(SpeedReaderController, "maybe_host_mcp", lambda self, frame: None)
-    app = SpeedReaderController()
+    app = new_controller()
     try:
         app.update()
         frame = app.winfo_children()[0]

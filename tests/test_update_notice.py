@@ -13,14 +13,14 @@ def test_frame_show_update_sets_title(frame):
     open_tab.assert_called_once_with(URL)
 
 
-def test_controller_starts_update_check(monkeypatch):
+def test_controller_starts_update_check(monkeypatch, new_controller):
     from unittest.mock import Mock
     import Controllers.SpeedReaderController as module
     from Core.version import __version__
     check = Mock()
     monkeypatch.setattr(module, "check_in_background", check, raising=False)
     monkeypatch.setattr(module.SpeedReaderController, "maybe_host_mcp", lambda self, frame: None)
-    app = module.SpeedReaderController()
+    app = new_controller()
     try:
         current, on_update = check.call_args.args
         assert current == __version__

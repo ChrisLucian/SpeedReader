@@ -58,12 +58,12 @@ def test_controller_quit_stops_tray_and_hotkey(app):
     frame.on_closing.assert_called_once()
 
 
-def test_controller_starts_tray_with_ui_thread_actions(monkeypatch):
+def test_controller_starts_tray_with_ui_thread_actions(monkeypatch, new_controller):
     import Controllers.SpeedReaderController as module
     tray_cls = Mock()
     monkeypatch.setattr(module, "TrayIcon", tray_cls, raising=False)
     monkeypatch.setattr(module.SpeedReaderController, "maybe_host_mcp", lambda self, frame: None)
-    app = module.SpeedReaderController()
+    app = new_controller()
     try:
         frame = app.main_frame
         tray_cls.return_value.start.assert_called_once()
