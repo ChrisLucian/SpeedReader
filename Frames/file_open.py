@@ -11,7 +11,8 @@ class FileOpenMixin:
 
     def on_open_file(self, event):
         path = filedialog.askopenfilename(parent=self, filetypes=FILE_TYPES)
-        self.open_file(path)
+        if path:
+            self.open_file(path)
         return "break"
 
     def open_file(self, path):
