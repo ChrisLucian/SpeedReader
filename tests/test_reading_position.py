@@ -10,5 +10,10 @@ def test_next_sentence_skips_to_following_sentence():
     assert next_sentence('One. Two. Three.', 1) == 5
 
 
+def test_next_sentence_at_last_sentence_returns_none():
+    from Core.reading_position import next_sentence
+    assert next_sentence('One. Two.', 6) is None
+
+
 def test_word_start_on_space_moves_to_next_word():
     assert word_start('hello world', 5) == 6
