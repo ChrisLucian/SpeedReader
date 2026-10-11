@@ -11,13 +11,14 @@ class CallbackQueue:
         self._lock = threading.Lock()
         self._calls = []
 
-    def post(self, fn, *args):
+    def post(self, fn, *args, **kwargs):
+        call = (fn, args, kwargs)
         with self._lock:
-            if not self._calls or self._calls[-1] != (fn, args):
-                self._calls.append((fn, args))
+            if not self._calls or self._calls[-1] != call:
+                self._calls.append(call)
 
     def drain(self):
         with self._lock:
             calls, self._calls = self._calls, []
-        for fn, args in calls:
-            fn(*args)
+        for fn, args, kwargs in calls:
+            fn(*args, **kwargs)
