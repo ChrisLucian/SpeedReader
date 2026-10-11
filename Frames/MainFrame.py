@@ -23,8 +23,9 @@ from Frames.media_control import MediaControlMixin
 from Frames.ui_pump import UiPumpMixin
 from Frames.reading_controls import ReadingControlsMixin
 from Frames.file_open import FileOpenMixin
+from Frames.focus_mode import FocusModeMixin
 
-class MainFrame(FileOpenMixin, ReadingControlsMixin, UiPumpMixin, MediaControlMixin, ttk.Frame):
+class MainFrame(FocusModeMixin, FileOpenMixin, ReadingControlsMixin, UiPumpMixin, MediaControlMixin, ttk.Frame):
     def __init__(self, **kw):
         ttk.Frame.__init__(self, **kw)
         self.callbacks = CallbackQueue()
