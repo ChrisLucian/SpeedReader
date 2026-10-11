@@ -25,5 +25,10 @@ def test_previous_sentence_at_start_goes_back_one():
     assert previous_sentence('One. Two.', 5) == 0
 
 
+def test_time_left_text_formats_minutes_seconds():
+    from Core.reading_position import time_left_text
+    assert time_left_text("word " * 250, 0, 500) == "0:30 left"
+
+
 def test_word_start_on_space_moves_to_next_word():
     assert word_start('hello world', 5) == 6
