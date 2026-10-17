@@ -14,5 +14,6 @@ description: Use when cutting a SpeedReader GitHub release or winget submission 
 6. HIGH-RISK/REPEAT: publishing is public — get the user's explicit go-ahead, then `python -m tools.release vX.Y --publish` (needs `gh auth login`).
 7. winget: copy `release\winget\*.yaml` to `manifests/c/ChrisLucian/SpeedReader/X.Y/` in a winget-pkgs fork and open a PR (or `wingetcreate submit`). Validate with `winget validate --manifest release\winget` and check the zip holds `SpeedReader/SpeedReader.exe` (the manifest's `RelativeFilePath`).
    - HIGH-RISK/REPEAT: the submit opens a PUBLIC PR on microsoft/winget-pkgs — the auto-mode classifier blocks it; hand the user `! wingetcreate submit -t (gh auth token) release\winget` instead of retrying. Review takes days.
+   - First PR gets `Needs-CLA`: the USER (never the agent — it's a legal agreement) comments `@microsoft-github-policy-service agree` on the PR. Watch checks with `gh pr checks <n> -R microsoft/winget-pkgs`.
 - First-time downloads of a new certificate may still hit SmartScreen until reputation builds; Smart App Control accepts the CA-signed build.
 - After publishing, verify anonymously: download the asset URL, compare its SHA-256 with the `.sha256`, check `releases/latest` returns the new tag and the tag commit equals `origin/master`.
