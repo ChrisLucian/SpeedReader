@@ -10,6 +10,7 @@ First downloadable release: a **signed** Windows build (Azure Artifact Signing, 
 - **← / → sentence rewind/skip** while speaking, and a **time left** readout.
 - **Open files** — `Ctrl+O` for `.txt`/`.md`, or drop a file onto `SpeedReader.exe`.
 - **F11 focus mode** — just the big word.
+- **Shortcuts page** — press `F1` (or *Shortcuts…*) to see every keyboard shortcut.
 - **Update check** — the title tells you when a newer release is on GitHub.
 - **MCP `stop_speaking` and `speech_status` tools** for agents.
 - **Smarter reading** — links, file paths, emails, GUIDs, hashes, code blocks and very long tokens are spoken as `[URL]`, `[file path]`, `[email]`, `[ID]`, `[hash]`, `[code]`, `[long text]` instead of being spelled out.
