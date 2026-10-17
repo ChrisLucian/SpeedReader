@@ -12,6 +12,7 @@ description: Use when cutting a SpeedReader GitHub release or winget submission 
 4. Update `release-notes.md` for the version. HIGH-RISK/REPEAT: bump `Core/version.py` `__version__` to match the tag, or the in-app update check nags users of the new build.
 5. Package: `python -m tools.release vX.Y` → `release\SpeedReader-vX.Y-win-x64.zip`, `.sha256`, `release\winget\*.yaml`. It refuses unsigned builds and drops the local `*.err.txt`/`*.out.txt` logs.
 6. HIGH-RISK/REPEAT: publishing is public — get the user's explicit go-ahead, then `python -m tools.release vX.Y --publish` (needs `gh auth login`).
-7. winget: copy `release\winget\*.yaml` to `manifests/c/ChrisLucian/SpeedReader/X.Y/` in a winget-pkgs fork and open a PR (or `wingetcreate submit`). Validate with `winget validate`.
+7. winget: copy `release\winget\*.yaml` to `manifests/c/ChrisLucian/SpeedReader/X.Y/` in a winget-pkgs fork and open a PR (or `wingetcreate submit`). Validate with `winget validate --manifest release\winget` and check the zip holds `SpeedReader/SpeedReader.exe` (the manifest's `RelativeFilePath`).
+   - HIGH-RISK/REPEAT: the submit opens a PUBLIC PR on microsoft/winget-pkgs — the auto-mode classifier blocks it; hand the user `! wingetcreate submit -t (gh auth token) release\winget` instead of retrying. Review takes days.
 - First-time downloads of a new certificate may still hit SmartScreen until reputation builds; Smart App Control accepts the CA-signed build.
 - After publishing, verify anonymously: download the asset URL, compare its SHA-256 with the `.sha256`, check `releases/latest` returns the new tag and the tag commit equals `origin/master`.
