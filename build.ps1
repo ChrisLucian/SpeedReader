@@ -48,6 +48,9 @@ python -m nuitka --standalone --assume-yes-for-downloads --enable-plugin=tk-inte
     --nofollow-import-to=pystray --nofollow-import-to=six --no-deployment-flag=excluded-module-usage `
     --include-module=inspect --include-module=tempfile --include-module=queue --include-module=logging `
     --include-module=PIL.Image --include-module=PIL.IcoImagePlugin --include-module=PIL.PngImagePlugin `
+    --include-module=Core.onecore_backend --include-module=winrt.windows.media.speechsynthesis `
+    --include-module=winrt.windows.media.core --include-module=winrt.windows.storage.streams `
+    --include-module=winrt.windows.foundation.collections `
     SpeedReader.py
 
 if ($LASTEXITCODE -eq 0) {
