@@ -71,3 +71,6 @@ class OneCoreBackend:
         self._playing = ctypes.create_string_buffer(wav, len(wav))
         self._play_sound(ctypes.addressof(self._playing), None, SND_ASYNC | SND_MEMORY)
         return wav_duration(wav)
+
+    def stop(self):
+        self._play_sound(None, None, 0)
