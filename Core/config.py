@@ -68,7 +68,12 @@ def load_mcp_config(path=None):
 
 def load_speech_engine_name(path=None):
     """``speech.engine`` from config: ``"onecore"`` (default) or ``"sapi"``."""
-    return "onecore"
+    path = resolve_config_path(path)
+    data = {}
+    if os.path.exists(path):
+        with open(path, "r", encoding="utf-8") as handle:
+            data = json.load(handle) or {}
+    return str(data.get("speech", {}).get("engine", "onecore"))
 
 
 def _update_mcp_config(updates, path=None):
