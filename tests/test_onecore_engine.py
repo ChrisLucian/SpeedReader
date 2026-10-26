@@ -33,3 +33,26 @@ def test_speak_synthesizes_with_rate_and_default_voice():
 
     assert fake.synthesized == [('hi', 2.0, 'v1')]
     assert fake.played == [b'wav']
+
+
+def recording_engine(fake):
+    events = []
+    engine = onecore.OneCoreEngine(
+        on_start=lambda **kw: events.append(('start', kw)),
+        on_word=lambda **kw: events.append(('word', kw)),
+        on_end=lambda **kw: events.append(('end', kw)),
+        backend=fake)
+    return engine, events
+
+
+def test_speak_reports_start_words_end():
+    engine, events = recording_engine(FakeBackend(words=[(0, 0, 2), (0, 3, 5)]))
+
+    engine.speak('hi there', 163, name=7)
+
+    assert events == [
+        ('start', {'name': 7}),
+        ('word', {'name': 7, 'location': 0, 'length': 2}),
+        ('word', {'name': 7, 'location': 3, 'length': 5}),
+        ('end', {'name': 7, 'completed': True}),
+    ]
