@@ -5,6 +5,10 @@ pywin32
 winrt-runtime
 winrt-Windows.Foundation
 winrt-Windows.Media.Control
+winrt-Windows.Media.Core
+winrt-Windows.Media.SpeechSynthesis
+winrt-Windows.Storage.Streams
+winrt-Windows.Foundation.Collections
 mcp<2
 nuitka
 sv-ttk
