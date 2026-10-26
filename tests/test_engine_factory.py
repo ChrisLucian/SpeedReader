@@ -19,3 +19,13 @@ def test_create_speech_engine_falls_back_to_sapi_when_onecore_unavailable():
     engine = create_speech_engine('onecore', None, None, None, make_backend=unavailable)
 
     assert isinstance(engine, SpeechEngine)
+
+
+def test_create_speech_engine_sapi():
+    from Core.engine_factory import create_speech_engine
+    built = []
+
+    engine = create_speech_engine('sapi', None, None, None, make_backend=lambda: built.append(1))
+
+    assert isinstance(engine, SpeechEngine)
+    assert built == []
