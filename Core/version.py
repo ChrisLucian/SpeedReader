@@ -1,2 +1,2 @@
 """SpeedReader's version; bump with each GitHub release tag (vX.Y)."""
-__version__ = "0.6"
+__version__ = "0.7"
