@@ -117,3 +117,17 @@ def test_prime_async_needs_no_loop_thread():
 
     assert engine.prime_async(500) is None
     assert fake.synthesized == [] and fake.played == []
+
+
+def test_interrupt_stops_current_utterance_then_speaks():
+    fake = FakeBackend(duration=5)
+    engine = onecore.OneCoreEngine(backend=fake)
+    first = speak_on_thread(engine, 'first')
+    fake.playing.wait(1)
+    fake.duration = 0
+
+    engine.speak('next', 163, interrupt=True)
+
+    first.join(1)
+    assert fake.stopped and not first.is_alive()
+    assert [text for text, _, _ in fake.synthesized] == ['first', 'next']
