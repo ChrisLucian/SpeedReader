@@ -1,3 +1,5 @@
+import threading
+
 import Core.onecore_engine as onecore
 from Core.onecore_engine import speaking_rate
 
@@ -8,6 +10,8 @@ class FakeBackend:
         self.duration = duration
         self.synthesized = []
         self.played = []
+        self.playing = threading.Event()
+        self.stopped = False
 
     def synthesize(self, text, rate, voice_id=None):
         self.synthesized.append((text, rate, voice_id))
@@ -15,7 +19,11 @@ class FakeBackend:
 
     def play(self, wav):
         self.played.append(wav)
+        self.playing.set()
         return self.duration
+
+    def stop(self):
+        self.stopped = True
 
 
 def test_speaking_rate_maps_wpm_and_clamps():
@@ -56,3 +64,23 @@ def test_speak_reports_start_words_end():
         ('word', {'name': 7, 'location': 3, 'length': 5}),
         ('end', {'name': 7, 'completed': True}),
     ]
+
+
+def speak_on_thread(engine, text='hi'):
+    thread = threading.Thread(target=engine.speak, args=(text, 163), daemon=True)
+    thread.start()
+    return thread
+
+
+def test_stop_interrupts_utterance():
+    fake = FakeBackend(words=[(5, 0, 2)], duration=5)
+    engine, events = recording_engine(fake)
+    thread = speak_on_thread(engine)
+    fake.playing.wait(1)
+
+    engine.stop()
+
+    thread.join(1)
+    assert not thread.is_alive()
+    assert fake.stopped
+    assert events == [('start', {'name': None}), ('end', {'name': None, 'completed': False})]
