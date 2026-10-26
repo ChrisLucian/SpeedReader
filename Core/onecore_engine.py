@@ -28,11 +28,19 @@ class OneCoreEngine:
         self._on_end = on_end or _ignore
         self._voice = None
         self._stopped = threading.Event()
+        self._speak_lock = threading.Lock()
+        self._flush_generation = 0
 
     def set_voice(self, voice_id):
         self._voice = voice_id
 
     def speak(self, text, rate, voice=None, block=True, interrupt=False, name=None):
+        my_generation = self._flush_generation
+        with self._speak_lock:
+            if self._flush_generation == my_generation:
+                self._speak_now(text, rate, voice, name)
+
+    def _speak_now(self, text, rate, voice, name):
         wav, words = self._backend.synthesize(text, speaking_rate(rate), voice or self._voice)
         self._stopped.clear()
         self._on_start(name=name)
@@ -44,6 +52,10 @@ class OneCoreEngine:
             self._on_word(name=name, location=location, length=length)
         completed = not self._wait_until(started + duration)
         self._on_end(name=name, completed=completed)
+
+    def flush(self):
+        self._flush_generation += 1
+        self.stop()
 
     def stop(self):
         self._stopped.set()
