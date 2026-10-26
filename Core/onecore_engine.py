@@ -39,10 +39,15 @@ class OneCoreEngine:
         started = time.monotonic()
         duration = self._backend.play(wav)
         for at, location, length in words:
-            self._wait_until(started + at)
+            if self._wait_until(started + at):
+                break
             self._on_word(name=name, location=location, length=length)
         completed = not self._wait_until(started + duration)
         self._on_end(name=name, completed=completed)
+
+    def stop(self):
+        self._stopped.set()
+        self._backend.stop()
 
     def _wait_until(self, deadline):
         """Sleep until ``deadline`` (monotonic); True if stopped meanwhile."""
