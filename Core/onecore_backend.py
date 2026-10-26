@@ -23,11 +23,17 @@ class OneCoreBackend:
         self._synth = _in_mta(SpeechSynthesizer)
         self._synth.options.include_word_boundary_metadata = True
 
-    def synthesize(self, text, rate):
-        """Return ``(wav_bytes, [(seconds, char_offset, length), ...])``."""
-        return _in_mta(self._synthesize, text, rate)
+    def voices(self):
+        return _in_mta(lambda: [(v.id, v.display_name) for v in SpeechSynthesizer.all_voices])
 
-    def _synthesize(self, text, rate):
+    def synthesize(self, text, rate, voice_id=None):
+        """Return ``(wav_bytes, [(seconds, char_offset, length), ...])``."""
+        return _in_mta(self._synthesize, text, rate, voice_id)
+
+    def _synthesize(self, text, rate, voice_id):
+        voice = {v.id: v for v in SpeechSynthesizer.all_voices}.get(voice_id)
+        if voice is not None:
+            self._synth.voice = voice
         self._synth.options.speaking_rate = rate
         stream = self._synth.synthesize_text_to_stream_async(text).get()
         reader = DataReader(stream.get_input_stream_at(0))
