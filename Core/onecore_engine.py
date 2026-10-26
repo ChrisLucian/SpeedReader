@@ -41,6 +41,14 @@ class OneCoreEngine:
         self._voice = voice_id
 
     def speak(self, text, rate, voice=None, block=True, interrupt=False, name=None):
+        """Speak one utterance on the caller's (worker) thread; always blocks.
+
+        Same contract as :meth:`SpeechEngine.speak`: serialized, ``interrupt``
+        flushes first, ``name`` is echoed to the callbacks. ``block`` is
+        accepted for parity only.
+        """
+        if interrupt:
+            self.flush()
         my_generation = self._flush_generation
         with self._speak_lock:
             if self._flush_generation == my_generation:
