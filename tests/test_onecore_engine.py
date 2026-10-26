@@ -1,4 +1,5 @@
 import threading
+import time
 
 import Core.onecore_engine as onecore
 from Core.onecore_engine import speaking_rate
@@ -84,3 +85,19 @@ def test_stop_interrupts_utterance():
     assert not thread.is_alive()
     assert fake.stopped
     assert events == [('start', {'name': None}), ('end', {'name': None, 'completed': False})]
+
+
+def test_flush_drops_queued_speak():
+    fake = FakeBackend(duration=5)
+    engine = onecore.OneCoreEngine(backend=fake)
+    first = speak_on_thread(engine, 'first')
+    fake.playing.wait(1)
+    queued = speak_on_thread(engine, 'queued')
+    time.sleep(0.05)
+
+    engine.flush()
+
+    first.join(1)
+    queued.join(1)
+    assert not first.is_alive() and not queued.is_alive()
+    assert [text for text, _, _ in fake.synthesized] == ['first']
