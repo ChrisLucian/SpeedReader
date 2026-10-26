@@ -117,3 +117,8 @@ def test_save_mcp_port_writes_port_and_keeps_voices(tmp_path):
     cfg = load_mcp_config(path=str(path))
     assert cfg.port == 9200
     assert cfg.voices == ["id-1"]
+
+
+def test_load_speech_engine_name_defaults_to_onecore(tmp_path):
+    from Core.config import load_speech_engine_name
+    assert load_speech_engine_name(path=str(tmp_path / "missing.json")) == "onecore"
