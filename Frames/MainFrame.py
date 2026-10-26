@@ -62,14 +62,12 @@ class MainFrame(ShortcutsHelpMixin, FocusModeMixin, FileOpenMixin, ReadingContro
     def _build_voice_registry(self):
         """Build the agent voice registry from system voices + saved config.
 
-        When the config lists no enabled voices, all system voices are enabled.
+        When the config lists no installed voices (none saved, or ids from the
+        other speech engine), all system voices are enabled.
         """
         cfg = load_mcp_config()
-        if cfg.voices:
-            enabled = [(vid, name) for vid, name in self.voices if vid in cfg.voices]
-        else:
-            enabled = list(self.voices)
-        return VoiceRegistry(enabled=enabled)
+        enabled = [(vid, name) for vid, name in self.voices if vid in cfg.voices]
+        return VoiceRegistry(enabled=enabled or list(self.voices))
 
     def build_frame_content(self, kw):
         # Columns: 0 and 3 stretch, 1/2 hold the centred Speak/Stop buttons.
