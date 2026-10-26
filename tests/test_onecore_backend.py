@@ -2,10 +2,7 @@
 import io
 import wave
 
-import Core.onecore_backend as backend_module
-from Core.onecore_backend import OneCoreBackend
-
-SND_ASYNC, SND_MEMORY = 0x1, 0x4
+from Core.onecore_backend import SND_ASYNC, SND_MEMORY, OneCoreBackend
 
 
 def test_backend_synthesize_returns_wav_and_word_offsets():
@@ -35,11 +32,23 @@ def two_second_wav():
     return out.getvalue()
 
 
-def test_backend_play_starts_async_memory_sound_and_returns_duration():
+def recording_backend():
     calls = []
-    backend = OneCoreBackend(play_sound=lambda *args: calls.append(args))
+    return OneCoreBackend(play_sound=lambda *args: calls.append(args)), calls
+
+
+def test_backend_play_starts_async_memory_sound_and_returns_duration():
+    backend, calls = recording_backend()
 
     duration = backend.play(two_second_wav())
 
     assert duration == 2.0
     assert calls[0][2] == SND_ASYNC | SND_MEMORY
+
+
+def test_backend_stop_silences_sound():
+    backend, calls = recording_backend()
+
+    backend.stop()
+
+    assert calls == [(None, None, 0)]
