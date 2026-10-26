@@ -101,3 +101,11 @@ def test_flush_drops_queued_speak():
     queued.join(1)
     assert not first.is_alive() and not queued.is_alive()
     assert [text for text, _, _ in fake.synthesized] == ['first']
+
+
+def test_get_voices_returns_backend_voices():
+    fake = FakeBackend()
+    fake.voices = lambda: [('id', 'Name')]
+    engine = onecore.OneCoreEngine(backend=fake)
+
+    assert engine.get_voices() == [('id', 'Name')]
