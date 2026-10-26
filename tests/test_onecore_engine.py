@@ -109,3 +109,11 @@ def test_get_voices_returns_backend_voices():
     engine = onecore.OneCoreEngine(backend=fake)
 
     assert engine.get_voices() == [('id', 'Name')]
+
+
+def test_prime_async_needs_no_loop_thread():
+    fake = FakeBackend()
+    engine = onecore.OneCoreEngine(backend=fake)
+
+    assert engine.prime_async(500) is None
+    assert fake.synthesized == [] and fake.played == []
