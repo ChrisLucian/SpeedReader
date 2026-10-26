@@ -15,6 +15,7 @@ pyttsx3==2.71 due to a bug detailed here: https://github.com/nateshmbhat/pyttsx3
 
 ## Controls
 - **Speed** — words per minute (spin box, steps of 25; start low, e.g. 200, and work up to 500).
+- **Speech engine** — SpeedReader speaks with the Windows **OneCore** voices by default, which go up to ~840 WPM. The older SAPI voices stop getting faster at ~470 WPM. To switch back to SAPI, set `"speech": {"engine": "sapi"}` in `config.json`. If OneCore can't start, SpeedReader falls back to SAPI on its own. OneCore and SAPI voice IDs differ, so after you switch, **Agent Voices…** enables all voices until you pick again.
 - **Voice** — pick from the text-to-speech voices installed on your system; the choice applies to both your reading and any AI agent speaking through the MCP server.
 - **Agent Voices…** — choose which system voices agents are allowed to use (see below). All voices are enabled by default.
 - **Server…** (shows `Server: <port>…` while hosting) — one dialog to change the MCP port and **Restart Server** without closing the app (the port is saved to `config.json` as `mcp.port`), plus live status: hosting state, pause-while-mic-in-use (and your current mic state), and each enabled voice with the agents that claimed it.
