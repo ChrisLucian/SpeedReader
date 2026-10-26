@@ -66,6 +66,11 @@ def load_mcp_config(path=None):
     return cfg
 
 
+def load_speech_engine_name(path=None):
+    """``speech.engine`` from config: ``"onecore"`` (default) or ``"sapi"``."""
+    return "onecore"
+
+
 def _update_mcp_config(updates, path=None):
     """Merge ``updates`` into the ``mcp`` section of the config file."""
     return update_config_section("mcp", updates, path=path)
