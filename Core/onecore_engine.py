@@ -11,3 +11,16 @@ MAX_RATE = 6.0
 def speaking_rate(wpm):
     """Map words per minute to OneCore ``SpeakingRate`` (0.5-6.0, 1.0 = normal)."""
     return min(MAX_RATE, max(MIN_RATE, wpm / BASE_WPM))
+
+
+class OneCoreEngine:
+    def __init__(self, on_start=None, on_word=None, on_end=None, backend=None):
+        self._backend = backend
+        self._voice = None
+
+    def set_voice(self, voice_id):
+        self._voice = voice_id
+
+    def speak(self, text, rate, voice=None, block=True, interrupt=False, name=None):
+        wav, words = self._backend.synthesize(text, speaking_rate(rate), voice or self._voice)
+        self._backend.play(wav)
