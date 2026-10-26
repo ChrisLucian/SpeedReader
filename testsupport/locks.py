@@ -76,6 +76,8 @@ LOCKED = [
     ("pystray", "Icon"),
     ("urllib.request", "urlopen"),
     ("tkinter.filedialog", "askopenfilename"),
+    ("Core.onecore_backend", "OneCoreBackend"),
+    ("Core.onecore_backend", "_play_sound"),
 ]
 
 

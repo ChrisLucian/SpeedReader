@@ -9,11 +9,11 @@ import pyttsx3
 from pyttsx3 import engine
 import re
 
-from Core.speech_engine import SpeechEngine
+from Core.engine_factory import create_speech_engine
 from Core.speak_service import SpeakService
 from Core.reading_position import time_left_text
 from Core.ui_dispatch import CallbackQueue
-from Core.config import load_mcp_config
+from Core.config import load_mcp_config, load_speech_engine_name
 from Core.text_processing import preprocess_text, word_window, highlight_indices
 from Core.voice_registry import VoiceRegistry
 from Core.theme import load_ui_theme, palette, save_ui_theme, text_style, toggled
@@ -30,7 +30,8 @@ class MainFrame(ShortcutsHelpMixin, FocusModeMixin, FileOpenMixin, ReadingContro
     def __init__(self, **kw):
         ttk.Frame.__init__(self, **kw)
         self.callbacks = CallbackQueue()
-        self.speech = SpeechEngine(
+        self.speech = create_speech_engine(
+            load_speech_engine_name(),
             self._queued(self.onStart), self._queued(self.onStartWord), self._queued(self.onEnd))
         self.speak_service = SpeakService(
             rate=500, speak_fn=self.speak_external, stop_fn=lambda: self.speech.flush())
