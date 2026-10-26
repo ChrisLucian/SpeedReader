@@ -31,6 +31,9 @@ class OneCoreEngine:
         self._speak_lock = threading.Lock()
         self._flush_generation = 0
 
+    def prime_async(self, rate):
+        """SAPI-compatible no-op: WinRT needs no pumped loop thread."""
+
     def get_voices(self):
         return self._backend.voices()
 
