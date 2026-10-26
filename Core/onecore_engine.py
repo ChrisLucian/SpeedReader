@@ -31,6 +31,9 @@ class OneCoreEngine:
         self._speak_lock = threading.Lock()
         self._flush_generation = 0
 
+    def get_voices(self):
+        return self._backend.voices()
+
     def set_voice(self, voice_id):
         self._voice = voice_id
 
