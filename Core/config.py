@@ -71,6 +71,11 @@ def load_speech_engine_name(path=None):
     return str(_read_config(resolve_config_path(path)).get("speech", {}).get("engine", "onecore"))
 
 
+def load_ui_wpm(path=None):
+    """``ui.wpm``: the Speed the user last picked."""
+    return 500
+
+
 def _read_config(path):
     if not os.path.exists(path):
         return {}
