@@ -73,7 +73,12 @@ def load_speech_engine_name(path=None):
 
 def load_ui_wpm(path=None):
     """``ui.wpm``: the Speed the user last picked."""
-    return 500
+    return _read_config(resolve_config_path(path)).get("ui", {}).get("wpm", 500)
+
+
+def save_ui_wpm(wpm, path=None):
+    """Persist ``ui.wpm`` so the Speed survives restarts."""
+    return update_config_section("ui", {"wpm": int(wpm)}, path=path)
 
 
 def _read_config(path):
