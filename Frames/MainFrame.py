@@ -13,7 +13,7 @@ from Core.engine_factory import create_speech_engine
 from Core.speak_service import SpeakService
 from Core.reading_position import time_left_text
 from Core.ui_dispatch import CallbackQueue
-from Core.config import load_mcp_config, load_speech_engine_name, save_ui_wpm
+from Core.config import load_mcp_config, load_speech_engine_name, save_ui_wpm, valid_wpm
 from Core.text_processing import preprocess_text, word_window, highlight_indices
 from Core.voice_registry import VoiceRegistry
 from Core.theme import load_ui_theme, palette, save_ui_theme, text_style, toggled
@@ -250,11 +250,10 @@ class MainFrame(ShortcutsHelpMixin, FocusModeMixin, FileOpenMixin, ReadingContro
 
     def on_rate_changed(self, *args):
         # Keep the shared service rate in sync so MCP agents speak at the UI rate.
-        try:
-            self.speak_service.set_rate(int(self.speed_var.get()))
-            save_ui_wpm(self.speak_service.rate)
-        except ValueError:
-            pass
+        wpm = valid_wpm(self.speed_var.get())
+        if wpm is not None:
+            self.speak_service.set_rate(wpm)
+            save_ui_wpm(wpm)
 
     def on_voice_changed(self, event=None):
         # Apply the picked voice to the shared engine (used by the GUI and MCP).
