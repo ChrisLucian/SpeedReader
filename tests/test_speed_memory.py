@@ -30,3 +30,10 @@ def test_changing_speed_saves_wpm(frame):
     frame.speed_var.set("650")
     assert load_ui_wpm() == 650
     assert frame.speak_service.rate == 650
+
+
+def test_partial_speed_entry_keeps_last_saved_wpm(frame):
+    frame.speed_var.set("650")
+    frame.speed_var.set("6")  # mid-typing; also guards time-left from 0 WPM
+    assert load_ui_wpm() == 650
+    assert frame.speak_service.rate == 650
