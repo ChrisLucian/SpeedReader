@@ -71,9 +71,22 @@ def load_speech_engine_name(path=None):
     return str(_read_config(resolve_config_path(path)).get("speech", {}).get("engine", "onecore"))
 
 
+MIN_WPM, MAX_WPM, DEFAULT_WPM = 100, 1000, 500
+
+
+def valid_wpm(value):
+    """``value`` as an int within the Speed spinbox range, else ``None``."""
+    try:
+        wpm = int(value)
+    except (TypeError, ValueError):
+        return None
+    return wpm if MIN_WPM <= wpm <= MAX_WPM else None
+
+
 def load_ui_wpm(path=None):
-    """``ui.wpm``: the Speed the user last picked."""
-    return _read_config(resolve_config_path(path)).get("ui", {}).get("wpm", 500)
+    """``ui.wpm``: the Speed the user last picked; default when missing or bad."""
+    saved = _read_config(resolve_config_path(path)).get("ui", {}).get("wpm")
+    return valid_wpm(saved) or DEFAULT_WPM
 
 
 def save_ui_wpm(wpm, path=None):
