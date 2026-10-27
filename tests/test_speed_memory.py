@@ -24,3 +24,9 @@ def test_out_of_range_saved_wpm_falls_back_to_default(tmp_path):
     for bad in (7, "fast", 5000):
         path.write_text(json.dumps({"ui": {"wpm": bad}}))
         assert load_ui_wpm(str(path)) == 500
+
+
+def test_changing_speed_saves_wpm(frame):
+    frame.speed_var.set("650")
+    assert load_ui_wpm() == 650
+    assert frame.speak_service.rate == 650
