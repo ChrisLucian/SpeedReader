@@ -13,7 +13,7 @@ from Core.engine_factory import create_speech_engine
 from Core.speak_service import SpeakService
 from Core.reading_position import time_left_text
 from Core.ui_dispatch import CallbackQueue
-from Core.config import load_mcp_config, load_speech_engine_name, save_ui_wpm, valid_wpm
+from Core.config import load_mcp_config, load_speech_engine_name, load_ui_wpm, save_ui_wpm, valid_wpm
 from Core.text_processing import preprocess_text, word_window, highlight_indices
 from Core.voice_registry import VoiceRegistry
 from Core.theme import load_ui_theme, palette, save_ui_theme, text_style, toggled
@@ -34,13 +34,13 @@ class MainFrame(ShortcutsHelpMixin, FocusModeMixin, FileOpenMixin, ReadingContro
             load_speech_engine_name(),
             self._queued(self.onStart), self._queued(self.onStartWord), self._queued(self.onEnd))
         self.speak_service = SpeakService(
-            rate=500, speak_fn=self.speak_external, stop_fn=lambda: self.speech.flush())
+            rate=load_ui_wpm(), speak_fn=self.speak_external, stop_fn=lambda: self.speech.flush())
         # Create + pump the pyttsx3 COM engine on ONE dedicated daemon thread.
         # It MUST NOT be created on this (tkinter main) thread, or SAPI5's word
         # callbacks fire on the pump thread with no Python thread state and crash
         # the process. prime_async builds it on the loop thread; get_voices then
         # waits for the voices that thread enumerated.
-        self.speech.prime_async(500)
+        self.speech.prime_async(self.speak_service.rate)
         self.voices = self.speech.get_voices()
         self.voice_registry = self._build_voice_registry()
         self.mcp_host = None  # set by the controller when MCP hosting is enabled
@@ -127,7 +127,7 @@ class MainFrame(ShortcutsHelpMixin, FocusModeMixin, FileOpenMixin, ReadingContro
         self.settings_frame.grid_columnconfigure(5, weight=1)
 
         ttk.Label(self.settings_frame, text="Speed").grid(row=0, column=0, padx=(0, 8))
-        self.speed_var = StringVar(master=self, value="500")
+        self.speed_var = StringVar(master=self, value=str(self.speak_service.rate))
         self.speed_entry = ttk.Spinbox(
             self.settings_frame, from_=100, to=1000, increment=25, width=6, textvariable=self.speed_var, font=ENTRY_FONT)
         self.speed_entry.grid(row=0, column=1, padx=(0, 4))
