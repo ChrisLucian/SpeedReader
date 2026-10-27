@@ -17,3 +17,10 @@ def test_save_ui_wpm_round_trips_and_preserves_other_keys(tmp_path):
     data = json.loads(path.read_text())
     assert data["mcp"] == {"enabled": True}
     assert data["ui"]["theme"] == "light"
+
+
+def test_out_of_range_saved_wpm_falls_back_to_default(tmp_path):
+    path = tmp_path / "config.json"
+    for bad in (7, "fast", 5000):
+        path.write_text(json.dumps({"ui": {"wpm": bad}}))
+        assert load_ui_wpm(str(path)) == 500
