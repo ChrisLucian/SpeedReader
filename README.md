@@ -14,7 +14,7 @@ install requirements.txt
 pyttsx3==2.71 due to a bug detailed here: https://github.com/nateshmbhat/pyttsx3/issues/78
 
 ## Controls
-- **Speed** — words per minute (spin box, steps of 25; start low, e.g. 200, and work up to 500).
+- **Speed** — words per minute (spin box, steps of 25; start low, e.g. 200, and work up to 500). Your last speed (100–1000) is saved to `config.json` as `ui.wpm` and restored at the next launch.
 - **Speech engine** — SpeedReader speaks with the Windows **OneCore** voices by default, which go up to ~840 WPM. The older SAPI voices stop getting faster at ~470 WPM. To switch back to SAPI, set `"speech": {"engine": "sapi"}` in `config.json`. If OneCore can't start, SpeedReader falls back to SAPI on its own. OneCore and SAPI voice IDs differ, so after you switch, **Agent Voices…** enables all voices until you pick again.
 - **Voice** — pick from the text-to-speech voices installed on your system; the choice applies to both your reading and any AI agent speaking through the MCP server.
 - **Agent Voices…** — choose which system voices agents are allowed to use (see below). All voices are enabled by default.
