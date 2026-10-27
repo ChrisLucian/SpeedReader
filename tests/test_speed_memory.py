@@ -37,3 +37,16 @@ def test_partial_speed_entry_keeps_last_saved_wpm(frame):
     frame.speed_var.set("6")
     assert load_ui_wpm() == 650
     assert frame.speak_service.rate == 650
+
+
+def test_app_starts_at_saved_wpm(monkeypatch, new_controller):
+    from Controllers.SpeedReaderController import SpeedReaderController
+    config.save_ui_wpm(725)
+    monkeypatch.setattr(SpeedReaderController, "maybe_host_mcp", lambda self, frame: None)
+    app = new_controller()
+    try:
+        frame = app.winfo_children()[0]
+        assert frame.speed_var.get() == "725"
+        assert frame.speak_service.rate == 725
+    finally:
+        app.destroy()
