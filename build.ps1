@@ -39,12 +39,14 @@ if ($LASTEXITCODE -ne 0) {
 Write-Host "Building executable..." -ForegroundColor Yellow
 # HIGH-RISK/REPEAT: run Nuitka from the venv (python -m), never the global `nuitka`,
 # so the EXE bundles the venv's pinned packages (mcp<2), not global ones.
-# No console window; stdout/stderr go to SpeedReader.out.txt / .err.txt beside the EXE
-# (uvicorn logs to stderr, which must not be None).
+# No console window; stdout/stderr go to %TEMP%\SpeedReader.out.txt / .err.txt (uvicorn logs to
+# stderr, which must not be None). HIGH-RISK/REPEAT: never {PROGRAM_BASE} - Nuitka exits(1) silently
+# when it can't create the log, so a read-only install folder (Program Files, Controlled Folder Access)
+# would stop the EXE launching at all.
 python -m nuitka --standalone --assume-yes-for-downloads --enable-plugin=tk-inter `
     --include-module=pyttsx3.drivers.sapi5 --include-module=win32com.server --include-module=win32com.server.util `
     --windows-icon-from-ico=assets/speedreader.ico --include-data-files=assets/speedreader.ico=assets/speedreader.ico `
-    --windows-console-mode=disable "--force-stdout-spec={PROGRAM_BASE}.out.txt" "--force-stderr-spec={PROGRAM_BASE}.err.txt" `
+    --windows-console-mode=disable "--force-stdout-spec={TEMP}\SpeedReader.out.txt" "--force-stderr-spec={TEMP}\SpeedReader.err.txt" `
     --nofollow-import-to=pystray --nofollow-import-to=six --no-deployment-flag=excluded-module-usage `
     --include-module=inspect --include-module=tempfile --include-module=queue --include-module=logging `
     --include-module=PIL.Image --include-module=PIL.IcoImagePlugin --include-module=PIL.PngImagePlugin `
