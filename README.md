@@ -123,7 +123,7 @@ The build uses Nuitka. For background on the bootloader fix: https://github.com/
 
 - Creates/uses `.venv`, installs `requirements.txt`, runs the tests, then builds with the **venv's** Nuitka (`python -m nuitka`) — a global `nuitka` would bundle global packages (e.g. an incompatible `mcp` 2.x) and the MCP server won't start.
 - Output: `SpeedReader.dist\SpeedReader.exe`. `config.json` is copied next to it; the app reads `config.json` from the working directory first, then from the EXE's folder.
-- The EXE has no console window; errors and server logs go to `SpeedReader.err.txt` (and `SpeedReader.out.txt`) beside it.
+- The EXE has no console window; errors and server logs go to `%TEMP%\SpeedReader.err.txt` (and `SpeedReader.out.txt`), so it also runs from read-only folders like `Program Files`.
 - Close any running `SpeedReader.exe` first — the script refuses to build while it locks `SpeedReader.dist`.
 - The tray icon uses [pystray](https://github.com/moses-palmer/pystray) (LGPL-3.0). It is **not** compiled into the EXE: `pystray` (and its `six` dependency) ship as plain, replaceable `.py` files in `SpeedReader.dist\pystray\`.
 
