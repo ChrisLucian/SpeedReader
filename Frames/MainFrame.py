@@ -458,6 +458,7 @@ class MainFrame(AgentSpeechMixin, SpeedTrainingMixin, SessionMemoryMixin, Shortc
     def speak_from(self, offset, interrupt=False):
         """Speak ``spoken_text`` from character ``offset`` on a worker thread."""
         self.speak_offset = offset
+        self.agent_text_shown = False
         self._clear_pause()
         speech_speed = int(self.speed_entry.get())
         self.thread = threading.Thread(
