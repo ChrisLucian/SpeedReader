@@ -3,7 +3,7 @@ import tkinter.ttk as ttk
 from tkinter import BooleanVar
 from tkinter.constants import W
 
-from Core.config import save_ui_train
+from Core.config import load_ui_train, save_ui_train
 from Core.speed_training import TRAINING_GOAL, TRAINING_STEP, next_training_wpm
 
 
@@ -11,7 +11,7 @@ class SpeedTrainingMixin:
     """Mixed into MainFrame; uses ``speed_var`` and ``speak_service``."""
 
     def _build_training_toggle(self, parent):
-        self.training_var = BooleanVar(master=self, value=False)
+        self.training_var = BooleanVar(master=self, value=load_ui_train())
         self.training_check = ttk.Checkbutton(
             parent, variable=self.training_var,
             text="Training: +{} WPM after each finished reading (up to {})".format(TRAINING_STEP, TRAINING_GOAL))
