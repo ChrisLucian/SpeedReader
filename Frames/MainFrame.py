@@ -26,8 +26,9 @@ from Frames.file_open import FileOpenMixin
 from Frames.focus_mode import FocusModeMixin
 from Frames.shortcuts_help import ShortcutsHelpMixin
 from Frames.session_memory import SessionMemoryMixin
+from Frames.speed_training import SpeedTrainingMixin
 
-class MainFrame(SessionMemoryMixin, ShortcutsHelpMixin, FocusModeMixin, FileOpenMixin, ReadingControlsMixin, UiPumpMixin, MediaControlMixin, ttk.Frame):
+class MainFrame(SpeedTrainingMixin, SessionMemoryMixin, ShortcutsHelpMixin, FocusModeMixin, FileOpenMixin, ReadingControlsMixin, UiPumpMixin, MediaControlMixin, ttk.Frame):
     def __init__(self, **kw):
         ttk.Frame.__init__(self, **kw)
         self.callbacks = CallbackQueue()
@@ -156,6 +157,7 @@ class MainFrame(SessionMemoryMixin, ShortcutsHelpMixin, FocusModeMixin, FileOpen
             self.settings_frame, text="Server…", command=lambda: dialogs.open_server_dialog(self))
         self.server_button.grid(row=0, column=7, padx=(8, 0))
         self._build_shortcuts_button(self.settings_frame, 8)
+        self._build_training_toggle(self.settings_frame)
         row_index += 1
 
         self.grid_rowconfigure(row_index, weight=1)
@@ -418,6 +420,7 @@ class MainFrame(SessionMemoryMixin, ShortcutsHelpMixin, FocusModeMixin, FileOpen
         
         self._clear_highlight()
         self.remember_position(name, completed)
+        self.train_after_reading(name, completed)
 
         # Resume any system media we paused, but only if this session wasn't
         # interrupted by a new speech session starting
