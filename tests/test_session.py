@@ -129,3 +129,12 @@ def test_quitting_during_agent_speech_keeps_users_session(frame):
     frame.is_speaking = True
     frame.on_closing()
     assert session.load_session() == ("Mine", 2)
+
+
+def test_quitting_during_agent_speech_keeps_users_session_and_opening_a_file_drops_old_resume(frame, tmp_path):
+    _reading(frame)
+    frame.paused_at = 6
+    path = tmp_path / "new.txt"
+    path.write_text("Fresh file", encoding="utf-8")
+    frame.open_file(str(path))
+    assert frame.paused_at is None
