@@ -20,7 +20,9 @@ def load_session(path=None):
         return None
     with open(path, "r", encoding="utf-8") as handle:
         data = json.load(handle)
-    return data["text"], data["offset"]
+    text, offset = data["text"], data["offset"]
+    valid = isinstance(offset, int) and 0 <= offset < len(text)
+    return text, offset if valid else 0
 
 
 def save_session(text, offset, path=None):
