@@ -36,3 +36,7 @@ def test_load_session_ignores_corrupt_file(tmp_path):
     path = tmp_path / "session.json"
     path.write_text("not json")
     assert session.load_session(str(path)) is None
+
+
+def test_save_session_reports_unwritable_location(tmp_path):
+    assert session.save_session("x", 0, str(tmp_path)) is False
