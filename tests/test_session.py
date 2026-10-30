@@ -121,3 +121,11 @@ def test_quitting_after_finished_reading_keeps_start(frame):
     frame.onEnd(session_id, True)
     frame.on_closing()
     assert session.load_session() == ("Hello World", 0)
+
+
+def test_quitting_during_agent_speech_keeps_users_session(frame):
+    session.save_session("Mine", 2)
+    frame._render_external("Agent says hi")
+    frame.is_speaking = True
+    frame.on_closing()
+    assert session.load_session() == ("Mine", 2)
