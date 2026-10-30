@@ -70,3 +70,12 @@ def test_agent_speech_keeps_saved_session(frame):
     _reading(frame, "Agent says hi", 0)
     frame.onEnd(None, True)
     assert session.load_session() == ("Mine", 2)
+
+
+def test_edited_text_saves_from_start(frame):
+    session_id = _reading(frame)
+    frame.paused_at = 6
+    frame.text_area.delete("1.0", "end")
+    frame.text_area.insert("end", "Other text")
+    frame.onEnd(session_id, False)
+    assert session.load_session() == ("Other text", 0)
