@@ -3,6 +3,7 @@ import tkinter.ttk as ttk
 from tkinter import BooleanVar
 from tkinter.constants import W
 
+from Core.config import save_ui_train
 from Core.speed_training import TRAINING_GOAL, TRAINING_STEP, next_training_wpm
 
 
@@ -15,6 +16,7 @@ class SpeedTrainingMixin:
             parent, variable=self.training_var,
             text="Training: +{} WPM after each finished reading (up to {})".format(TRAINING_STEP, TRAINING_GOAL))
         self.training_check.grid(row=1, column=0, columnspan=5, sticky=W, pady=(8, 0))
+        self.training_var.trace_add("write", lambda *args: save_ui_train(self.training_var.get()))
 
     def train_after_reading(self, name, completed):
         """Called from ``onEnd``; only the user's own finished readings count, not agent speech."""
