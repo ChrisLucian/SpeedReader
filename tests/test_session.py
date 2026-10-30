@@ -79,3 +79,10 @@ def test_edited_text_saves_from_start(frame):
     frame.text_area.insert("end", "Other text")
     frame.onEnd(session_id, False)
     assert session.load_session() == ("Other text", 0)
+
+
+def test_quitting_mid_reading_saves_current_word(frame):
+    _reading(frame)
+    frame.is_speaking = True
+    frame.on_closing()
+    assert session.load_session() == ("Hello World", 6)
