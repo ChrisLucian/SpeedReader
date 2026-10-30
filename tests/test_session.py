@@ -63,3 +63,10 @@ def test_finished_reading_saves_from_start(frame):
     frame.onEnd(session_id, True)
     with open(session.session_path(), encoding="utf-8") as handle:
         assert json.load(handle) == {"text": "Hello World", "offset": 0}
+
+
+def test_agent_speech_keeps_saved_session(frame):
+    session.save_session("Mine", 2)
+    _reading(frame, "Agent says hi", 0)
+    frame.onEnd(None, True)
+    assert session.load_session() == ("Mine", 2)
