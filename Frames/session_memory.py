@@ -7,4 +7,4 @@ class SessionMemoryMixin:
 
     def remember_position(self, name, completed):
         """Called from ``onEnd`` (Pause, Stop or the end of the text)."""
-        save_session(self.spoken_text, self.paused_at)
+        save_session(self.spoken_text, 0 if completed else self.paused_at)
