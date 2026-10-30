@@ -35,3 +35,9 @@ def test_finished_reading_with_training_raises_speed(frame):
 def test_training_off_keeps_speed(frame):
     _finish(frame)
     assert frame.speed_var.get() == "200"
+
+
+def test_stopped_reading_does_not_train(frame):
+    frame.training_var.set(True)
+    _finish(frame, completed=False)
+    assert frame.speed_var.get() == "200"
