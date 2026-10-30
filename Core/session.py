@@ -8,4 +8,5 @@ import os
 
 def session_path():
     """``SPEEDREADER_SESSION``, else ``%LOCALAPPDATA%\\SpeedReader\\session.json``."""
-    return os.path.join(os.environ["LOCALAPPDATA"], "SpeedReader", "session.json")
+    return os.environ.get("SPEEDREADER_SESSION") or os.path.join(
+        os.environ["LOCALAPPDATA"], "SpeedReader", "session.json")

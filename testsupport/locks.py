@@ -84,6 +84,7 @@ LOCKED = [
 @pytest.fixture(autouse=True)
 def lock_side_effects(monkeypatch, tmp_path, fake_clipboard):
     monkeypatch.setenv("SPEEDREADER_CONFIG", str(tmp_path / "config.json"))
+    monkeypatch.setenv("SPEEDREADER_SESSION", str(tmp_path / "session.json"))
     for module, attr, stub in STUBS:
         monkeypatch.setattr(importlib.import_module(module), attr, stub, raising=False)
     for module, attr in LOCKED:
