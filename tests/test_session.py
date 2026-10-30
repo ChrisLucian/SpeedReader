@@ -86,3 +86,20 @@ def test_quitting_mid_reading_saves_current_word(frame):
     frame.is_speaking = True
     frame.on_closing()
     assert session.load_session() == ("Hello World", 6)
+
+
+def _started_frame(monkeypatch, new_controller):
+    from Controllers.SpeedReaderController import SpeedReaderController
+    monkeypatch.setattr(SpeedReaderController, "maybe_host_mcp", lambda self, frame: None)
+    app = new_controller()
+    return app, app.winfo_children()[0]
+
+
+def test_startup_restores_text_without_resume_at_start(monkeypatch, new_controller):
+    session.save_session("Hello World", 0)
+    app, frame = _started_frame(monkeypatch, new_controller)
+    try:
+        assert frame.text_area.get("1.0", "end-1c") == "Hello World"
+        assert frame.paused_at is None
+    finally:
+        app.destroy()
