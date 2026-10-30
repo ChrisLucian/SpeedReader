@@ -15,12 +15,12 @@ def session_path():
 
 def load_session(path=None):
     """``(text, offset)`` saved last time, or ``None``."""
-    path = path or session_path()
-    if not os.path.exists(path):
+    try:
+        with open(path or session_path(), "r", encoding="utf-8") as handle:
+            data = json.load(handle)
+        text, offset = str(data["text"]), data["offset"]
+    except (OSError, ValueError, KeyError, TypeError):
         return None
-    with open(path, "r", encoding="utf-8") as handle:
-        data = json.load(handle)
-    text, offset = data["text"], data["offset"]
     valid = isinstance(offset, int) and 0 <= offset < len(text)
     return text, offset if valid else 0
 
