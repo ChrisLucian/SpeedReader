@@ -27,7 +27,8 @@ class SessionMemoryMixin:
 
     def remember_on_quit(self):
         """Quit while reading: save the current word (Pause/Stop/end already saved)."""
-        self._save_position(self.current_location)
+        if self.is_speaking:
+            self._save_position(self.current_location)
 
     def _save_position(self, offset):
         """Save the text area; ``offset`` only applies while it still holds the spoken text."""
