@@ -10,3 +10,8 @@ def session_path():
     """``SPEEDREADER_SESSION``, else ``%LOCALAPPDATA%\\SpeedReader\\session.json``."""
     return os.environ.get("SPEEDREADER_SESSION") or os.path.join(
         os.environ["LOCALAPPDATA"], "SpeedReader", "session.json")
+
+
+def load_session(path=None):
+    """``(text, offset)`` saved last time, or ``None``."""
+    return None
