@@ -103,3 +103,14 @@ def test_startup_restores_text_without_resume_at_start(monkeypatch, new_controll
         assert frame.paused_at is None
     finally:
         app.destroy()
+
+
+def test_startup_restores_resume_button_at_saved_word(monkeypatch, new_controller):
+    session.save_session("Hello World", 6)
+    app, frame = _started_frame(monkeypatch, new_controller)
+    try:
+        assert frame.paused_at == 6
+        assert frame.pause_button["text"] == "Resume"
+        assert frame.spoken_text == "Hello World"
+    finally:
+        app.destroy()
