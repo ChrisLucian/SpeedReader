@@ -53,3 +53,15 @@ def test_training_checkbox_is_saved(frame):
     from Core.config import load_ui_train
     frame.training_var.set(True)
     assert load_ui_train() is True
+
+
+def test_app_starts_with_saved_training_on(monkeypatch, new_controller):
+    from Controllers.SpeedReaderController import SpeedReaderController
+    from Core.config import save_ui_train
+    save_ui_train(True)
+    monkeypatch.setattr(SpeedReaderController, "maybe_host_mcp", lambda self, frame: None)
+    app = new_controller()
+    try:
+        assert app.winfo_children()[0].training_var.get() is True
+    finally:
+        app.destroy()
