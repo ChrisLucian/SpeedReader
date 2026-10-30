@@ -16,3 +16,9 @@ def test_tests_never_touch_the_real_session_file(tmp_path):
 
 def test_load_session_is_none_without_file():
     assert session.load_session() is None
+
+
+def test_save_session_round_trips_text_and_offset(tmp_path):
+    path = str(tmp_path / "new" / "session.json")
+    session.save_session("Hello World", 6, path)
+    assert session.load_session(path) == ("Hello World", 6)
