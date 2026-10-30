@@ -94,6 +94,16 @@ def save_ui_wpm(wpm, path=None):
     return update_config_section("ui", {"wpm": int(wpm)}, path=path)
 
 
+def load_ui_train(path=None):
+    """``ui.train``: speed training on (+25 WPM per finished reading); off by default."""
+    return _read_config(resolve_config_path(path)).get("ui", {}).get("train") is True
+
+
+def save_ui_train(enabled, path=None):
+    """Persist the speed-training checkbox."""
+    return update_config_section("ui", {"train": bool(enabled)}, path=path)
+
+
 def _read_config(path):
     if not os.path.exists(path):
         return {}
