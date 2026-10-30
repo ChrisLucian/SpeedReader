@@ -30,3 +30,9 @@ def test_load_session_resets_bad_offset_to_start(tmp_path):
     for bad in (999, -3, "x"):
         path.write_text(json.dumps({"text": "Hello World", "offset": bad}))
         assert session.load_session(str(path)) == ("Hello World", 0)
+
+
+def test_load_session_ignores_corrupt_file(tmp_path):
+    path = tmp_path / "session.json"
+    path.write_text("not json")
+    assert session.load_session(str(path)) is None
