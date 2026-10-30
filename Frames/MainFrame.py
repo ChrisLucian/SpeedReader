@@ -25,8 +25,9 @@ from Frames.reading_controls import ReadingControlsMixin
 from Frames.file_open import FileOpenMixin
 from Frames.focus_mode import FocusModeMixin
 from Frames.shortcuts_help import ShortcutsHelpMixin
+from Frames.session_memory import SessionMemoryMixin
 
-class MainFrame(ShortcutsHelpMixin, FocusModeMixin, FileOpenMixin, ReadingControlsMixin, UiPumpMixin, MediaControlMixin, ttk.Frame):
+class MainFrame(SessionMemoryMixin, ShortcutsHelpMixin, FocusModeMixin, FileOpenMixin, ReadingControlsMixin, UiPumpMixin, MediaControlMixin, ttk.Frame):
     def __init__(self, **kw):
         ttk.Frame.__init__(self, **kw)
         self.callbacks = CallbackQueue()
@@ -414,6 +415,7 @@ class MainFrame(ShortcutsHelpMixin, FocusModeMixin, FileOpenMixin, ReadingContro
             print(f"onEnd: {name} - interrupted")
         
         self._clear_highlight()
+        self.remember_position(name, completed)
 
         # Resume any system media we paused, but only if this session wasn't
         # interrupted by a new speech session starting
