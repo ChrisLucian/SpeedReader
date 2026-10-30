@@ -61,4 +61,5 @@ def test_pausing_saves_resume_word(frame):
 def test_finished_reading_saves_from_start(frame):
     session_id = _reading(frame)
     frame.onEnd(session_id, True)
-    assert session.load_session() == ("Hello World", 0)
+    with open(session.session_path(), encoding="utf-8") as handle:
+        assert json.load(handle) == {"text": "Hello World", "offset": 0}
