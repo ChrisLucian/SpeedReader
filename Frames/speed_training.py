@@ -18,4 +18,5 @@ class SpeedTrainingMixin:
 
     def train_after_reading(self, name, completed):
         """Called from ``onEnd``."""
-        self.speed_var.set(str(next_training_wpm(self.speak_service.rate)))
+        if self.training_var.get():
+            self.speed_var.set(str(next_training_wpm(self.speak_service.rate)))
