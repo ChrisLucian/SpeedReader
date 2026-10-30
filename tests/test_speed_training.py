@@ -41,3 +41,9 @@ def test_stopped_reading_does_not_train(frame):
     frame.training_var.set(True)
     _finish(frame, completed=False)
     assert frame.speed_var.get() == "200"
+
+
+def test_agent_speech_does_not_train(frame):
+    frame.training_var.set(True)
+    _finish(frame, name=None)
+    assert frame.speed_var.get() == "200"
