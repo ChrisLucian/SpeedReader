@@ -15,3 +15,18 @@ def test_training_setting_round_trips():
     assert config.load_ui_train() is False
     config.save_ui_train(True)
     assert config.load_ui_train() is True
+
+
+def _finish(frame, name=7, completed=True, wpm="200"):
+    frame.speed_var.set(wpm)
+    frame.spoken_text = "Hello World"
+    frame.current_session_id = frame.speech_session_id = 7
+    frame.onEnd(name, completed)
+
+
+def test_finished_reading_with_training_raises_speed(frame):
+    from Core.config import load_ui_wpm
+    frame.training_var.set(True)
+    _finish(frame)
+    assert frame.speed_var.get() == "225"
+    assert load_ui_wpm() == 225
