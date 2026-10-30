@@ -204,6 +204,7 @@ class MainFrame(SessionMemoryMixin, ShortcutsHelpMixin, FocusModeMixin, FileOpen
 
     def on_closing(self):
         # Stop any ongoing speech and clean up resources
+        self.remember_on_quit()
         self.force_stop_and_reset()
         self.master.destroy()
         self.master.quit()

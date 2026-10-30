@@ -13,6 +13,10 @@ class SessionMemoryMixin:
         if isinstance(name, int):
             self._save_position(0 if completed else self.paused_at)
 
+    def remember_on_quit(self):
+        """Quit while reading: save the current word (Pause/Stop/end already saved)."""
+        self._save_position(self.current_location)
+
     def _save_position(self, offset):
         """Save the text area; ``offset`` only applies while it still holds the spoken text."""
         text = self.text_area.get("1.0", "end-1c")
