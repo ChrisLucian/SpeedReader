@@ -47,3 +47,9 @@ def test_agent_speech_does_not_train(frame):
     frame.training_var.set(True)
     _finish(frame, name=None)
     assert frame.speed_var.get() == "200"
+
+
+def test_training_checkbox_is_saved(frame):
+    from Core.config import load_ui_train
+    frame.training_var.set(True)
+    assert load_ui_train() is True
