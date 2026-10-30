@@ -56,3 +56,9 @@ def test_pausing_saves_resume_word(frame):
     frame.paused_at = 6
     frame.onEnd(session_id, False)
     assert session.load_session() == ("Hello World", 6)
+
+
+def test_finished_reading_saves_from_start(frame):
+    session_id = _reading(frame)
+    frame.onEnd(session_id, True)
+    assert session.load_session() == ("Hello World", 0)
