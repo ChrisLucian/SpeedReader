@@ -30,3 +30,8 @@ def test_finished_reading_with_training_raises_speed(frame):
     _finish(frame)
     assert frame.speed_var.get() == "225"
     assert load_ui_wpm() == 225
+
+
+def test_training_off_keeps_speed(frame):
+    _finish(frame)
+    assert frame.speed_var.get() == "200"
