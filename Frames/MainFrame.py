@@ -59,6 +59,7 @@ class MainFrame(SessionMemoryMixin, ShortcutsHelpMixin, FocusModeMixin, FileOpen
         self.engine = None
         self.theme = load_ui_theme()
         self.build_frame_content(kw)
+        self.restore_session()
         self.pump_callbacks()
 
     def _build_voice_registry(self):
