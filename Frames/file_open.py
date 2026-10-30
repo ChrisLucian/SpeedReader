@@ -18,5 +18,6 @@ class FileOpenMixin:
     def open_file(self, path):
         self.force_stop_and_reset()
         self.clear_display_labels()
+        self._clear_pause()
         self.text_area.delete("1.0", "end")
         self.text_area.insert("end", read_text_file(path))
