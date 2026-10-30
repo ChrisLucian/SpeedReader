@@ -11,4 +11,9 @@ class SessionMemoryMixin:
         Agent (MCP) utterances carry no int session id and are never saved.
         """
         if isinstance(name, int):
-            save_session(self.spoken_text, 0 if completed else self.paused_at)
+            self._save_position(0 if completed else self.paused_at)
+
+    def _save_position(self, offset):
+        """Save the text area; ``offset`` only applies while it still holds the spoken text."""
+        text = self.text_area.get("1.0", "end-1c")
+        save_session(text, offset if text == self.spoken_text else 0)
