@@ -114,3 +114,10 @@ def test_startup_restores_resume_button_at_saved_word(monkeypatch, new_controlle
         assert frame.spoken_text == "Hello World"
     finally:
         app.destroy()
+
+
+def test_quitting_after_finished_reading_keeps_start(frame):
+    session_id = _reading(frame)
+    frame.onEnd(session_id, True)
+    frame.on_closing()
+    assert session.load_session() == ("Hello World", 0)
