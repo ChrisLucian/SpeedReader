@@ -22,6 +22,8 @@ pyttsx3==2.71 due to a bug detailed here: https://github.com/nateshmbhat/pyttsx3
 - **Light mode / Dark mode** — toggles the modern Windows 11 look ([sv-ttk](https://github.com/rdbende/Sun-Valley-ttk-theme)), including the title bar. Dark by default; the choice is saved to `config.json` as `ui.theme`.
 - **Shortcuts… / `F1`** — a page listing every keyboard shortcut and hidden option (paste & speak, sentence skip, focus mode, tray behaviour…).
 - **Pause / Resume** (left of Speak) — pause mid-text; Resume picks up at the same word.
+- **Resume where you left off** — the text and the word you stopped at (Pause, Stop, finishing, or quitting mid-read) are saved to `%LOCALAPPDATA%\SpeedReader\session.json`; next launch the text is back and **Resume** continues from that word (**Speak** starts over). Agent speech never replaces your saved reading.
+- **Training** checkbox (under Speed) — each time you finish a whole reading, the speed goes up 25 WPM, up to 500, following the advice above; stopped or paused readings don't count. Saved to `config.json` as `ui.train`.
 - **Double-click a word** — start reading from that word.
 - **← / →** (while speaking, with the text box focused) — rewind to the start of the sentence (again to go back one more) / skip to the next sentence.
 - **Time left** — `m:ss left` in the header, from the remaining words and the current WPM.
