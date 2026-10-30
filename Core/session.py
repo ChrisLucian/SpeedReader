@@ -26,8 +26,16 @@ def load_session(path=None):
 
 
 def save_session(text, offset, path=None):
-    """Remember ``text`` and the character ``offset`` to resume reading at."""
+    """Remember ``text`` and the character ``offset`` to resume reading at.
+
+    Returns ``False`` instead of raising when the file can't be written, so a
+    locked-down profile never breaks Stop/Pause/Quit.
+    """
     path = path or session_path()
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, "w", encoding="utf-8") as handle:
-        json.dump({"text": text, "offset": offset}, handle)
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as handle:
+            json.dump({"text": text, "offset": offset}, handle)
+    except OSError:
+        return False
+    return True
