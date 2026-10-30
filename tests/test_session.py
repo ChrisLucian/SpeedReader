@@ -40,3 +40,19 @@ def test_load_session_ignores_corrupt_file(tmp_path):
 
 def test_save_session_reports_unwritable_location(tmp_path):
     assert session.save_session("x", 0, str(tmp_path)) is False
+
+
+def _reading(frame, text="Hello World", location=6):
+    frame.spoken_text = text
+    frame.text_area.delete("1.0", "end")
+    frame.text_area.insert("end", text)
+    frame.current_location = location
+    frame.current_session_id = frame.speech_session_id = 7
+    return 7
+
+
+def test_pausing_saves_resume_word(frame):
+    session_id = _reading(frame)
+    frame.paused_at = 6
+    frame.onEnd(session_id, False)
+    assert session.load_session() == ("Hello World", 6)
