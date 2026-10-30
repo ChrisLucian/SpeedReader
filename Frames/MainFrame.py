@@ -27,8 +27,9 @@ from Frames.focus_mode import FocusModeMixin
 from Frames.shortcuts_help import ShortcutsHelpMixin
 from Frames.session_memory import SessionMemoryMixin
 from Frames.speed_training import SpeedTrainingMixin
+from Frames.agent_speech import AgentSpeechMixin
 
-class MainFrame(SpeedTrainingMixin, SessionMemoryMixin, ShortcutsHelpMixin, FocusModeMixin, FileOpenMixin, ReadingControlsMixin, UiPumpMixin, MediaControlMixin, ttk.Frame):
+class MainFrame(AgentSpeechMixin, SpeedTrainingMixin, SessionMemoryMixin, ShortcutsHelpMixin, FocusModeMixin, FileOpenMixin, ReadingControlsMixin, UiPumpMixin, MediaControlMixin, ttk.Frame):
     def __init__(self, **kw):
         ttk.Frame.__init__(self, **kw)
         self.callbacks = CallbackQueue()
@@ -474,20 +475,6 @@ class MainFrame(SpeedTrainingMixin, SessionMemoryMixin, ShortcutsHelpMixin, Focu
 
     def speak_on_thread(self, speech_speed, spoken_text, interrupt=False, name=None):
         self.speech.speak(spoken_text, speech_speed, interrupt=interrupt, name=name)
-
-    def speak_external(self, text, rate, voice=None):
-        # Entry point for MCP agent speech (called from the server thread).
-        # Update the UI on the tkinter main thread, but run the BLOCKING speak on
-        # this server thread (never inside `after`, which would freeze the UI).
-        # Blocking serializes per-utterance voices so agents don't bleed voices.
-        self.callbacks.post(self._render_external, text)
-        self.speech.speak(text, rate, voice=voice, block=True)
-
-    def _render_external(self, text):
-        self.spoken_text = text
-        self.speak_offset = 0
-        self.text_area.delete("1.0", END)
-        self.text_area.insert(END, text)
 
 
 TAG_CURRENT_WORD = "current word"
