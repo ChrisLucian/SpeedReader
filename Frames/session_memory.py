@@ -6,11 +6,16 @@ class SessionMemoryMixin:
     """Mixed into MainFrame; uses ``spoken_text``, ``paused_at``, ``current_location``."""
 
     def restore_session(self):
-        """Startup: put last session's text back in the text area."""
+        """Startup: put last session's text back and arm Resume at its word."""
         saved = load_session()
         if saved:
             text, offset = saved
             self.text_area.insert("end", text)
+            self.spoken_text = text
+            if offset:
+                self.paused_at = self.current_location = offset
+                self.pause_button["text"] = "Resume"
+                self.text_area.see("1.{}".format(offset))
 
     def remember_position(self, name, completed):
         """Called from ``onEnd`` (Pause, Stop or the end of the text).
