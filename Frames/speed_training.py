@@ -17,6 +17,6 @@ class SpeedTrainingMixin:
         self.training_check.grid(row=1, column=0, columnspan=5, sticky=W, pady=(8, 0))
 
     def train_after_reading(self, name, completed):
-        """Called from ``onEnd``."""
-        if completed and self.training_var.get():
+        """Called from ``onEnd``; only the user's own finished readings count, not agent speech."""
+        if completed and isinstance(name, int) and self.training_var.get():
             self.speed_var.set(str(next_training_wpm(self.speak_service.rate)))
