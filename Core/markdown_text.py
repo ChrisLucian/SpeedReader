@@ -14,11 +14,22 @@ LINE_MARKS = [
 ]
 
 
+INLINE_MARKS = [
+    (re.compile(r'\*\*(?=\S)(.+?)(?<=\S)\*\*'), r'\1'),
+    (re.compile(r'__(?=\S)(.+?)(?<=\S)__'), r'\1'),
+    (re.compile(r'~~(?=\S)(.+?)(?<=\S)~~'), r'\1'),
+    (re.compile(r'(?<![\w*])\*(?=\S)([^*]+?)(?<=\S)\*(?![\w*])'), r'\1'),
+    (re.compile(r'_(?=\S)([^_]+?)(?<=\S)_'), r'\1'),
+]
+
+
 def strip_markdown(text):
     """Remove Markdown formatting marks, keeping the words (and the line breaks)."""
     lines = []
     for line in text.split('\n'):
         for pattern in LINE_MARKS:
             line = pattern.sub('', line)
+        for pattern, replacement in INLINE_MARKS:
+            line = pattern.sub(replacement, line)
         lines.append(line)
     return '\n'.join(lines)
