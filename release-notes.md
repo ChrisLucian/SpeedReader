@@ -1,14 +1,15 @@
-## SpeedReader v0.8.1
+## SpeedReader v0.9
 
 ### New
-- **Remembers your speed** — the WPM you set in the Speed box is saved to `config.json` (`ui.wpm`) and restored the next time you start SpeedReader.
+- **Resume where you left off** — the text and the word you stopped at (Pause, Stop, finishing, or quitting mid-read) are saved to `%LOCALAPPDATA%\SpeedReader\session.json`. Next launch the text is back and **Resume** continues from that word (**Speak** starts over). Agent speech never replaces your saved reading.
+- **Training** checkbox (under Speed) — every reading you finish adds 25 WPM, up to 500. Stopped or paused readings don't count. Saved to `config.json` as `ui.train`.
+- **Markdown is read as plain words** — when text (yours or an AI agent's) looks like Markdown, `#` headings, `**bold**`/`*italic*`, backticks, list bullets, `>` quotes, table pipes and link URLs are no longer read aloud. Links read their text, images their alt text; plain text like `5 * 3` or `snake_case` is untouched.
 
 ### Fixed
-- **SpeedReader now starts from any folder.** v0.8 quit silently, with no window, when it was unzipped somewhere it couldn't write files (e.g. `Program Files`, or Documents/Desktop under Windows Controlled Folder Access). Logs now go to `%TEMP%\SpeedReader.err.txt`.
-- Typing a speed no longer applies half-typed values (e.g. 6 WPM on the way to 650); speeds outside 100–1000 are ignored.
+- Opening a file (`Ctrl+O` or drag onto the EXE) no longer leaves an old Resume point that would read the previous text.
 
 ### Install
-1. `winget install ChrisLucian.SpeedReader`, or download `SpeedReader-v0.8.1-win-x64.zip` and verify it against `SpeedReader-v0.8.1-win-x64.zip.sha256`.
+1. `winget install ChrisLucian.SpeedReader`, or download `SpeedReader-v0.9-win-x64.zip` and verify it against `SpeedReader-v0.9-win-x64.zip.sha256`.
 2. Extract and run `SpeedReader\SpeedReader.exe`.
 3. A brand-new certificate may still show a SmartScreen prompt on download until it builds reputation: **More info → Run anyway**.
 
