@@ -35,3 +35,7 @@ def test_link_reads_text_and_image_reads_alt():
 def test_strip_list_markers_and_task_boxes():
     text = "- one\n* two\n3. three\n- [x] done\n  + nested"
     assert md.strip_markdown(text) == "one\ntwo\nthree\ndone\nnested"
+
+
+def test_strip_blockquote_marks():
+    assert md.strip_markdown("> quoted\n>> deeper") == "quoted\ndeeper"
