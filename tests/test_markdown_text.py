@@ -8,3 +8,7 @@ def test_plain_text_is_not_markdown():
 
 def test_heading_marks_markdown():
     assert md.looks_like_markdown("# Title\nbody") is True
+
+
+def test_strip_heading_marks():
+    assert md.strip_markdown("## Install\nRun it") == "Install\nRun it"
