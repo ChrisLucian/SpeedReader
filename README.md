@@ -33,6 +33,7 @@ pyttsx3==2.71 due to a bug detailed here: https://github.com/nateshmbhat/pyttsx3
 - Shortcuts: `Ctrl+B` paste & speak (interrupts and clears anything currently playing or queued, including agent speech, then reads the clipboard now), `Ctrl+A` select all. Agent (MCP) utterances otherwise queue and play in order.
 - **`Ctrl+Alt+B` from any app** — system-wide paste & speak, even while SpeedReader is hidden. If another app already owns that hotkey, SpeedReader just skips it.
 - **System tray** — closing the window hides SpeedReader to the tray (so agents can keep speaking). Tray menu: *Show SpeedReader*, *Read clipboard*, *Quit* (Quit is how you exit).
+- **Markdown is read as plain words** — when the text (yours or an agent's) looks like Markdown, SpeedReader drops the formatting before speaking: `#` headings, `**bold**`/`*italic*`/`~~strike~~`, inline `` `code` `` backticks, list bullets and numbers, `- [x]` task boxes, `>` quotes, `---` rules and table pipes. Links read their text (`[docs](url)` → "docs"), images their alt text. Plain text such as `5 * 3` or `snake_case` is left alone.
 - Junk isn't read character by character — for both your text and agent speech: code blocks → "[code]", links → "[URL]", Windows paths (`C:\...`, `C:/...`, `\\server\...`) → "[file path]", emails → "[email]", GUIDs → "[ID]", hex hashes → "[hash]", any 40+ character token → "[long text]". Plain numbers and words stay as they are.
 
 ## MCP server (let AI agents speak through SpeedReader)
