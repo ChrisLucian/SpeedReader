@@ -115,3 +115,9 @@ def test_word_window_respects_read_trail():
 
 def test_highlight_indices_single_line_format():
     assert highlight_indices(4, 5) == ('1.4', '1.9')
+
+
+def test_fenced_code_left_for_code_placeholder():
+    out = preprocess_text('# T\n```py\nx = **y**\n```')
+    assert '[code]' in out
+    assert '#' not in out and '```' not in out
