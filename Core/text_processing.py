@@ -1,5 +1,7 @@
 import re
 
+from Core.markdown_text import looks_like_markdown, strip_markdown
+
 PLACEHOLDERS = [
     (re.compile(r'```.*?```'), '[code]'),
     (re.compile(r'http\S+'), '[URL]'),
@@ -19,6 +21,8 @@ def preprocess_text(text):
     HIGH-RISK/REPEAT: SAPI spells long unbroken tokens (paths, hashes, URLs)
     letter by letter and floods word callbacks, so they never reach it.
     """
+    if looks_like_markdown(text):
+        text = strip_markdown(text)
     text = text.replace('\n', ' ')
     for pattern, placeholder in PLACEHOLDERS:
         text = pattern.sub(' {} '.format(placeholder), text)
