@@ -21,3 +21,7 @@ def test_strip_bold_italic_and_strikethrough():
 
 def test_snake_case_keeps_underscores():
     assert md.strip_markdown("call my_var_name now") == "call my_var_name now"
+
+
+def test_inline_code_drops_backticks():
+    assert md.strip_markdown("run `pytest -q` now") == "run pytest -q now"
