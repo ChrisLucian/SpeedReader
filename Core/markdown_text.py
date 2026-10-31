@@ -1,7 +1,10 @@
 """GUI-free Markdown cleanup so formatting marks (#, **, `, [](), |) are not read aloud."""
 import re
 
-MARKDOWN_SIGNAL = re.compile(r'^#{1,6}\s', re.MULTILINE)
+MARKDOWN_SIGNAL = re.compile(
+    r'^(?:#{1,6}\s|\s*(?:[-*+]|\d+\.)\s|>|```)'
+    r'|\*\*\S|`[^`\n]+`|\]\([^)\s]*\)',
+    re.MULTILINE)
 
 
 def looks_like_markdown(text):
