@@ -39,3 +39,8 @@ def test_strip_list_markers_and_task_boxes():
 
 def test_strip_blockquote_marks():
     assert md.strip_markdown("> quoted\n>> deeper") == "quoted\ndeeper"
+
+
+def test_rules_and_table_separators_dropped_pipes_spaced():
+    text = "a\n---\n| h1 | h2 |\n|---|:--:|\n| c1 | c2 |"
+    assert md.strip_markdown(text) == "a\n\nh1 h2\n\nc1 c2"
