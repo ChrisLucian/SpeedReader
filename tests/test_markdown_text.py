@@ -12,3 +12,8 @@ def test_heading_marks_markdown():
 
 def test_strip_heading_marks():
     assert md.strip_markdown("## Install\nRun it") == "Install\nRun it"
+
+
+def test_strip_bold_italic_and_strikethrough():
+    text = "a **bold** b *it* c __u__ d _em_ e ~~old~~"
+    assert md.strip_markdown(text) == "a bold b it c u d em e old"
