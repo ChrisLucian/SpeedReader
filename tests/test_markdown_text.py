@@ -30,3 +30,8 @@ def test_inline_code_drops_backticks():
 def test_link_reads_text_and_image_reads_alt():
     text = "see [the docs](https://x.io/a) and ![a cat](cat.png)"
     assert md.strip_markdown(text) == "see the docs and a cat"
+
+
+def test_strip_list_markers_and_task_boxes():
+    text = "- one\n* two\n3. three\n- [x] done\n  + nested"
+    assert md.strip_markdown(text) == "one\ntwo\nthree\ndone\nnested"
