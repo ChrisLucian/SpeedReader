@@ -10,6 +10,7 @@ def looks_like_markdown(text):
 
 
 LINE_MARKS = [
+    re.compile(r'^\s*(?:>\s?)+'),
     re.compile(r'^#{1,6}\s+'),
     re.compile(r'^\s*(?:[-*+]|\d+[.)])\s+(?:\[[ xX]\]\s+)?'),
 ]
