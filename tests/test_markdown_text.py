@@ -17,3 +17,7 @@ def test_strip_heading_marks():
 def test_strip_bold_italic_and_strikethrough():
     text = "a **bold** b *it* c __u__ d _em_ e ~~old~~"
     assert md.strip_markdown(text) == "a bold b it c u d em e old"
+
+
+def test_snake_case_keeps_underscores():
+    assert md.strip_markdown("call my_var_name now") == "call my_var_name now"
