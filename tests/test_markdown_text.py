@@ -25,3 +25,8 @@ def test_snake_case_keeps_underscores():
 
 def test_inline_code_drops_backticks():
     assert md.strip_markdown("run `pytest -q` now") == "run pytest -q now"
+
+
+def test_link_reads_text_and_image_reads_alt():
+    text = "see [the docs](https://x.io/a) and ![a cat](cat.png)"
+    assert md.strip_markdown(text) == "see the docs and a cat"
