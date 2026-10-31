@@ -121,3 +121,10 @@ def test_fenced_code_left_for_code_placeholder():
     out = preprocess_text('# T\n```py\nx = **y**\n```')
     assert '[code]' in out
     assert '#' not in out and '```' not in out
+
+
+def test_preprocess_strips_markdown_only_when_detected():
+    reply = "- **Done**: tests pass\n- see `x` and [docs](https://d.io)"
+    assert " ".join(preprocess_text(reply).split()) == "Done: tests pass see x and docs"
+    plain = "Pay 5 * 3 * 2 now"
+    assert preprocess_text(plain) == plain
