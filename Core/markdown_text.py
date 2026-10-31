@@ -27,10 +27,22 @@ INLINE_MARKS = [
 ]
 
 
+SILENT_LINE = re.compile(
+    r'^\s*(?:([-*_])(?:\s*\1){2,}|\|?\s*:?-+:?\s*(?:\|\s*:?-+:?\s*)+\|?)\s*$')
+
+
+def _table_row(line):
+    """``| a | b |`` -> ``a b``; other lines unchanged."""
+    if not line.strip().startswith('|'):
+        return line
+    return ' '.join(cell.strip() for cell in line.strip().strip('|').split('|') if cell.strip())
+
+
 def strip_markdown(text):
     """Remove Markdown formatting marks, keeping the words (and the line breaks)."""
     lines = []
     for line in text.split('\n'):
+        line = '' if SILENT_LINE.match(line) else _table_row(line)
         for pattern in LINE_MARKS:
             line = pattern.sub('', line)
         for pattern, replacement in INLINE_MARKS:
