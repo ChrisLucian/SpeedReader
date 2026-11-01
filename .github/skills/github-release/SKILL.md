@@ -23,4 +23,7 @@ description: Use when cutting a SpeedReader GitHub release or winget submission 
    - Until a PR is merged, `winget install ChrisLucian.SpeedReader` finds nothing. Install the same release with `winget install --manifest release\winget` (LocalManifestFiles is already enabled on Chris's PC). It lands in `%LOCALAPPDATA%\Microsoft\WinGet\Packages\ChrisLucian.SpeedReader__DefaultSource\SpeedReader\` (no version in the path, so pins survive upgrades) and is tracked for `winget upgrade`.
    - To point the taskbar pin at that copy, see the `windows-taskbar-pin-retarget` skill. That includes the Smart App Control/Mark-of-the-Web trap.
 - First-time downloads of a new certificate may still hit SmartScreen until reputation builds; Smart App Control accepts the CA-signed build.
+- After publishing, update Chris's own copy (his taskbar pin targets the winget folder, so the pin itself needs no change): close SpeedReader, run `winget install --manifest release\winget --accept-package-agreements --disable-interactivity` (an in-place upgrade; LocalManifestFiles is enabled). Then:
+  - HIGH-RISK/REPEAT: run `Unblock-File` on the new `SpeedReader.exe` (signed, hash verified by winget), or launching through the pin is blocked by Smart App Control.
+  - Check by launching the pin's `.lnk`: the window opens from the winget path.
 - After publishing, verify anonymously: download the asset URL, compare its SHA-256 with the `.sha256`, check `releases/latest` returns the new tag and the tag commit equals `origin/master`.
