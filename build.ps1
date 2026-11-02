@@ -69,9 +69,13 @@ if ($LASTEXITCODE -eq 0) {
     if ($env:ARTIFACT_SIGNING_ACCOUNT) {
         Write-Host "Signing with Azure Artifact Signing..." -ForegroundColor Yellow
         if (-not (Get-Command sign -ErrorAction SilentlyContinue)) { dotnet tool install --global sign --prerelease }
+        # HIGH-RISK/REPEAT: run sign.dll through the Microsoft-signed dotnet.exe. The global-tool
+        # apphost sign.exe is unsigned, and Smart App Control blocks it ("Application Control policy").
+        $signDll = Get-ChildItem "$env:USERPROFILE\.dotnet\tools\.store\sign" -Recurse -Filter sign.dll |
+            Sort-Object LastWriteTime -Descending | Select-Object -First 1 -ExpandProperty FullName
         $unsigned = Get-ChildItem SpeedReader.dist -Recurse -Include *.exe, *.dll, *.pyd |
             Where-Object { (Get-AuthenticodeSignature $_.FullName).Status -ne 'Valid' } | ForEach-Object FullName
-        sign code artifact-signing $unsigned -v Warning -act azure-cli `
+        dotnet $signDll code artifact-signing $unsigned -v Warning -act azure-cli `
             -ase $env:ARTIFACT_SIGNING_ENDPOINT -asa $env:ARTIFACT_SIGNING_ACCOUNT -ascp $env:ARTIFACT_SIGNING_PROFILE
         if ($LASTEXITCODE -ne 0 -or (Get-AuthenticodeSignature SpeedReader.dist\SpeedReader.exe).Status -ne 'Valid') {
             Write-Host "Signing failed! (az login? Signer role? env vars?)" -ForegroundColor Red
