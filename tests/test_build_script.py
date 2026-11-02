@@ -23,3 +23,12 @@ def test_build_signs_through_dotnet_not_the_unsigned_apphost():
     assert not re.search(r"^\s*sign\s+code", text, re.MULTILINE)
     assert re.search(r"dotnet\s+\$signDll\s+code\s+artifact-signing", text)
     assert "sign.dll" in text
+
+
+def test_build_signs_through_dotnet_not_the_unsigned_apphost_and_links_for_baseline_cpu():
+    """Nuitka passes -march only when compiling; zig then links its own memcpy/compiler-rt for
+    the BUILD machine's CPU (AVX-512 on a Ryzen 9 9900X), and the EXE dies with 0xc000001d
+    (illegal instruction) on CPUs without it (e.g. Core Ultra 9 285H)."""
+    text = BUILD.read_text(encoding="utf-8")
+    assert re.search(r'\$env:LDFLAGS\s*=\s*"-march=x86_64"', text)
+    assert "62F17C48" in text
