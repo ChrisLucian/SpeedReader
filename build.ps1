@@ -43,6 +43,10 @@ Write-Host "Building executable..." -ForegroundColor Yellow
 # stderr, which must not be None). HIGH-RISK/REPEAT: never {PROGRAM_BASE} - Nuitka exits(1) silently
 # when it can't create the log, so a read-only install folder (Program Files, Controlled Folder Access)
 # would stop the EXE launching at all.
+# HIGH-RISK/REPEAT: Nuitka passes -march=x86_64 to zig only when COMPILING. Without it at LINK time,
+# zig builds its memcpy/compiler-rt for THIS machine's CPU (AVX-512 on the Ryzen 9 9900X), and the EXE
+# dies at start with 0xc000001d (illegal instruction) on CPUs without it (e.g. Core Ultra 9 285H).
+$env:LDFLAGS = "-march=x86_64"
 python -m nuitka --standalone --assume-yes-for-downloads --enable-plugin=tk-inter `
     --include-module=pyttsx3.drivers.sapi5 --include-module=win32com.server --include-module=win32com.server.util `
     --windows-icon-from-ico=assets/speedreader.ico --include-data-files=assets/speedreader.ico=assets/speedreader.ico `
@@ -63,6 +67,13 @@ if ($LASTEXITCODE -eq 0) {
     $site = python -c "import site; print(site.getsitepackages()[-1])"
     Copy-Item "$site\pystray" SpeedReader.dist\pystray -Recurse -Force -Exclude __pycache__
     Copy-Item "$site\six.py" SpeedReader.dist\ -Force
+
+    # Canary: an AVX-512 memcpy (vmovups zmm0, EVEX 62 F1 7C 48) means the link step used the build CPU.
+    python -c "import sys; sys.exit(open(r'SpeedReader.dist\SpeedReader.exe','rb').read().find(bytes.fromhex('62F17C48')) >= 0)"
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "SpeedReader.exe contains AVX-512 code - it would crash on CPUs without AVX-512 (LDFLAGS?)" -ForegroundColor Red
+        exit 1
+    }
 
     # HIGH-RISK/REPEAT: Smart App Control only trusts a CA-chained signature (Azure Artifact
     # Signing), never self-signed. Opt in via env vars; sign every unsigned binary, not just the EXE.
