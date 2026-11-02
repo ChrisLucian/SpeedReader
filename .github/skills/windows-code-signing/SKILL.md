@@ -19,8 +19,7 @@ description: Use when Windows Smart App Control / SmartScreen blocks the SpeedRe
 - Privacy: leave "Include street address/postal code" unchecked on profiles — the subject is public in every signed file.
 
 ## Smart App Control blocks the `sign` tool itself
-- HIGH-RISK/REPEAT: `sign.exe` in `%USERPROFILE%\.dotnet	ools` is an UNSIGNED .NET apphost. With Smart App Control enforcing (state 1) it can suddenly fail: "Program 'sign.exe' failed to run: An Application Control policy has blocked this file" (Code Integrity event 3077). It worked on 2026-10-31 and was blocked on 2026-11-01.
-- Fix: run the Microsoft-signed `sign.dll` through the Microsoft-signed `dotnet.exe`: `dotnet <...\.store\sign\<ver>\sign\<ver>	ools
-et8.0ny\sign.dll> code artifact-signing ...`.
+- HIGH-RISK/REPEAT: `sign.exe` in `%USERPROFILE%/.dotnet/tools` is an UNSIGNED .NET apphost. With Smart App Control enforcing (state 1) it can suddenly fail: "Program 'sign.exe' failed to run: An Application Control policy has blocked this file" (Code Integrity event 3077). It worked on 2026-10-31 and was blocked on 2026-11-01.
+- Fix: run the Microsoft-signed `sign.dll` through the Microsoft-signed `dotnet.exe`: `dotnet <.dotnet/tools/.store/sign/<ver>/sign/<ver>/tools/net8.0/any/sign.dll> code artifact-signing ...`.
 - `build.ps1` resolves `$signDll` this way, and `tests/test_build_script.py` forbids a bare `sign code`.
-- Watch backslashes when generating PowerShell from Python: `	ools` became a TAB once.
+- HIGH-RISK/REPEAT: when writing Windows paths from a Bash heredoc + Python, `\tools` turns into a TAB (it happened twice). Build backslashes with `chr(92)`, then grep for tabs.
