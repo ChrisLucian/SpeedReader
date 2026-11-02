@@ -25,3 +25,9 @@ def test_first_instance_acquires():
     api = FakeApi(exists=False)
     assert single_instance.SingleInstance(api=api).acquire() is True
     assert api.set_events == []
+
+
+def test_second_instance_signals_first_and_declines():
+    api = FakeApi(exists=True)
+    assert single_instance.SingleInstance(api=api).acquire() is False
+    assert api.set_events == ["event"]
