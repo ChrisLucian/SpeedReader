@@ -5,6 +5,7 @@ another process (another tray icon, hotkey and MCP port). The first instance
 owns a named mutex and waits on a named event; later launches find the mutex
 taken, signal the event and quit.
 """
+import threading
 
 
 MUTEX_NAME = "Local\\ChrisLucian.SpeedReader.Instance"
@@ -26,3 +27,13 @@ class SingleInstance:
             self._api.set_event(self._event)
             return False
         return True
+
+    def listen(self, on_show):
+        """Daemon thread: call ``on_show`` (from that thread) each time a later launch signals."""
+        thread = threading.Thread(target=self._wait_loop, args=(on_show,), daemon=True)
+        thread.start()
+        return thread
+
+    def _wait_loop(self, on_show):
+        while self._api.wait(self._event):
+            on_show()
