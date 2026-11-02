@@ -7,12 +7,22 @@ taken, signal the event and quit.
 """
 
 
+MUTEX_NAME = "Local\\ChrisLucian.SpeedReader.Instance"
+EVENT_NAME = "Local\\ChrisLucian.SpeedReader.Show"
+
+
 class SingleInstance:
     """Guard around a Win32-style ``api`` (injectable for tests)."""
 
     def __init__(self, api):
         self._api = api
+        self._mutex = self._event = None
 
     def acquire(self):
         """True for the first instance; later ones signal it and get False."""
+        self._mutex, already_running = self._api.create_mutex(MUTEX_NAME)
+        self._event = self._api.create_event(EVENT_NAME)
+        if already_running:
+            self._api.set_event(self._event)
+            return False
         return True
