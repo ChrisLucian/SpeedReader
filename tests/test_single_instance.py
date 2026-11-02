@@ -45,7 +45,7 @@ def test_listen_calls_on_show_each_signal_until_wait_fails():
 def test_win32_api_mutex_event_round_trip():
     import uuid
     api = single_instance.Win32Api()
-    name = "Local\SpeedReaderTest." + uuid.uuid4().hex
+    name = r"Local\SpeedReaderTest." + uuid.uuid4().hex
     first, first_exists = api.create_mutex(name)
     second, second_exists = api.create_mutex(name)
     event = api.create_event(name + ".Show")
