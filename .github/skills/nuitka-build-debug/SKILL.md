@@ -24,3 +24,9 @@ Bare `nuitka` resolves to the GLOBAL Python and bundles GLOBAL packages (unpinne
    running SpeedReader.exe locked it). Close the app, delete `SpeedReader.dist`, rebuild.
    `build.ps1` now refuses to build while the dist EXE is running.
 7. REPEAT: pin majors of fast-moving deps (`mcp<2`) in `requirements.txt`.
+
+## EXE crashes at start on other PCs: 0xc000001d (illegal instruction)
+- HIGH-RISK/REPEAT: with no MSVC installed, Nuitka falls back to Zig. Nuitka passes `-march=x86_64` only to COMPILE steps. The LINK step then builds Zig's memcpy/compiler-rt for the BUILD CPU, which is AVX-512 on this Ryzen 9 9900X. The EXE dies on CPUs without AVX-512 (Core Ultra 285H): Application log, exception 0xc000001d inside SpeedReader.exe, bytes `62 F1 7C 48 10 02` (vmovups zmm0).
+- Fix (in `build.ps1`): `$env:LDFLAGS = "-march=x86_64"` before `python -m nuitka`. Nuitka logs "Inherited LDFLAGS".
+- Canary: after the build, `build.ps1` fails if `SpeedReader.exe` contains `62F17C48`. v0.9.1 had 70 hits, v0.9.2 has 0. `tests/test_build_script.py` guards both lines.
+- Repro without the app: `zig cc -O2 -march=x86_64 -c t.c` and then `zig cc -o t.exe t.o` (no -march when linking) gives 92 hits; adding -march at link gives 0.

@@ -72,6 +72,8 @@ HIGH-RISK/REPEAT: Smart App Control only trusts CA-chained signatures — never 
 
 HIGH-RISK/REPEAT: pystray is LGPL-3.0 — `build.ps1` excludes it (and `six`) from compilation (`--nofollow-import-to` + `--no-deployment-flag=excluded-module-usage`) and copies the source beside the EXE. Without the deployment flag the EXE dies at start ("actively excluded"); always smoke-run the built EXE after build changes.
 
+HIGH-RISK/REPEAT: the Zig backend links for the BUILD machine's CPU unless `LDFLAGS=-march=x86_64` (set in `build.ps1`). The build PC has AVX-512, and without that flag the EXE crashed with 0xc000001d on CPUs without AVX-512. `build.ps1` fails if the AVX-512 memcpy bytes `62F17C48` appear in the EXE.
+
 HIGH-RISK/REPEAT: Nuitka must run from the venv (`python -m nuitka` after activation), never the global `nuitka` — it bundles whatever site-packages its interpreter sees. See the `nuitka-build-debug` skill.
 
 GUI-free logic lives in [Core/](Core/) so it can be unit tested (and is reused by the MCP server) without tkinter or audio. Run the tests with:
