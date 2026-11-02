@@ -40,3 +40,16 @@ def test_listen_calls_on_show_each_signal_until_wait_fails():
     shown = []
     guard.listen(lambda: shown.append(1)).join(2)
     assert shown == [1, 1]
+
+
+def test_win32_api_mutex_event_round_trip():
+    import uuid
+    api = single_instance.Win32Api()
+    name = "Local\SpeedReaderTest." + uuid.uuid4().hex
+    first, first_exists = api.create_mutex(name)
+    second, second_exists = api.create_mutex(name)
+    event = api.create_event(name + ".Show")
+    api.set_event(event)
+    assert (first_exists, second_exists) == (False, True)
+    assert api.wait(event, timeout_ms=1000) is True
+    assert api.wait(event, timeout_ms=10) is False
