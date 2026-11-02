@@ -31,3 +31,12 @@ def test_second_instance_signals_first_and_declines():
     api = FakeApi(exists=True)
     assert single_instance.SingleInstance(api=api).acquire() is False
     assert api.set_events == ["event"]
+
+
+def test_listen_calls_on_show_each_signal_until_wait_fails():
+    api = FakeApi(waits=[True, True, False])
+    guard = single_instance.SingleInstance(api=api)
+    guard.acquire()
+    shown = []
+    guard.listen(lambda: shown.append(1)).join(2)
+    assert shown == [1, 1]
