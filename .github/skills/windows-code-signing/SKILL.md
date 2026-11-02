@@ -17,3 +17,10 @@ description: Use when Windows Smart App Control / SmartScreen blocks the SpeedRe
 - Verify: `Get-AuthenticodeSignature SpeedReader.dist\SpeedReader.exe` → `Valid`.
 - One profile (`Chris-Lucian-Cert-Profile`, publisher `Christopher Lucian`) signs ALL projects (open source + Steam games); `ARTIFACT_SIGNING_*` vars are deliberately generic, set once per machine. Game builds: see user skill `artifact-signing-games`.
 - Privacy: leave "Include street address/postal code" unchecked on profiles — the subject is public in every signed file.
+
+## Smart App Control blocks the `sign` tool itself
+- HIGH-RISK/REPEAT: `sign.exe` in `%USERPROFILE%\.dotnet	ools` is an UNSIGNED .NET apphost. With Smart App Control enforcing (state 1) it can suddenly fail: "Program 'sign.exe' failed to run: An Application Control policy has blocked this file" (Code Integrity event 3077). It worked on 2026-10-31 and was blocked on 2026-11-01.
+- Fix: run the Microsoft-signed `sign.dll` through the Microsoft-signed `dotnet.exe`: `dotnet <...\.store\sign\<ver>\sign\<ver>	ools
+et8.0ny\sign.dll> code artifact-signing ...`.
+- `build.ps1` resolves `$signDll` this way, and `tests/test_build_script.py` forbids a bare `sign code`.
+- Watch backslashes when generating PowerShell from Python: `	ools` became a TAB once.
