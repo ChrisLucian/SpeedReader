@@ -21,7 +21,7 @@ Thin MVC split — keep new UI logic in the frame, not in entry points:
 - [testsupport/locks.py](testsupport/locks.py) — pytest plugin (registered in root `conftest.py`). HIGH-RISK/REPEAT: every real OS side effect is stubbed (`STUBS`) or raises `SideEffectLocked` (`LOCKED`) in tests; add any new OS-touching API (hotkeys, tray, clipboard, registry, network, files outside tmp) to these tables in the same change.
 - Theme: [sv-ttk](https://github.com/rdbende/Sun-Valley-ttk-theme) styles ttk widgets; plain tk widgets (`Text`, placeholder, link) are coloured from [Core/theme.py](Core/theme.py) `palette()`/`text_style()`. HIGH-RISK/REPEAT: always pass the root explicitly (`sv_ttk.set_theme(theme, root)`, `StringVar(master=...)`) — tkinter's global default root can be a stale `Tk` (flaky tests, "Theme ... already exists"). Set the theme and flush `<<ThemeChanged>>` (`update()`) BEFORE building widgets, or sv-ttk's `tk_setPalette` overwrites tk widget colours.
 - [Core/](Core/) — GUI-free, unit-tested logic shared by the GUI and the MCP server: text preprocessing/word-window ([Core/text_processing.py](Core/text_processing.py), which strips Markdown marks first via [Core/markdown_text.py](Core/markdown_text.py) when `looks_like_markdown`; Markdown is line-based, so it runs BEFORE newlines are flattened), the GUI callback engine ([Core/speech_engine.py](Core/speech_engine.py)), the headless blocking speak ([Core/speech.py](Core/speech.py)), the shared-rate TTS entry point ([Core/speak_service.py](Core/speak_service.py)), microphone/"in a call" detection ([Core/call_detection.py](Core/call_detection.py)), and opt-in MCP hosting config ([Core/config.py](Core/config.py)). No tkinter/pyttsx3 imports leak into tests — `pyttsx3` is injected for mocking.
-- [mcp_server.py](mcp_server.py) — locally hosted MCP server exposing `speak` (plus voice claim/release, `stop_speaking`, `speech_status`) so agents can read text aloud on the host. Runs **stdio** standalone (`python mcp_server.py`) or is **hosted over HTTP in-process by the running GUI** (`start_http_in_thread`) when the user enables it. Reuses `Core`; VS Code connects via [.vscode/mcp.json](.vscode/mcp.json).
+- [mcp_server.py](mcp_server.py) — locally hosted MCP server exposing `speak` (plus voice claim/release, `stop_speaking`, `speech_status`) so agents can read text aloud on the host. Runs over **stdio only**: the agent spawns `python mcp_server.py` (`build_stdio`: config voices, the GUI's saved `ui.wpm` re-read per speak). HIGH-RISK/REPEAT: the GUI does NOT host MCP (HTTP hosting was removed: ECONNREFUSED whenever the app was closed), never re-add it; stdout is the JSON-RPC channel, so no `print()` on the server path. Registered in [.mcp.json](.mcp.json) (Claude Code) and `.vscode/mcp.json`. See the `speedreader-mcp-server` skill.
 
 
 ## TTS engine model (the core pattern)
@@ -52,15 +52,7 @@ pip install -r requirements.txt
 python SpeedReader.py
 ```
 
-Run the MCP server so an agent can call the `speak` tool. Two modes:
-
-- **Standalone (stdio)** for dev/agent-spawned use:
-
-```pwsh
-python mcp_server.py
-```
-
-- **Hosted in-process by the running GUI (HTTP)** so the user speaks text AND agents speak through the same app. Opt in via [config.json](config.json) (`{"mcp": {"enabled": true, "host": "127.0.0.1", "port": 8765}}`); the GUI then starts the server on a daemon thread at startup. Agent speech uses the **rate currently set in the UI** (shared via `SpeakService`). VS Code connects to the running app via [.vscode/mcp.json](.vscode/mcp.json) (`type: http`, `http://127.0.0.1:8765/mcp`). HIGH-RISK/REPEAT: hosting from the already-running GUI requires HTTP, not stdio, and the uvicorn server must run on a non-main daemon thread.
+The agent spawns the MCP server over stdio (venv python + `mcp_server.py`, wired in [.mcp.json](.mcp.json)); it runs with or without the GUI and speaks at the `ui.wpm` the GUI last saved. HIGH-RISK/REPEAT: stdio only. The built EXE can't serve it (stdout is forced to a file), and nothing may print to stdout on the server path.
 
 Build a standalone EXE with Nuitka (output `SpeedReader.dist\SpeedReader.exe`, `config.json` copied beside it):
 

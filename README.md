@@ -18,7 +18,6 @@ pyttsx3==2.71 due to a bug detailed here: https://github.com/nateshmbhat/pyttsx3
 - **Speech engine** — SpeedReader speaks with the Windows **OneCore** voices by default, which go up to ~840 WPM. The older SAPI voices stop getting faster at ~470 WPM. To switch back to SAPI, set `"speech": {"engine": "sapi"}` in `config.json`. If OneCore can't start, SpeedReader falls back to SAPI on its own. OneCore and SAPI voice IDs differ, so after you switch, **Agent Voices…** enables all voices until you pick again.
 - **Voice** — pick from the text-to-speech voices installed on your system; the choice applies to both your reading and any AI agent speaking through the MCP server.
 - **Agent Voices…** — choose which system voices agents are allowed to use (see below). All voices are enabled by default.
-- **Server…** (shows `Server: <port>…` while hosting) — one dialog to change the MCP port and **Restart Server** without closing the app (the port is saved to `config.json` as `mcp.port`), plus live status: hosting state, pause-while-mic-in-use (and your current mic state), and each enabled voice with the agents that claimed it.
 - **Light mode / Dark mode** — toggles the modern Windows 11 look ([sv-ttk](https://github.com/rdbende/Sun-Valley-ttk-theme)), including the title bar. Dark by default; the choice is saved to `config.json` as `ui.theme`.
 - **Shortcuts… / `F1`** — a page listing every keyboard shortcut and hidden option (paste & speak, sentence skip, focus mode, tray behaviour…).
 - **Pause / Resume** (left of Speak) — pause mid-text; Resume picks up at the same word.
@@ -39,41 +38,46 @@ pyttsx3==2.71 due to a bug detailed here: https://github.com/nateshmbhat/pyttsx3
 ## MCP server (let AI agents speak through SpeedReader)
 SpeedReader ships a [Model Context Protocol](https://modelcontextprotocol.io) server so an AI agent (e.g. in VS Code) can read text aloud on your machine. It exposes these tools:
 
-- `speak(text, agent?, voice?, rate?)` — read text aloud. Omit `rate` to use the WPM set in the UI; pass the `agent` you claimed with (or an explicit `voice`) to speak in a specific voice, otherwise the UI's selected voice is used.
+- `speak(text, agent?, voice?, rate?)` — read text aloud. Omit `rate` to use the WPM last set in the app; pass the `agent` you claimed with (or an explicit `voice`).
 - `list_voices()` — list the voices the user enabled for agents, with claim status.
 - `claim_voice(agent?, voice?)` — claim a voice to speak with (see *Per-agent voices* below).
 - `release_voice(agent)` — release a claimed voice.
 - `stop_speaking()` — stop whatever SpeedReader is saying now and drop queued speech.
 - `speech_status()` — `{speaking, pending}`: whether agent speech is playing and how many `speak` calls are in flight.
 
-There are two ways to run it:
+It runs over **stdio**: your agent starts it when it needs it, so it works whether or not the SpeedReader window is open. Agent speech uses the **speed you last set in the app** (`ui.wpm`, re-read for every sentence). It needs a Python checkout (the EXE can't serve stdio):
 
-### Hosted by the running app (recommended)
-This is the main use case: you keep SpeedReader open to read your own text, and agents speak through the very same window. It also means agent speech uses the **rate and voice currently set in the UI**.
+1. `pip install -r requirements.txt` into the repo's `.venv`.
+2. Point your agent at it.
+   - **Claude Code** — already wired in [.mcp.json](.mcp.json):
 
-1. Enable hosting in `config.json` at the repo root (hosting is **off by default**):
-
-   ```json
-   {
-     "mcp": { "enabled": true, "host": "127.0.0.1", "port": 8765 }
-   }
-   ```
-
-2. Start the app (`python SpeedReader.py`). It hosts the server over HTTP on `http://127.0.0.1:8765/mcp`, bound to localhost only. You can change the port at runtime in the app's **Server…** dialog (**Restart Server**) — the new port is persisted to `config.json` for next launch (update your agent's URL to match).
-3. Point your agent at it. In VS Code this is already wired in [.vscode/mcp.json](.vscode/mcp.json):
-
-   ```json
-   {
-     "servers": {
-       "speedreader": { "type": "http", "url": "http://127.0.0.1:8765/mcp" }
+     ```json
+     "speedreader": {
+       "command": "${CLAUDE_PROJECT_DIR:-.}/.venv/Scripts/python.exe",
+       "args": ["${CLAUDE_PROJECT_DIR:-.}/mcp_server.py"]
      }
-   }
-   ```
+     ```
 
-The agent now has the tools above. Omit `rate` to use the WPM set in the UI.
+   - **VS Code** — `.vscode/mcp.json`:
+
+     ```json
+     {
+       "servers": {
+         "speedreader": {
+           "type": "stdio",
+           "command": "${workspaceFolder}/.venv/Scripts/python.exe",
+           "args": ["${workspaceFolder}/mcp_server.py"]
+         }
+       }
+     }
+     ```
+
+   - From another repo, use absolute paths to SpeedReader's `.venv\Scripts\python.exe` and `mcp_server.py`.
+
+Agents speak with the installed SAPI voices (up to ~470 WPM). Each agent gets its own server, so voice claims are per agent session.
 
 ### Per-agent voices (multiple agents, multiple voices)
-Use **Agent Voices…** in the app to enable/disable which installed voices agents may use; the choice is saved to `config.json` under `mcp.voices`. The voice you pick in the **Voice** dropdown is reserved for you — agents avoid it and claim the other voices first (unless it's the only enabled voice). The agent handshake is:
+Use **Agent Voices…** in the app to enable/disable which installed voices agents may use; the choice is saved to `config.json` under `mcp.voices`. The agent handshake is:
 
 1. **(optional) discover** — `list_voices()` shows enabled voices and who holds each.
 2. **reserve** — `claim_voice(agent="my-repo")` reserves a voice and returns it. Use a stable identifier (repo folder name or current task). Re-claiming returns the same voice.
@@ -91,7 +95,7 @@ Set `mcp.pause_when_mic_in_use` to `true` in `config.json` to stop agents talkin
 
 ```json
 {
-  "mcp": { "enabled": true, "pause_when_mic_in_use": true }
+  "mcp": { "pause_when_mic_in_use": true }
 }
 ```
 
@@ -105,17 +109,12 @@ To enable this:
 
    ```json
    {
-     "mcp": { "enabled": true, "pause_media_when_speaking": true }
+     "mcp": { "pause_media_when_speaking": true }
    }
    ```
 2. Restart SpeedReader for the change to take effect.
 
-### Standalone (stdio)
-For development or agent-spawned use without the GUI:
-
-```pwsh
-python mcp_server.py
-```
+To run it by hand (it waits for JSON-RPC on stdin): `python mcp_server.py`.
 
 ## Convert to EXE
 The build uses Nuitka. For background on the bootloader fix: https://github.com/pyinstaller/pyinstaller/issues/3268
@@ -179,14 +178,14 @@ Rules (follow exactly):
    Use a stable id (the repo folder name) as `agent` — not a random string.
 2. For EVERY summary and EVERY question, call `speak(agent="<same-id>", text="<the message>")`.
    - Keep `text` to the spoken gist (1–3 sentences), not full code or logs.
-   - Omit `rate` so it uses the WPM set in the SpeedReader UI.
+   - Omit `rate` so it uses the WPM last set in the SpeedReader app.
 3. When the task is fully done, call `release_voice(agent="<same-id>")`.
 4. If multiple voices exist and you skip `agent`, `speak` errors — always pass `agent`.
    To see/pick a voice, call `list_voices` and optionally `claim_voice(agent=..., voice="<name|id>")`.
 
 If the `speedreader` tools are NOT available, do NOT silently skip speaking —
-tell me to enable hosting (set `mcp.enabled: true` in SpeedReader's config.json,
-host 127.0.0.1, then restart the app) so the `speak` tool is reachable, and
+tell me to register it (stdio: SpeedReader's venv python running `mcp_server.py`,
+see SpeedReader's README) so the `speak` tool is reachable, and
 continue the task without speaking until it's on.
 
 REPEAT (high-risk, easy to forget): speak the summary AND every question; claim
