@@ -11,7 +11,7 @@ Bare `nuitka` resolves to the GLOBAL Python and bundles GLOBAL packages (unpinne
 ## Steps
 1. Capture the EXE's traceback (console build):
    `Start-Process SpeedReader.dist\SpeedReader.exe -WorkingDirectory . -RedirectStandardError $env:TEMP\err.txt`
-   then `Test-NetConnection 127.0.0.1 -Port 8765` to check the MCP host.
+   (the EXE no longer hosts MCP; agents spawn `mcp_server.py` over stdio).
 2. Disabled "Restart Server" button = MCP never hosted: either `config.json` not found
    (cwd, then EXE folder) or `import mcp_server` raised.
 3. Compare envs: `(Get-Command nuitka).Source`, `pip show mcp pydantic` in venv vs global.

@@ -24,7 +24,7 @@ GUI-free "is the user in a call?" detection, used to optionally pause MCP agent 
 - `_key_active(winreg, key)` is the recursive unit: check `LastUsedTimeStop == 0` on the key, then recurse into every subkey. Both `winreg` and the key are passed in so tests drive it with a fake winreg + nested-dict tree — NO real registry needed (see [tests/test_call_detection.py](../../../tests/test_call_detection.py)).
 
 ## Gating MCP speech (suppress, not queue)
-- `mcp.pause_when_mic_in_use` (bool, default false) in `config.json` turns this on. It is threaded `config.pause_when_mic_in_use` → `start_http_in_thread` → `McpHost` → `build_mcp(pause_when_mic_in_use, call_active)`; `call_active` defaults to `microphone_in_use` and is injectable.
+- `mcp.pause_when_mic_in_use` (bool, default false) in `config.json` turns this on. It is threaded `config.pause_when_mic_in_use` → `build_stdio` → `build_mcp(pause_when_mic_in_use, call_active)`; `call_active` defaults to `microphone_in_use` and is injectable.
 - In the `speak` tool: `if pause_when_mic_in_use and call_active(): return "Skipped..."` — REPEAT: it **suppresses and returns a message**, it does NOT queue/defer/wait for the call to end (waiting would block the agent's tool call). 
 - REPEAT: gating lives ONLY in the MCP `speak` tool — it must NOT touch `SpeakService` or the GUI, so the user's own reading is never paused.
 - Off by default; only affects agent/MCP speech.

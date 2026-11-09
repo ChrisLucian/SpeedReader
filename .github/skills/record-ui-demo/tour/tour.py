@@ -13,7 +13,7 @@ os.chdir(REPO)
 os.environ["SPEEDREADER_CONFIG"] = os.path.join(OUT, "config.json")
 os.environ["SPEEDREADER_SESSION"] = os.path.join(OUT, "session.json")
 with open(os.environ["SPEEDREADER_CONFIG"], "w") as f:
-    json.dump({"mcp": {"enabled": False}, "ui": {"theme": "dark", "wpm": 230, "train": False}}, f)
+    json.dump({"ui": {"theme": "dark", "wpm": 230, "train": False}}, f)
 
 import Core.onecore_backend as ob  # noqa: E402
 

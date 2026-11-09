@@ -14,7 +14,7 @@ Done twice so far: `ui.theme` ([Core/theme.py](../../../Core/theme.py)) and `ui.
 4. **Tests** (`tests/test_<x>_memory.py`):
    - Core: default without a file; round-trip that keeps other keys; bad values give the default.
    - Frame: `frame.<var>.set(...)` then `load_ui_<x>()`. No path is needed: `testsupport/locks.py` already points `SPEEDREADER_CONFIG` at a tmp file.
-   - Startup: `config.save_ui_<x>(...)`, stub `maybe_host_mcp`, build with the `new_controller` fixture (never `SpeedReaderController()` directly), and `destroy()` in `finally`.
+   - Startup: `config.save_ui_<x>(...)`, build with the `new_controller` fixture (never `SpeedReaderController()` directly), and `destroy()` in `finally`.
 5. README: name the key (`ui.<x>`) in the feature bullet.
 
 ## Traps
