@@ -60,3 +60,10 @@ def test_voice_is_passed_through_to_speak_fn():
     service.speak('hi', voice='voice-id-1')
 
     speak_fn.assert_called_once_with('hi', 500, 'voice-id-1')
+
+
+def test_speak_service_reads_rate_source_each_call():
+    rates = [300, 450]
+    service = SpeakService(rate_source=lambda: rates.pop(0), speak_fn=MagicMock())
+
+    assert [service.speak('a'), service.speak('a')] == [300, 450]
