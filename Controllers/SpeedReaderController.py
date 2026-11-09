@@ -6,7 +6,6 @@ from Frames.chrome import ICON_PATH, enable_dpi_awareness, apply_title_bar, set_
 from Frames.tray import TrayIcon
 from PIL import Image
 import pystray
-from Core.config import load_mcp_config
 from Core.global_hotkey import GlobalHotkey
 from Core.theme import load_ui_theme
 from Core.update_check import check_in_background
@@ -31,7 +30,6 @@ class SpeedReaderController(Tk):
         main_frame.grid(padx=32, pady=(8, 16), sticky=(N, S, E, W))
         self.minsize(int(self.winfo_fpixels("540p")), int(self.winfo_fpixels("480p")))
         apply_title_bar(self, main_frame.theme)
-        self.maybe_host_mcp(main_frame)
         self._start_background(main_frame)
 
     def _start_background(self, main_frame):
@@ -68,18 +66,3 @@ class SpeedReaderController(Tk):
         self.tray.stop()
         self.hotkey.stop()
         self.main_frame.on_closing()
-
-    def maybe_host_mcp(self, main_frame):
-        # Host the MCP server in-process only if the user opted in via config.
-        # Imported lazily so the GUI doesn't require the mcp package otherwise.
-        # MainFrame already primes the shared engine's single run loop, so agents
-        # can speak as soon as the server is up.
-        config = load_mcp_config()
-        if not config.enabled:
-            return
-        import mcp_server
-        # Keep a handle on the frame so the UI can restart the server on a new port.
-        main_frame.mcp_host = mcp_server.start_http_in_thread(
-            main_frame.speak_service, main_frame.voice_registry,
-            config.host, config.port, pause_when_mic_in_use=config.pause_when_mic_in_use)
-        main_frame.set_server_port(config.port)

@@ -6,11 +6,8 @@ from dataclasses import dataclass, field
 
 @dataclass
 class McpConfig:
-    """User configuration for hosting the MCP server from the running app."""
+    """User configuration for the agent (MCP) voices and speech gating."""
 
-    enabled: bool = False
-    host: str = "127.0.0.1"
-    port: int = 8765
     voices: list = field(default_factory=list)  # enabled voice IDs; empty = all
     pause_when_mic_in_use: bool = False  # skip agent speech while the mic is in use
     pause_media_when_speaking: bool = False # pause media playback when speaking
@@ -20,7 +17,7 @@ def _default_path():
     """``config.json`` in the working directory, else next to the executable.
 
     A double-clicked build runs with its own folder as cwd only sometimes, so
-    fall back to the EXE's directory to keep MCP hosting working there.
+    fall back to the EXE's directory so settings are still found there.
     """
     if os.path.exists("config.json"):
         return "config.json"
@@ -34,16 +31,15 @@ def resolve_config_path(path=None):
 
 
 def load_mcp_config(path=None):
-    """Load MCP hosting config from a JSON file.
+    """Load the MCP agent-speech config from a JSON file.
 
     Lookup order: explicit ``path`` arg, then the ``SPEEDREADER_CONFIG``
     environment variable, then ``config.json`` in the working directory, then
     ``config.json`` next to the executable. Missing
-    file or keys fall back to the (disabled) defaults, so hosting is strictly
-    opt-in.
+    file or keys fall back to the defaults.
 
     The JSON may be nested under an ``"mcp"`` key or flat:
-        {"mcp": {"enabled": true, "host": "127.0.0.1", "port": 8765}}
+        {"mcp": {"voices": ["<voice id>"], "pause_when_mic_in_use": true}}
     """
     path = resolve_config_path(path)
     cfg = McpConfig()
@@ -51,12 +47,6 @@ def load_mcp_config(path=None):
         with open(path, "r", encoding="utf-8") as handle:
             data = json.load(handle) or {}
         mcp = data.get("mcp", data)
-        if "enabled" in mcp:
-            cfg.enabled = bool(mcp["enabled"])
-        if "host" in mcp:
-            cfg.host = str(mcp["host"])
-        if "port" in mcp:
-            cfg.port = int(mcp["port"])
         if "voices" in mcp and isinstance(mcp["voices"], list):
             cfg.voices = [str(v) for v in mcp["voices"]]
         if "pause_when_mic_in_use" in mcp:
@@ -137,11 +127,6 @@ def save_enabled_voices(voice_ids, path=None):
     Voice Settings dialog.
     """
     return _update_mcp_config({"voices": list(voice_ids)}, path=path)
-
-
-def save_mcp_port(port, path=None):
-    """Persist the MCP port (``mcp.port``) chosen via Restart Server."""
-    return _update_mcp_config({"port": int(port)}, path=path)
 
 
 def save_media_pause_setting(enabled, path=None):

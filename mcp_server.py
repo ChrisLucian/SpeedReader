@@ -1,20 +1,10 @@
 """Locally hosted MCP server exposing SpeedReader's text-to-speech.
 
-Two ways to run:
-
-* **Standalone (stdio)** for development/agent-spawned use: ``python mcp_server.py``.
-* **Hosted by the running GUI (HTTP)** so external agents can connect while the
-  user also uses the app: the GUI calls :func:`start_http_in_thread` when the
-  user has enabled it in ``config.json``. HTTP is required here because the app
-  is already running — a stdio server would have to be spawned and owned by the
-  client.
-
-Either way the server reuses the GUI-free logic in ``Core`` and speaks at the
-rate held by a shared :class:`~Core.speak_service.SpeakService` (kept in sync
-with the UI), so agent speech matches the WPM the user has set.
+The agent spawns it over **stdio** (``python mcp_server.py``), so it is up
+whenever the agent is, with or without the GUI running. It reuses the GUI-free
+logic in ``Core`` and speaks at the ``ui.wpm`` the GUI last saved, re-read on
+every call, so agent speech matches the speed the user has set.
 """
-import threading
-
 from mcp.server.fastmcp import FastMCP
 
 from Core.call_detection import microphone_in_use
@@ -124,79 +114,6 @@ def build_stdio(load_voices, speak_fn=None):
     service = SpeakService(rate_source=load_ui_wpm, speak_fn=speak_fn)
     return build_mcp(service, VoiceRegistry(enabled=enabled),
                      pause_when_mic_in_use=cfg.pause_when_mic_in_use)
-
-
-def start_http_in_thread(service, registry=None, host="127.0.0.1", port=8765,
-                         pause_when_mic_in_use=False):
-    """Host the MCP server over HTTP in a daemon thread (for the running GUI).
-
-    uvicorn skips signal-handler installation off the main thread, so this is
-    safe to run alongside the tkinter mainloop. Returns a started :class:`McpHost`
-    so the GUI can restart it on a new port.
-    """
-    host_obj = McpHost(service, registry=registry, host=host, port=port,
-                       pause_when_mic_in_use=pause_when_mic_in_use)
-    host_obj.start()
-    return host_obj
-
-
-class McpHost:
-    """A restartable in-process HTTP MCP server running on a daemon thread.
-
-    The GUI uses this to change the listening port at runtime: ``restart(port)``
-    gracefully stops the current uvicorn server and binds the new port. We drive
-    uvicorn ourselves (via the FastMCP ASGI app) instead of ``FastMCP.run`` so we
-    hold a ``uvicorn.Server`` handle whose ``should_exit`` flag stops it cleanly.
-    uvicorn only installs signal handlers on the main thread, so running on a
-    daemon thread alongside the tkinter mainloop is safe.
-    """
-
-    def __init__(self, service, registry=None, host="127.0.0.1", port=8765,
-                 pause_when_mic_in_use=False):
-        self._service = service
-        self._registry = registry
-        self.host = host
-        self.port = int(port)
-        self.pause_when_mic_in_use = bool(pause_when_mic_in_use)
-        self._server = None
-        self._thread = None
-
-    def is_running(self):
-        return self._thread is not None and self._thread.is_alive()
-
-    def start(self):
-        """Build the FastMCP app and serve it on a daemon thread."""
-        import uvicorn
-
-        server, _, _ = build_mcp(
-            self._service, registry=self._registry, host=self.host, port=self.port,
-            pause_when_mic_in_use=self.pause_when_mic_in_use)
-        app = server.streamable_http_app()
-        config = uvicorn.Config(app, host=self.host, port=self.port, log_level="warning")
-        self._server = uvicorn.Server(config)
-        self._thread = threading.Thread(
-            target=self._server.run, name="speedreader-mcp", daemon=True)
-        self._thread.start()
-        return self._thread
-
-    def stop(self, timeout=5):
-        """Signal the running server to exit and wait for the thread to finish."""
-        if self._server is not None:
-            self._server.should_exit = True
-        if self._thread is not None:
-            self._thread.join(timeout=timeout)
-        self._server = None
-        self._thread = None
-
-    def restart(self, port=None, host=None):
-        """Stop the server and start it again, optionally on a new host/port."""
-        if port is not None:
-            self.port = int(port)
-        if host is not None:
-            self.host = host
-        self.stop()
-        return self.start()
-
 
 
 # Module-level server for the standalone stdio path (and import smoke tests).

@@ -46,7 +46,6 @@ class MainFrame(AgentSpeechMixin, SpeedTrainingMixin, SessionMemoryMixin, Shortc
         self.speech.prime_async(self.speak_service.rate)
         self.voices = self.speech.get_voices()
         self.voice_registry = self._build_voice_registry()
-        self.mcp_host = None  # set by the controller when MCP hosting is enabled
         self.spoken_text = ''
         self.speak_offset = 0
         self.highlight_index1 = None
@@ -154,10 +153,7 @@ class MainFrame(AgentSpeechMixin, SpeedTrainingMixin, SessionMemoryMixin, Shortc
         self.voice_settings_button = ttk.Button(
             self.settings_frame, text="Agent Voices…", command=lambda: dialogs.open_voice_settings(self))
         self.voice_settings_button.grid(row=0, column=6, padx=(8, 0))
-        self.server_button = ttk.Button(
-            self.settings_frame, text="Server…", command=lambda: dialogs.open_server_dialog(self))
-        self.server_button.grid(row=0, column=7, padx=(8, 0))
-        self._build_shortcuts_button(self.settings_frame, 8)
+        self._build_shortcuts_button(self.settings_frame, 7)
         self._build_training_toggle(self.settings_frame)
         row_index += 1
 
@@ -249,10 +245,6 @@ class MainFrame(AgentSpeechMixin, SpeedTrainingMixin, SessionMemoryMixin, Shortc
             self.placeholder.place_forget()
         else:
             self.placeholder.place(x=14, y=12)
-
-    def set_server_port(self, port):
-        """Show the active MCP port on the Server button (host is up)."""
-        self.server_button["text"] = "Server: {}…".format(port)
 
     def on_rate_changed(self, *args):
         # Keep the shared service rate in sync so MCP agents speak at the UI rate.
