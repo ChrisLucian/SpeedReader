@@ -22,8 +22,10 @@
             }
         },
         "speedreader": {
-            "type": "http",
-            "url": "http://127.0.0.1:8765/mcp"
+            "command": "${CLAUDE_PROJECT_DIR:-.}/.venv/Scripts/python.exe",
+            "args": [
+                "${CLAUDE_PROJECT_DIR:-.}/mcp_server.py"
+            ]
         }
     }
 }
