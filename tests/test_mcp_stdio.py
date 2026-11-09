@@ -15,3 +15,11 @@ def test_build_stdio_enables_configured_voices_at_saved_wpm():
 
     assert registry.enabled() == [("v2", "Two")]
     assert service.speak("hi") == 640
+
+
+def test_gui_does_not_host_mcp_or_show_server_button__main_serves_stdio():
+    server = MagicMock()
+
+    mcp_server.main(build=lambda: (server, None, None))
+
+    server.run.assert_called_once_with("stdio")
