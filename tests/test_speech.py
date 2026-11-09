@@ -37,3 +37,13 @@ def test_speak_blocking_sets_voice_when_given():
     fake_engine.setProperty.assert_any_call('voice', 'voice-id-1')
     fake_engine.say.assert_called_once_with('hi')
     fake_engine.runAndWait.assert_called_once_with()
+
+
+def test_sapi_voices_lists_installed_voice_ids_and_names():
+    from types import SimpleNamespace
+    from Core.speech import sapi_voices
+    engine = MagicMock()
+    engine.getProperty.return_value = [SimpleNamespace(id="id1", name="One"), SimpleNamespace(id="id2", name="Two")]
+
+    assert sapi_voices(init=lambda: engine) == [("id1", "One"), ("id2", "Two")]
+    engine.getProperty.assert_called_once_with("voices")
