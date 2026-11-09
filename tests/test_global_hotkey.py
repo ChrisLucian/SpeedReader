@@ -71,7 +71,6 @@ def test_controller_starts_global_hotkey_for_frame(monkeypatch, new_controller):
     import Controllers.SpeedReaderController as module
     hotkey_cls = Mock()
     monkeypatch.setattr(module, "GlobalHotkey", hotkey_cls, raising=False)
-    monkeypatch.setattr(module.SpeedReaderController, "maybe_host_mcp", lambda self, frame: None)
     app = new_controller()
     try:
         frame = app.winfo_children()[0]

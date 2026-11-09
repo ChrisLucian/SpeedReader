@@ -51,13 +51,10 @@ def app():
 
     This fixture handles proper cleanup to avoid Tcl/Tk initialization issues.
     Includes retry logic for intermittent Tcl initialization failures on Windows.
-    MCP hosting is stubbed out so the uvicorn server isn't started (and port
-    8765 isn't bound) for every UI test — that startup dominated test runtime.
     """
     from Controllers.SpeedReaderController import SpeedReaderController
 
-    with patch.object(SpeedReaderController, "maybe_host_mcp", lambda self, frame: None):
-        yield from _make_controller(SpeedReaderController)
+    yield from _make_controller(SpeedReaderController)
 
 
 def _make_controller(SpeedReaderController):

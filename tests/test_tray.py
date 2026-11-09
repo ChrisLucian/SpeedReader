@@ -62,7 +62,6 @@ def test_controller_starts_tray_with_ui_thread_actions(monkeypatch, new_controll
     import Controllers.SpeedReaderController as module
     tray_cls = Mock()
     monkeypatch.setattr(module, "TrayIcon", tray_cls, raising=False)
-    monkeypatch.setattr(module.SpeedReaderController, "maybe_host_mcp", lambda self, frame: None)
     app = new_controller()
     try:
         frame = app.main_frame

@@ -90,7 +90,6 @@ def test_quitting_mid_reading_saves_current_word(frame):
 
 def _started_frame(monkeypatch, new_controller):
     from Controllers.SpeedReaderController import SpeedReaderController
-    monkeypatch.setattr(SpeedReaderController, "maybe_host_mcp", lambda self, frame: None)
     app = new_controller()
     return app, app.winfo_children()[0]
 

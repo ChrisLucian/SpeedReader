@@ -1,59 +1,49 @@
 import json
 import os
 
-from Core.config import load_mcp_config, save_enabled_voices, McpConfig, save_media_pause_setting, save_mcp_port
+from Core.config import load_mcp_config, save_enabled_voices, McpConfig, save_media_pause_setting
 
 
 def test_defaults_are_disabled_when_no_file(tmp_path):
     cfg = load_mcp_config(path=str(tmp_path / "does_not_exist.json"))
-    assert cfg == McpConfig(enabled=False, host="127.0.0.1", port=8765)
+    assert cfg == McpConfig()
 
-
-def test_loads_nested_mcp_config(tmp_path):
-    path = tmp_path / "config.json"
-    path.write_text(json.dumps({"mcp": {"enabled": True, "host": "0.0.0.0", "port": 9000}}))
-    cfg = load_mcp_config(path=str(path))
-    assert cfg.enabled is True
-    assert cfg.host == "0.0.0.0"
-    assert cfg.port == 9000
 
 
 def test_loads_flat_config_and_coerces_types(tmp_path):
     path = tmp_path / "config.json"
-    path.write_text(json.dumps({"enabled": 1, "port": "8000"}))
+    path.write_text(json.dumps({"voices": [1], "pause_when_mic_in_use": 1}))
     cfg = load_mcp_config(path=str(path))
-    assert cfg.enabled is True
-    assert cfg.port == 8000
-    assert cfg.host == "127.0.0.1"  # untouched default
+    assert cfg.voices == ["1"]
+    assert cfg.pause_when_mic_in_use is True
 
 
 def test_env_var_is_used_when_path_not_given(tmp_path, monkeypatch):
     path = tmp_path / "env.json"
-    path.write_text(json.dumps({"mcp": {"enabled": True}}))
+    path.write_text(json.dumps({"mcp": {"voices": ["env"]}}))
     monkeypatch.setenv("SPEEDREADER_CONFIG", str(path))
-    cfg = load_mcp_config()
-    assert cfg.enabled is True
+    assert load_mcp_config().voices == ["env"]
 
 
 def test_falls_back_to_config_next_to_executable(tmp_path, monkeypatch):
     exe_dir = tmp_path / "dist"
     exe_dir.mkdir()
-    (exe_dir / "config.json").write_text(json.dumps({"mcp": {"enabled": True}}))
+    (exe_dir / "config.json").write_text(json.dumps({"mcp": {"voices": ["exe"]}}))
     monkeypatch.delenv("SPEEDREADER_CONFIG", raising=False)
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr("sys.argv", [str(exe_dir / "SpeedReader.exe")])
-    assert load_mcp_config().enabled is True
+    assert load_mcp_config().voices == ["exe"]
 
 
 def test_working_directory_config_wins_over_executable_dir(tmp_path, monkeypatch):
     exe_dir = tmp_path / "dist"
     exe_dir.mkdir()
-    (exe_dir / "config.json").write_text(json.dumps({"mcp": {"enabled": True}}))
-    (tmp_path / "config.json").write_text(json.dumps({"mcp": {"enabled": False}}))
+    (exe_dir / "config.json").write_text(json.dumps({"mcp": {"voices": ["exe"]}}))
+    (tmp_path / "config.json").write_text(json.dumps({"mcp": {"voices": ["cwd"]}}))
     monkeypatch.delenv("SPEEDREADER_CONFIG", raising=False)
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr("sys.argv", [str(exe_dir / "SpeedReader.exe")])
-    assert load_mcp_config().enabled is False
+    assert load_mcp_config().voices == ["cwd"]
 
 
 def test_loads_enabled_voices(tmp_path):
@@ -91,7 +81,7 @@ def test_save_enabled_voices_creates_file_when_missing(tmp_path):
     assert data["mcp"]["voices"] == ["id-1"]
 
 
-def test_save_mcp_port_persists_and_preserves_config(tmp_path):
+def test_save_media_pause_setting_preserves_config(tmp_path):
     path = tmp_path / "config.json"
     # Write initial state, ensuring 'port' is present for the assertion to pass
     initial_data = {"mcp": {"enabled": True, "voices": ["id-1"], "port": 9100}}
@@ -106,17 +96,6 @@ def test_save_mcp_port_persists_and_preserves_config(tmp_path):
     assert data["mcp"]["voices"] == ["id-1"]  # preserved
     assert data["mcp"]["pause_media_when_speaking"] is True  # Asserting new key was added
 
-    # round-trips through the loader
-    assert load_mcp_config(path=str(path)).port == 9100
-
-
-def test_save_mcp_port_writes_port_and_keeps_voices(tmp_path):
-    path = tmp_path / "config.json"
-    path.write_text(json.dumps({"mcp": {"enabled": True, "voices": ["id-1"], "port": 8765}}))
-    save_mcp_port(9200, path=str(path))
-    cfg = load_mcp_config(path=str(path))
-    assert cfg.port == 9200
-    assert cfg.voices == ["id-1"]
 
 
 def test_load_speech_engine_name_defaults_to_onecore(tmp_path):

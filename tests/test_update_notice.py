@@ -19,7 +19,6 @@ def test_controller_starts_update_check(monkeypatch, new_controller):
     from Core.version import __version__
     check = Mock()
     monkeypatch.setattr(module, "check_in_background", check, raising=False)
-    monkeypatch.setattr(module.SpeedReaderController, "maybe_host_mcp", lambda self, frame: None)
     app = new_controller()
     try:
         current, on_update = check.call_args.args
