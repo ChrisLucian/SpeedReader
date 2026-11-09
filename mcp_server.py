@@ -19,7 +19,7 @@ from mcp.server.fastmcp import FastMCP
 
 from Core.call_detection import microphone_in_use
 import logging
-from Core.config import load_mcp_config
+from Core.config import load_mcp_config, load_ui_wpm
 from Core.speak_service import SpeakService
 from Core.voice_registry import VoiceRegistry
 
@@ -114,6 +114,16 @@ def build_mcp(service=None, registry=None, host="127.0.0.1", port=8765,
         return service.status()
 
     return server, service, registry
+
+
+def build_stdio(load_voices, speak_fn=None):
+    """The agent-spawned stdio server: config voices, and the GUI's saved speed per call."""
+    cfg = load_mcp_config()
+    voices = load_voices()
+    enabled = [(vid, name) for vid, name in voices if vid in cfg.voices] or voices
+    service = SpeakService(rate_source=load_ui_wpm, speak_fn=speak_fn)
+    return build_mcp(service, VoiceRegistry(enabled=enabled),
+                     pause_when_mic_in_use=cfg.pause_when_mic_in_use)
 
 
 def start_http_in_thread(service, registry=None, host="127.0.0.1", port=8765,
