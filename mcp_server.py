@@ -5,12 +5,14 @@ whenever the agent is, with or without the GUI running. It reuses the GUI-free
 logic in ``Core`` and speaks at the ``ui.wpm`` the GUI last saved, re-read on
 every call, so agent speech matches the speed the user has set.
 """
+import pyttsx3
 from mcp.server.fastmcp import FastMCP
 
 from Core.call_detection import microphone_in_use
 import logging
 from Core.config import load_mcp_config, load_ui_wpm
 from Core.speak_service import SpeakService
+from Core.speech import sapi_voices
 from Core.voice_registry import VoiceRegistry
 
 
@@ -116,7 +118,7 @@ def build_stdio(load_voices, speak_fn=None):
                      pause_when_mic_in_use=cfg.pause_when_mic_in_use)
 
 
-def main(build=lambda: build_stdio(sapi_voices)):
+def main(build=lambda: build_stdio(lambda: sapi_voices(pyttsx3.init))):
     server, _, _ = build()
     server.run("stdio")
 

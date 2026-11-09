@@ -15,3 +15,8 @@ def speak_blocking(text, rate, voice=None, init=None):
         engine.setProperty('voice', voice)
     engine.say(text)
     engine.runAndWait()
+
+
+def sapi_voices(init):
+    """``[(id, name), ...]`` of the installed SAPI voices (``init`` = ``pyttsx3.init``)."""
+    return [(voice.id, voice.name) for voice in init().getProperty("voices")]
