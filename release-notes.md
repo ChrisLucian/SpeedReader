@@ -1,12 +1,11 @@
-## SpeedReader v0.9.2
+## SpeedReader v0.10.0
 
-### Fixed
-- **SpeedReader now starts on PCs without AVX-512** (for example Intel Core Ultra laptops). Earlier builds closed immediately on those CPUs ("illegal instruction"), because part of the program was built for the build PC's newer processor. It is now built for any 64-bit x86 CPU, and the build fails if that ever slips again.
-
-Also in v0.9.x: only one SpeedReader runs at a time, resume where you left off, the Training checkbox, and Markdown formatting is no longer read aloud.
+### Changed
+- **AI agents now start SpeedReader's voice server themselves (MCP over stdio).** Agents no longer need the SpeedReader window open, and they no longer fail with "connection refused" when it is closed. Agent speech still follows the speed you last set in the app.
+- The **Server…** button and the `mcp.enabled` / `host` / `port` settings are gone; nothing listens on a network port any more. To let an agent speak, register `mcp_server.py` from a Python checkout (see the README's *MCP server* section). The EXE itself can't serve stdio.
 
 ### Install
-1. `winget install ChrisLucian.SpeedReader`, or download `SpeedReader-v0.9.2-win-x64.zip` and verify it against `SpeedReader-v0.9.2-win-x64.zip.sha256`.
+1. `winget install ChrisLucian.SpeedReader`, or download `SpeedReader-v0.10.0-win-x64.zip` and verify it against `SpeedReader-v0.10.0-win-x64.zip.sha256`.
 2. Extract and run `SpeedReader\SpeedReader.exe`.
 3. A brand-new certificate may still show a SmartScreen prompt on download until it builds reputation: **More info → Run anyway**.
 
