@@ -116,12 +116,9 @@ def build_stdio(load_voices, speak_fn=None):
                      pause_when_mic_in_use=cfg.pause_when_mic_in_use)
 
 
-# Module-level server for the standalone stdio path (and import smoke tests).
-mcp, _service, _registry = build_mcp(pause_when_mic_in_use=load_mcp_config().pause_when_mic_in_use)
-
-
-def main():
-    mcp.run()
+def main(build=lambda: build_stdio(sapi_voices)):
+    server, _, _ = build()
+    server.run("stdio")
 
 
 if __name__ == "__main__":
