@@ -13,8 +13,9 @@ class SpeakService:
     MCP server thread. ``speak_fn`` is injectable for testing.
     """
 
-    def __init__(self, rate=500, speak_fn=None, stop_fn=None):
+    def __init__(self, rate=500, speak_fn=None, stop_fn=None, rate_source=None):
         self._rate = int(rate)
+        self._rate_source = rate_source
         self._speak_fn = speak_fn or speak_blocking
         self._stop_fn = stop_fn or (lambda: None)
         self._lock = threading.Lock()
@@ -22,7 +23,7 @@ class SpeakService:
 
     @property
     def rate(self):
-        return self._rate
+        return self._rate if self._rate_source is None else int(self._rate_source())
 
     def set_rate(self, rate):
         self._rate = int(rate)
@@ -33,7 +34,7 @@ class SpeakService:
         ``voice`` is an optional per-call voice id (used by the MCP server to
         speak in an agent's claimed voice). Returns the rate actually used.
         """
-        used = self._rate if rate is None else int(rate)
+        used = self.rate if rate is None else int(rate)
         with self._lock:
             self._pending += 1
         try:
